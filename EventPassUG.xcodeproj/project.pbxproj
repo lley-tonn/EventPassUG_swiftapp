@@ -1,0 +1,455 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		047105C3CD36E8332DE9584E /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895DFD1F2FE6AC18A83CAD70 /* OnboardingView.swift */; };
+		09FAC6D6C79081D9E0BD3982 /* TicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E6E92191F9AB14C54B6068 /* TicketsView.swift */; };
+		21CDF1727063CD17314AB363 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7CA2AA86FBCA64DFB5F2B2 /* DateUtilities.swift */; };
+		444EB09653E81469F548A0AA /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2313076A8185AB6077783B /* AuthService.swift */; };
+		46E9B9F4A0374E490F9B654A /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00713774485CFA643C799D96 /* ServiceContainer.swift */; };
+		4BFF38ECB3BB3A747D9D023D /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6961111E4D843400FAC858CC /* QRCodeGenerator.swift */; };
+		4F54BFF2A62B80C5358E7C0D /* HeaderBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FFE9B235686C62124C2D44F /* HeaderBar.swift */; };
+		4F63463E328ACE0986AA01D6 /* TicketType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD28A7234D09CBE658F246FB /* TicketType.swift */; };
+		53D742CABF22688160DED5F0 /* OrganizerDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8849E56804096FEBDE1A0407 /* OrganizerDashboardView.swift */; };
+		5615137F7AB59F60CF115AC1 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AEF6AC7575EB98FEF7649E4 /* LoadingView.swift */; };
+		58EA486844396E9940A00660 /* NotificationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73EB53D84C2463C4F1B81B9 /* NotificationModel.swift */; };
+		58FB05B1ABCE583B6E49CB53 /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE55E270C60FD0ED068F6CC /* CreateEventWizard.swift */; };
+		5F28275667B36833615E860C /* EventPassUGApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158929866ECF6423592BC1CF /* EventPassUGApp.swift */; };
+		6150B84554B832DD3386BB4D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229B0901E878F467E84294BC /* ContentView.swift */; };
+		66A845E938712CEEE9E228E4 /* CategoryTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117A3D867E42500CAF6C316F /* CategoryTile.swift */; };
+		6827572AF1B7872D1DBAAD5A /* PulsingDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93D0DDB99BED0DF46DA2050 /* PulsingDot.swift */; };
+		6941AB8488897972177F82E4 /* EventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE2D2FD1566EC7242E87855 /* EventCard.swift */; };
+		6C3C2EE1DC38786B7E5BDF55 /* RoleConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD79D821F31DFB60238066B8 /* RoleConfig.swift */; };
+		74EC2466CF3BB916C667AFA9 /* HapticFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED7E7D0680E34F4D57781E7 /* HapticFeedback.swift */; };
+		758BE6A2751C3C8A59F2273B /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A985E909937BCFB8D437A27 /* QRScannerView.swift */; };
+		7681A578AC6DFB945BE81E4B /* NotificationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E204946E450304F9CA9BFE43 /* NotificationBadge.swift */; };
+		8DEA425EE2B3A4501120017E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8265D580E7C405A20B6293F /* QRCodeView.swift */; };
+		8E0975A94C974C157055A789 /* TicketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF769D9BC7A4304B9869B03 /* TicketService.swift */; };
+		97463084C86EE72F770E3FF1 /* PaymentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F4EB6F3C8FE302F706ED47 /* PaymentService.swift */; };
+		9B533C1F570D1AD89682D220 /* AttendeeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A457FBAC46EF217AFEA1A069 /* AttendeeHomeView.swift */; };
+		9BFB69DA9DB498AEF2487924 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBEB03F102784481FE6225A2 /* PersistenceController.swift */; };
+		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
+		A7498908FBFA7C6604B364DC /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C06242B6C4DA6CCDFE4A0 /* Event.swift */; };
+		AF6E41A1FB2F26FC7694E117 /* AnimatedLikeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB9AE7B9BF2FB6F9369CE374 /* AnimatedLikeButton.swift */; };
+		CAEA57B52E6412E64442A8A7 /* Ticket.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAF91718BE8B1BB1DE08DBA /* Ticket.swift */; };
+		CE8E0E41DF176B2C8D35BA47 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7626F25DDC896D33321E81F6 /* MainTabView.swift */; };
+		D0B128EEB8B85701C980F6B7 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70791FDD3842CD748EA0BD4D /* EventService.swift */; };
+		D405978B760746F6E313FFB7 /* EventPassUG.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C5E439C88EC6F46BCC7003AE /* EventPassUG.xcdatamodeld */; };
+		D57AD772CAA14DA0EC0157A2 /* TicketPurchaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1043EC8F72645A3B098AECC5 /* TicketPurchaseView.swift */; };
+		DD512B3F5FA0BB9D36FA0082 /* EventDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331A311953E06A5485ABD5D /* EventDetailsView.swift */; };
+		F2BDB712ACBAE7FC7377253A /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA9B44AABA193CF4CC07A81 /* User.swift */; };
+		FD0C7C547515A7A4D88DE87C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B784D15D47FFF5B3256AB33 /* ProfileView.swift */; };
+		FD44253B87E147E5B3CBDF25 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11351F80F4DD6933C81A6AF7 /* NotificationsView.swift */; };
+		FFD5D3A06224B5AD9C45D411 /* OrganizerHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B5BBD301D50AB81688CC62 /* OrganizerHomeView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00713774485CFA643C799D96 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServiceContainer.swift; path = Services/ServiceContainer.swift; sourceTree = "<group>"; };
+		1043EC8F72645A3B098AECC5 /* TicketPurchaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketPurchaseView.swift; path = Views/Attendee/TicketPurchaseView.swift; sourceTree = "<group>"; };
+		11351F80F4DD6933C81A6AF7 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotificationsView.swift; path = Views/Common/NotificationsView.swift; sourceTree = "<group>"; };
+		117A3D867E42500CAF6C316F /* CategoryTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CategoryTile.swift; path = Views/Components/CategoryTile.swift; sourceTree = "<group>"; };
+		158929866ECF6423592BC1CF /* EventPassUGApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUGApp.swift; sourceTree = "<group>"; };
+		1AEF6AC7575EB98FEF7649E4 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LoadingView.swift; path = Views/Components/LoadingView.swift; sourceTree = "<group>"; };
+		229B0901E878F467E84294BC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		268C06242B6C4DA6CCDFE4A0 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Event.swift; path = Models/Event.swift; sourceTree = "<group>"; };
+		37E6E92191F9AB14C54B6068 /* TicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketsView.swift; path = Views/Attendee/TicketsView.swift; sourceTree = "<group>"; };
+		43B5BBD301D50AB81688CC62 /* OrganizerHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrganizerHomeView.swift; path = Views/Organizer/OrganizerHomeView.swift; sourceTree = "<group>"; };
+		5A985E909937BCFB8D437A27 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRScannerView.swift; path = Views/Organizer/QRScannerView.swift; sourceTree = "<group>"; };
+		5D7CA2AA86FBCA64DFB5F2B2 /* DateUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DateUtilities.swift; path = Utilities/DateUtilities.swift; sourceTree = "<group>"; };
+		6961111E4D843400FAC858CC /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRCodeGenerator.swift; path = Utilities/QRCodeGenerator.swift; sourceTree = "<group>"; };
+		6EE55E270C60FD0ED068F6CC /* CreateEventWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CreateEventWizard.swift; path = Views/Organizer/CreateEventWizard.swift; sourceTree = "<group>"; };
+		70791FDD3842CD748EA0BD4D /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventService.swift; path = Services/EventService.swift; sourceTree = "<group>"; };
+		7626F25DDC896D33321E81F6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = Views/Navigation/MainTabView.swift; sourceTree = "<group>"; };
+		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7DA9B44AABA193CF4CC07A81 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = User.swift; path = Models/User.swift; sourceTree = "<group>"; };
+		7FE2D2FD1566EC7242E87855 /* EventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventCard.swift; path = Views/Components/EventCard.swift; sourceTree = "<group>"; };
+		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8849E56804096FEBDE1A0407 /* OrganizerDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrganizerDashboardView.swift; path = Views/Organizer/OrganizerDashboardView.swift; sourceTree = "<group>"; };
+		895DFD1F2FE6AC18A83CAD70 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OnboardingView.swift; path = Views/Auth/OnboardingView.swift; sourceTree = "<group>"; };
+		8A2313076A8185AB6077783B /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AuthService.swift; path = Services/AuthService.swift; sourceTree = "<group>"; };
+		8B784D15D47FFF5B3256AB33 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileView.swift; path = Views/Common/ProfileView.swift; sourceTree = "<group>"; };
+		8FFE9B235686C62124C2D44F /* HeaderBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeaderBar.swift; path = Views/Components/HeaderBar.swift; sourceTree = "<group>"; };
+		A457FBAC46EF217AFEA1A069 /* AttendeeHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AttendeeHomeView.swift; path = Views/Attendee/AttendeeHomeView.swift; sourceTree = "<group>"; };
+		AFAF91718BE8B1BB1DE08DBA /* Ticket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Ticket.swift; path = Models/Ticket.swift; sourceTree = "<group>"; };
+		BBEB03F102784481FE6225A2 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PersistenceController.swift; path = CoreData/PersistenceController.swift; sourceTree = "<group>"; };
+		C5E439C88EC6F46BCC7003AE /* EventPassUG.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = EventPassUG.xcdatamodeld; sourceTree = "<group>"; };
+		C93D0DDB99BED0DF46DA2050 /* PulsingDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PulsingDot.swift; path = Views/Components/PulsingDot.swift; sourceTree = "<group>"; };
+		CCF769D9BC7A4304B9869B03 /* TicketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketService.swift; path = Services/TicketService.swift; sourceTree = "<group>"; };
+		CD79D821F31DFB60238066B8 /* RoleConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RoleConfig.swift; path = Config/RoleConfig.swift; sourceTree = "<group>"; };
+		D331A311953E06A5485ABD5D /* EventDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventDetailsView.swift; path = Views/Attendee/EventDetailsView.swift; sourceTree = "<group>"; };
+		D73EB53D84C2463C4F1B81B9 /* NotificationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotificationModel.swift; path = Models/NotificationModel.swift; sourceTree = "<group>"; };
+		DD28A7234D09CBE658F246FB /* TicketType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketType.swift; path = Models/TicketType.swift; sourceTree = "<group>"; };
+		DED7E7D0680E34F4D57781E7 /* HapticFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HapticFeedback.swift; path = Utilities/HapticFeedback.swift; sourceTree = "<group>"; };
+		E204946E450304F9CA9BFE43 /* NotificationBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NotificationBadge.swift; path = Views/Components/NotificationBadge.swift; sourceTree = "<group>"; };
+		E8265D580E7C405A20B6293F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRCodeView.swift; path = Views/Components/QRCodeView.swift; sourceTree = "<group>"; };
+		ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F8F4EB6F3C8FE302F706ED47 /* PaymentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaymentService.swift; path = Services/PaymentService.swift; sourceTree = "<group>"; };
+		FB9AE7B9BF2FB6F9369CE374 /* AnimatedLikeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnimatedLikeButton.swift; path = Views/Components/AnimatedLikeButton.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3420984D166303D4AB05B2C9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04B77584117B2FE894D09283 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				83D32D584282FCF601A3ADB6 /* EventPassUG.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		185E7F565787E6447E2D00F2 /* EventPassUG */ = {
+			isa = PBXGroup;
+			children = (
+				CD79D821F31DFB60238066B8 /* RoleConfig.swift */,
+				BBEB03F102784481FE6225A2 /* PersistenceController.swift */,
+				DD28A7234D09CBE658F246FB /* TicketType.swift */,
+				268C06242B6C4DA6CCDFE4A0 /* Event.swift */,
+				D73EB53D84C2463C4F1B81B9 /* NotificationModel.swift */,
+				7DA9B44AABA193CF4CC07A81 /* User.swift */,
+				AFAF91718BE8B1BB1DE08DBA /* Ticket.swift */,
+				5D7CA2AA86FBCA64DFB5F2B2 /* DateUtilities.swift */,
+				6961111E4D843400FAC858CC /* QRCodeGenerator.swift */,
+				DED7E7D0680E34F4D57781E7 /* HapticFeedback.swift */,
+				1043EC8F72645A3B098AECC5 /* TicketPurchaseView.swift */,
+				D331A311953E06A5485ABD5D /* EventDetailsView.swift */,
+				37E6E92191F9AB14C54B6068 /* TicketsView.swift */,
+				A457FBAC46EF217AFEA1A069 /* AttendeeHomeView.swift */,
+				895DFD1F2FE6AC18A83CAD70 /* OnboardingView.swift */,
+				5A985E909937BCFB8D437A27 /* QRScannerView.swift */,
+				8849E56804096FEBDE1A0407 /* OrganizerDashboardView.swift */,
+				43B5BBD301D50AB81688CC62 /* OrganizerHomeView.swift */,
+				6EE55E270C60FD0ED068F6CC /* CreateEventWizard.swift */,
+				7626F25DDC896D33321E81F6 /* MainTabView.swift */,
+				C93D0DDB99BED0DF46DA2050 /* PulsingDot.swift */,
+				7FE2D2FD1566EC7242E87855 /* EventCard.swift */,
+				E204946E450304F9CA9BFE43 /* NotificationBadge.swift */,
+				117A3D867E42500CAF6C316F /* CategoryTile.swift */,
+				E8265D580E7C405A20B6293F /* QRCodeView.swift */,
+				FB9AE7B9BF2FB6F9369CE374 /* AnimatedLikeButton.swift */,
+				1AEF6AC7575EB98FEF7649E4 /* LoadingView.swift */,
+				8FFE9B235686C62124C2D44F /* HeaderBar.swift */,
+				8B784D15D47FFF5B3256AB33 /* ProfileView.swift */,
+				11351F80F4DD6933C81A6AF7 /* NotificationsView.swift */,
+				229B0901E878F467E84294BC /* ContentView.swift */,
+				00713774485CFA643C799D96 /* ServiceContainer.swift */,
+				CCF769D9BC7A4304B9869B03 /* TicketService.swift */,
+				70791FDD3842CD748EA0BD4D /* EventService.swift */,
+				F8F4EB6F3C8FE302F706ED47 /* PaymentService.swift */,
+				8A2313076A8185AB6077783B /* AuthService.swift */,
+				158929866ECF6423592BC1CF /* EventPassUGApp.swift */,
+				ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */,
+				79DADAF080FA89248B8A3F25 /* Info.plist */,
+				C5E439C88EC6F46BCC7003AE /* EventPassUG.xcdatamodeld */,
+			);
+			path = EventPassUG;
+			sourceTree = "<group>";
+		};
+		2F72F308404F2B7306E8F85E = {
+			isa = PBXGroup;
+			children = (
+				185E7F565787E6447E2D00F2 /* EventPassUG */,
+				04B77584117B2FE894D09283 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6ACA69C978E2C1F3E7FB996D /* EventPassUG */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E14275F31EE7750F5C048541 /* Build configuration list for PBXNativeTarget "EventPassUG" */;
+			buildPhases = (
+				95C21B39E19E8FD1A1225601 /* Sources */,
+				3420984D166303D4AB05B2C9 /* Frameworks */,
+				4B2F48D69676CEE7B4FD11EA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EventPassUG;
+			productName = EventPassUG;
+			productReference = 83D32D584282FCF601A3ADB6 /* EventPassUG.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2152215DAD3233DF3D4586FA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					6ACA69C978E2C1F3E7FB996D = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 7E08856E0CC0D76315C167C3 /* Build configuration list for PBXProject "EventPassUG" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2F72F308404F2B7306E8F85E;
+			productRefGroup = 04B77584117B2FE894D09283 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6ACA69C978E2C1F3E7FB996D /* EventPassUG */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4B2F48D69676CEE7B4FD11EA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		95C21B39E19E8FD1A1225601 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6C3C2EE1DC38786B7E5BDF55 /* RoleConfig.swift in Sources */,
+				9BFB69DA9DB498AEF2487924 /* PersistenceController.swift in Sources */,
+				4F63463E328ACE0986AA01D6 /* TicketType.swift in Sources */,
+				A7498908FBFA7C6604B364DC /* Event.swift in Sources */,
+				58EA486844396E9940A00660 /* NotificationModel.swift in Sources */,
+				F2BDB712ACBAE7FC7377253A /* User.swift in Sources */,
+				CAEA57B52E6412E64442A8A7 /* Ticket.swift in Sources */,
+				21CDF1727063CD17314AB363 /* DateUtilities.swift in Sources */,
+				4BFF38ECB3BB3A747D9D023D /* QRCodeGenerator.swift in Sources */,
+				74EC2466CF3BB916C667AFA9 /* HapticFeedback.swift in Sources */,
+				D57AD772CAA14DA0EC0157A2 /* TicketPurchaseView.swift in Sources */,
+				DD512B3F5FA0BB9D36FA0082 /* EventDetailsView.swift in Sources */,
+				09FAC6D6C79081D9E0BD3982 /* TicketsView.swift in Sources */,
+				9B533C1F570D1AD89682D220 /* AttendeeHomeView.swift in Sources */,
+				047105C3CD36E8332DE9584E /* OnboardingView.swift in Sources */,
+				758BE6A2751C3C8A59F2273B /* QRScannerView.swift in Sources */,
+				53D742CABF22688160DED5F0 /* OrganizerDashboardView.swift in Sources */,
+				FFD5D3A06224B5AD9C45D411 /* OrganizerHomeView.swift in Sources */,
+				58FB05B1ABCE583B6E49CB53 /* CreateEventWizard.swift in Sources */,
+				CE8E0E41DF176B2C8D35BA47 /* MainTabView.swift in Sources */,
+				6827572AF1B7872D1DBAAD5A /* PulsingDot.swift in Sources */,
+				6941AB8488897972177F82E4 /* EventCard.swift in Sources */,
+				7681A578AC6DFB945BE81E4B /* NotificationBadge.swift in Sources */,
+				66A845E938712CEEE9E228E4 /* CategoryTile.swift in Sources */,
+				8DEA425EE2B3A4501120017E /* QRCodeView.swift in Sources */,
+				AF6E41A1FB2F26FC7694E117 /* AnimatedLikeButton.swift in Sources */,
+				5615137F7AB59F60CF115AC1 /* LoadingView.swift in Sources */,
+				4F54BFF2A62B80C5358E7C0D /* HeaderBar.swift in Sources */,
+				FD0C7C547515A7A4D88DE87C /* ProfileView.swift in Sources */,
+				FD44253B87E147E5B3CBDF25 /* NotificationsView.swift in Sources */,
+				6150B84554B832DD3386BB4D /* ContentView.swift in Sources */,
+				46E9B9F4A0374E490F9B654A /* ServiceContainer.swift in Sources */,
+				8E0975A94C974C157055A789 /* TicketService.swift in Sources */,
+				D0B128EEB8B85701C980F6B7 /* EventService.swift in Sources */,
+				97463084C86EE72F770E3FF1 /* PaymentService.swift in Sources */,
+				444EB09653E81469F548A0AA /* AuthService.swift in Sources */,
+				5F28275667B36833615E860C /* EventPassUGApp.swift in Sources */,
+				D405978B760746F6E313FFB7 /* EventPassUG.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		27147C209055D528230ABC49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z6Y36CWYBC;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EventPassUG/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eventpass.ug;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		62C553F4403A7BDD7BB252F1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		724E9363F9638D1C40CD4864 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9F263BA7E99EC3FC11FA1223 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z6Y36CWYBC;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EventPassUG/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eventpass.ug;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7E08856E0CC0D76315C167C3 /* Build configuration list for PBXProject "EventPassUG" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				724E9363F9638D1C40CD4864 /* Debug */,
+				62C553F4403A7BDD7BB252F1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E14275F31EE7750F5C048541 /* Build configuration list for PBXNativeTarget "EventPassUG" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9F263BA7E99EC3FC11FA1223 /* Debug */,
+				27147C209055D528230ABC49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2152215DAD3233DF3D4586FA /* Project object */;
+}

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uuidgen:*)",
+      "Bash(chmod:*)",
+      "Bash(ruby create_xcode_project.rb:*)",
+      "Bash(tree:*)",
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(ruby generate_project.rb:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(tee:*)",
+      "Bash(open:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

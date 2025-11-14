@@ -1,0 +1,11 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project EventPassUG.xcodeproj -scheme EventPassUG -destination "platform=iOS Simulator,name=iPhone 15 Pro" clean build
+
+2025-11-14 16:31:19.633 xcodebuild[33814:15086655] Writing error result bundle to /var/folders/cx/t3v18prx0cv2s147q31lv5yh0000gn/T/ResultBundle_2025-14-11_16-31-0019.xcresult
+xcodebuild: error: Unable to find a device matching the provided destination specifier:
+		{ platform:iOS Simulator, OS:latest, name:iPhone 15 Pro }
+
+	The requested device could not be found because no available devices matched the request.
+
+	Ineligible destinations for the "EventPassUG" scheme:
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 26.1 is not installed. Please download and install the platform from Xcode > Settings > Components. }
