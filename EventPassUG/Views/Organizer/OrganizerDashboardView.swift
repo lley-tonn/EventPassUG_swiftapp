@@ -17,10 +17,12 @@ struct OrganizerDashboardView: View {
     @State private var isLoading = true
     @State private var showingQRScanner = false
     @State private var events: [Event] = []
+    @State private var showingVerification = false
 
     var body: some View {
         NavigationView {
-            ScrollView {
+            ZStack {
+                ScrollView {
                 VStack(alignment: .leading, spacing: AppSpacing.lg) {
                     // Analytics cards
                     VStack(spacing: AppSpacing.md) {
@@ -141,12 +143,65 @@ struct OrganizerDashboardView: View {
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Dashboard")
+            .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
+
+                // Verification Required Overlay
+                if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                    VStack(spacing: AppSpacing.lg) {
+                        Spacer()
+
+                        VStack(spacing: AppSpacing.md) {
+                            Image(systemName: "exclamationmark.shield.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.orange)
+
+                            Text("Verification Required")
+                                .font(AppTypography.title2)
+                                .fontWeight(.bold)
+
+                            Text("You must verify your National ID before accessing organizer features.")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, AppSpacing.xl)
+
+                            Button(action: {
+                                showingVerification = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "checkmark.shield")
+                                    Text("Verify Now")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(RoleConfig.organizerPrimary)
+                                .cornerRadius(AppCornerRadius.medium)
+                            }
+                            .padding(.horizontal, AppSpacing.xl)
+                        }
+                        .padding(AppSpacing.xl)
+                        .background(Color(UIColor.systemBackground))
+                        .cornerRadius(AppCornerRadius.large)
+                        .shadow(radius: 10)
+                        .padding(AppSpacing.md)
+
+                        Spacer()
+                    }
+                    .background(Color.black.opacity(0.3))
+                }
+            }
         }
         .onAppear {
             loadAnalytics()
         }
         .sheet(isPresented: $showingQRScanner) {
             QRScannerView()
+        }
+        .sheet(isPresented: $showingVerification) {
+            NationalIDVerificationView()
+                .environmentObject(authService)
         }
     }
 

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		047105C3CD36E8332DE9584E /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895DFD1F2FE6AC18A83CAD70 /* OnboardingView.swift */; };
 		09FAC6D6C79081D9E0BD3982 /* TicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E6E92191F9AB14C54B6068 /* TicketsView.swift */; };
+		0D1CC136143FAC16DF2BE20B /* ProfileView+ContactVerification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4CC4E0295B8C209497F6FC /* ProfileView+ContactVerification.swift */; };
 		124937C269CD498AA8D824AF /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041F59421E5A413792023047 /* ShareSheet.swift */; };
 		21CDF1727063CD17314AB363 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7CA2AA86FBCA64DFB5F2B2 /* DateUtilities.swift */; };
 		347F4D14B750402188BB6D3B /* ImageColorExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60A848E346544CF9C1A88EB /* ImageColorExtractor.swift */; };
@@ -47,6 +48,7 @@
 		B408CDE94C344DC9A436FD47 /* FavoriteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B485B7091BAC4BACB773B20C /* FavoriteManager.swift */; };
 		BD68405A958E23137B8619D7 /* AddContactMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D10A2E1F443E839F7A0CA17 /* AddContactMethodView.swift */; };
 		C194BDE2CD7F46F7885F7555 /* FavoriteEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA83ADB1F55344D18423C1F7 /* FavoriteEventsView.swift */; };
+		C6A8C3D6C7FB898B8D2DD7E6 /* OnboardingView+SocialAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 781D5CBA65D59030E62BB651 /* OnboardingView+SocialAuth.swift */; };
 		CAEA57B52E6412E64442A8A7 /* Ticket.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAF91718BE8B1BB1DE08DBA /* Ticket.swift */; };
 		CE8E0E41DF176B2C8D35BA47 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7626F25DDC896D33321E81F6 /* MainTabView.swift */; };
 		D0B128EEB8B85701C980F6B7 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70791FDD3842CD748EA0BD4D /* EventService.swift */; };
@@ -73,22 +75,22 @@
 		229B0901E878F467E84294BC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		268C06242B6C4DA6CCDFE4A0 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Event.swift; path = Models/Event.swift; sourceTree = "<group>"; };
 		297FD57AB39F4C11981D8E38 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUG/Views/Attendee/SearchView.swift; sourceTree = "<group>"; };
-		2B4CC4E0295B8C209497F6FC /* ProfileView+ContactVerification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Views/Common/ProfileView+ContactVerification.swift"; sourceTree = "<group>"; };
+		2B4CC4E0295B8C209497F6FC /* ProfileView+ContactVerification.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "ProfileView+ContactVerification.swift"; sourceTree = "<group>"; };
 		37E6E92191F9AB14C54B6068 /* TicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketsView.swift; path = Views/Attendee/TicketsView.swift; sourceTree = "<group>"; };
 		38E4C3E07B99459DA60DD426 /* TicketDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketDetailView.swift; path = Views/Attendee/TicketDetailView.swift; sourceTree = "<group>"; };
 		42338FC91CCA4E4CA10CC11F /* PDFGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PDFGenerator.swift; path = Utilities/PDFGenerator.swift; sourceTree = "<group>"; };
 		43B5BBD301D50AB81688CC62 /* OrganizerHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrganizerHomeView.swift; path = Views/Organizer/OrganizerHomeView.swift; sourceTree = "<group>"; };
-		5A0A2BF179EA414A77B763D7 /* PhoneVerificationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views/Auth/PhoneVerificationView.swift; sourceTree = "<group>"; };
+		5A0A2BF179EA414A77B763D7 /* PhoneVerificationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoneVerificationView.swift; sourceTree = "<group>"; };
 		5A985E909937BCFB8D437A27 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRScannerView.swift; path = Views/Organizer/QRScannerView.swift; sourceTree = "<group>"; };
-		5D10A2E1F443E839F7A0CA17 /* AddContactMethodView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views/Auth/AddContactMethodView.swift; sourceTree = "<group>"; };
+		5D10A2E1F443E839F7A0CA17 /* AddContactMethodView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddContactMethodView.swift; sourceTree = "<group>"; };
 		5D7CA2AA86FBCA64DFB5F2B2 /* DateUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DateUtilities.swift; path = Utilities/DateUtilities.swift; sourceTree = "<group>"; };
 		6961111E4D843400FAC858CC /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRCodeGenerator.swift; path = Utilities/QRCodeGenerator.swift; sourceTree = "<group>"; };
 		6EE55E270C60FD0ED068F6CC /* CreateEventWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CreateEventWizard.swift; path = Views/Organizer/CreateEventWizard.swift; sourceTree = "<group>"; };
-		6F1276BBB457B4C219247A52 /* SocialAuthButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views/Auth/SocialAuthButtons.swift; sourceTree = "<group>"; };
+		6F1276BBB457B4C219247A52 /* SocialAuthButtons.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SocialAuthButtons.swift; sourceTree = "<group>"; };
 		70791FDD3842CD748EA0BD4D /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventService.swift; path = Services/EventService.swift; sourceTree = "<group>"; };
 		710D62EEAA834B63BA718F4E /* TicketSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUG/Views/Attendee/TicketSuccessView.swift; sourceTree = "<group>"; };
 		7626F25DDC896D33321E81F6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = Views/Navigation/MainTabView.swift; sourceTree = "<group>"; };
-		781D5CBA65D59030E62BB651 /* OnboardingView+SocialAuth.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Views/Auth/OnboardingView+SocialAuth.swift"; sourceTree = "<group>"; };
+		781D5CBA65D59030E62BB651 /* OnboardingView+SocialAuth.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "OnboardingView+SocialAuth.swift"; sourceTree = "<group>"; };
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7DA9B44AABA193CF4CC07A81 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = User.swift; path = Models/User.swift; sourceTree = "<group>"; };
 		7FE2D2FD1566EC7242E87855 /* EventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventCard.swift; path = Views/Components/EventCard.swift; sourceTree = "<group>"; };
@@ -348,6 +350,8 @@
 				8403EF63144C3B19B0B3D944 /* PhoneVerificationView.swift in Sources */,
 				BD68405A958E23137B8619D7 /* AddContactMethodView.swift in Sources */,
 				ED5C0BD86C7A7398F68F8217 /* SocialAuthButtons.swift in Sources */,
+				C6A8C3D6C7FB898B8D2DD7E6 /* OnboardingView+SocialAuth.swift in Sources */,
+				0D1CC136143FAC16DF2BE20B /* ProfileView+ContactVerification.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,6 +20,29 @@ protocol AuthServiceProtocol: AnyObject {
     func signOut() throws
     func updateProfile(_ user: User) async throws
     func switchRole(to role: UserRole) async throws
+    func submitVerification(nationalIDNumber: String, frontImageData: Data?, backImageData: Data?) async throws
+
+    // Social Auth
+    func signInWithGoogle(firstName: String, lastName: String, role: UserRole) async throws -> User
+    func signInWithApple(firstName: String, lastName: String, role: UserRole) async throws -> User
+
+    // Phone Auth
+    func signInWithPhone(phoneNumber: String, firstName: String, lastName: String, role: UserRole) async throws -> String // Returns verification ID
+    func verifyPhoneCode(verificationId: String, code: String) async throws -> User
+
+    // Email/Phone Verification
+    func sendEmailVerification() async throws
+    func sendPhoneVerification(phoneNumber: String) async throws -> String // Returns verification ID
+    func verifyPhone(verificationId: String, code: String) async throws
+
+    // Add Contact Methods
+    func addEmail(email: String, password: String) async throws
+    func addPhoneNumber(phoneNumber: String) async throws -> String // Returns verification ID
+
+    // Account Linking
+    func linkGoogleAccount() async throws
+    func linkAppleAccount() async throws
+    func linkEmailPassword(email: String, password: String) async throws
 }
 
 // MARK: - Mock Implementation
@@ -98,6 +121,234 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
     func switchRole(to role: UserRole) async throws {
         guard var user = currentUser else { return }
         user.role = role
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func submitVerification(nationalIDNumber: String, frontImageData: Data?, backImageData: Data?) async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Replace with real API call to upload images and verify
+        // Simulate network delay
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+
+        // Mock success - update user verification status
+        user.isVerified = true
+        user.nationalIDNumber = nationalIDNumber
+        user.verificationDate = Date()
+
+        // In real implementation, upload images to server and store URLs
+        // For now, we'll just mark as verified
+        if frontImageData != nil {
+            user.nationalIDFrontImageURL = "mock://front-image-url"
+        }
+        if backImageData != nil {
+            user.nationalIDBackImageURL = "mock://back-image-url"
+        }
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    // MARK: - Social Auth
+
+    func signInWithGoogle(firstName: String, lastName: String, role: UserRole) async throws -> User {
+        // TODO: Implement Google Sign In with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        let user = User(
+            firstName: firstName,
+            lastName: lastName,
+            email: "\(firstName.lowercased()).\(lastName.lowercased())@gmail.com", // Mock email from Google
+            role: role,
+            isEmailVerified: true, // Google emails are pre-verified
+            authProviders: ["google.com"]
+        )
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+        return user
+    }
+
+    func signInWithApple(firstName: String, lastName: String, role: UserRole) async throws -> User {
+        // TODO: Implement Apple Sign In with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        let user = User(
+            firstName: firstName,
+            lastName: lastName,
+            email: nil, // Apple can hide email
+            role: role,
+            authProviders: ["apple.com"]
+        )
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+        return user
+    }
+
+    // MARK: - Phone Auth
+
+    func signInWithPhone(phoneNumber: String, firstName: String, lastName: String, role: UserRole) async throws -> String {
+        // TODO: Implement Firebase Phone Auth
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Mock verification ID
+        return "mock-verification-id-\(UUID().uuidString)"
+    }
+
+    func verifyPhoneCode(verificationId: String, code: String) async throws -> User {
+        // TODO: Verify phone code with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Extract phone from verification ID (in real implementation, Firebase handles this)
+        let user = User(
+            firstName: "Phone",
+            lastName: "User",
+            role: .attendee,
+            phoneNumber: "+256700000000", // Mock phone number
+            isPhoneVerified: true,
+            authProviders: ["phone"]
+        )
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+        return user
+    }
+
+    // MARK: - Email/Phone Verification
+
+    func sendEmailVerification() async throws {
+        guard var user = currentUser, user.email != nil else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "No email address found"])
+        }
+
+        // TODO: Send email verification with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Mock: Automatically verify for now
+        user.isEmailVerified = true
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func sendPhoneVerification(phoneNumber: String) async throws -> String {
+        guard currentUser != nil else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+
+        // TODO: Send SMS with Firebase Phone Auth
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        return "mock-verification-id-\(UUID().uuidString)"
+    }
+
+    func verifyPhone(verificationId: String, code: String) async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Verify code with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        user.isPhoneVerified = true
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    // MARK: - Add Contact Methods
+
+    func addEmail(email: String, password: String) async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Add email/password to Firebase account
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        user.email = email
+        if !user.authProviders.contains("email") {
+            user.authProviders.append("email")
+        }
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func addPhoneNumber(phoneNumber: String) async throws -> String {
+        guard currentUser != nil else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+
+        // TODO: Send SMS verification
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        return "mock-verification-id-\(UUID().uuidString)"
+    }
+
+    // MARK: - Account Linking
+
+    func linkGoogleAccount() async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Link Google account with Firebase auth().link(with:)
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        if !user.authProviders.contains("google.com") {
+            user.authProviders.append("google.com")
+        }
+        if user.email == nil {
+            user.email = "linked@gmail.com" // Mock
+            user.isEmailVerified = true
+        }
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func linkAppleAccount() async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Link Apple account with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        if !user.authProviders.contains("apple.com") {
+            user.authProviders.append("apple.com")
+        }
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func linkEmailPassword(email: String, password: String) async throws {
+        guard var user = currentUser else { return }
+
+        // TODO: Link email/password with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        user.email = email
+        if !user.authProviders.contains("email") {
+            user.authProviders.append("email")
+        }
 
         await MainActor.run {
             self.currentUser = user

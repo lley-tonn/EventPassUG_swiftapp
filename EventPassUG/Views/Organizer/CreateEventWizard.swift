@@ -16,6 +16,7 @@ struct CreateEventWizard: View {
     @State private var currentStep = 1
     @State private var isLoading = false
     @State private var showingSuccessAlert = false
+    @State private var showingVerification = false
 
     // Step 1: Event Details
     @State private var title = ""
@@ -161,6 +162,16 @@ struct CreateEventWizard: View {
             }
         } message: {
             Text("Your event has been published successfully!")
+        }
+        .sheet(isPresented: $showingVerification) {
+            NationalIDVerificationView()
+                .environmentObject(authService)
+        }
+        .onAppear {
+            // Check verification on load
+            if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                showingVerification = true
+            }
         }
     }
 

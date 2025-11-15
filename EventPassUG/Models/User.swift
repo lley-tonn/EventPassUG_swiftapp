@@ -23,15 +23,34 @@ struct User: Identifiable, Codable, Equatable {
     let id: UUID
     var firstName: String
     var lastName: String
-    var email: String
+    var email: String?
     var role: UserRole
     var profileImageURL: String?
     var phoneNumber: String?
     var dateJoined: Date
     var favoriteEventIds: [UUID]
 
+    // Contact Verification
+    var isEmailVerified: Bool
+    var isPhoneVerified: Bool
+
+    // Auth Providers
+    var authProviders: [String] // "email", "google.com", "apple.com", "phone"
+
+    // National ID Verification
+    var isVerified: Bool
+    var nationalIDNumber: String?
+    var nationalIDFrontImageURL: String?
+    var nationalIDBackImageURL: String?
+    var verificationDate: Date?
+
     var fullName: String {
         "\(firstName) \(lastName)"
+    }
+
+    // Check if user needs verification for organizer actions
+    var needsVerificationForOrganizerActions: Bool {
+        isOrganizer && !isVerified
     }
 
     // Role capabilities - for future dual-role support
@@ -56,12 +75,20 @@ struct User: Identifiable, Codable, Equatable {
         id: UUID = UUID(),
         firstName: String,
         lastName: String,
-        email: String,
+        email: String? = nil,
         role: UserRole,
         profileImageURL: String? = nil,
         phoneNumber: String? = nil,
         dateJoined: Date = Date(),
-        favoriteEventIds: [UUID] = []
+        favoriteEventIds: [UUID] = [],
+        isEmailVerified: Bool = false,
+        isPhoneVerified: Bool = false,
+        authProviders: [String] = [],
+        isVerified: Bool = false,
+        nationalIDNumber: String? = nil,
+        nationalIDFrontImageURL: String? = nil,
+        nationalIDBackImageURL: String? = nil,
+        verificationDate: Date? = nil
     ) {
         self.id = id
         self.firstName = firstName
@@ -72,6 +99,14 @@ struct User: Identifiable, Codable, Equatable {
         self.phoneNumber = phoneNumber
         self.dateJoined = dateJoined
         self.favoriteEventIds = favoriteEventIds
+        self.isEmailVerified = isEmailVerified
+        self.isPhoneVerified = isPhoneVerified
+        self.authProviders = authProviders
+        self.isVerified = isVerified
+        self.nationalIDNumber = nationalIDNumber
+        self.nationalIDFrontImageURL = nationalIDFrontImageURL
+        self.nationalIDBackImageURL = nationalIDBackImageURL
+        self.verificationDate = verificationDate
     }
 }
 
