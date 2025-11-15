@@ -10,15 +10,23 @@ import Foundation
 // MARK: - Models
 
 enum PaymentMethod: String, Codable, CaseIterable {
-    case mobileMoney = "Mobile Money"
-    case creditCard = "Credit Card"
-    case bankTransfer = "Bank Transfer"
+    case mtnMomo = "MTN MoMo"
+    case airtelMoney = "Airtel Money"
+    case card = "Card (Visa/Mastercard)"
 
     var iconName: String {
         switch self {
-        case .mobileMoney: return "phone.fill"
-        case .creditCard: return "creditcard.fill"
-        case .bankTransfer: return "building.columns.fill"
+        case .mtnMomo: return "phone.circle.fill"
+        case .airtelMoney: return "antenna.radiowaves.left.and.right"
+        case .card: return "creditcard.fill"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .mtnMomo: return "FFC000" // MTN Yellow
+        case .airtelMoney: return "ED1C24" // Airtel Red
+        case .card: return "007AFF" // Blue
         }
     }
 }

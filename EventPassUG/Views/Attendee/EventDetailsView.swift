@@ -38,12 +38,13 @@ struct EventDetailsView: View {
                         Image(posterURL)
                             .resizable()
                             .aspectRatio(16/9, contentMode: .fill)
-                            .frame(maxWidth: .infinity)
                             .frame(height: 280)
+                            .frame(maxWidth: .infinity)
                             .clipped()
                     } else {
                         Rectangle()
                             .fill(Color(UIColor.systemGray5))
+                            .frame(maxWidth: .infinity)
                             .frame(height: 280)
                             .overlay(
                                 Image(systemName: "photo")
@@ -77,10 +78,12 @@ struct EventDetailsView: View {
                         Text(event.title)
                             .font(AppTypography.largeTitle)
                             .fontWeight(.bold)
+                            .fixedSize(horizontal: false, vertical: true)
 
                         Text("by \(event.organizerName)")
                             .font(AppTypography.callout)
                             .foregroundColor(.secondary)
+                            .lineLimit(2)
 
                         // Actions
                         HStack(spacing: AppSpacing.lg) {
@@ -145,6 +148,7 @@ struct EventDetailsView: View {
                                 tint: RoleConfig.attendeePrimary
                             )
                         }
+                        .frame(maxWidth: .infinity)
                         .frame(height: 200)
                         .cornerRadius(AppCornerRadius.medium)
                         .allowsHitTesting(false)
@@ -167,6 +171,7 @@ struct EventDetailsView: View {
                         Text(event.description)
                             .font(AppTypography.body)
                             .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Divider()
@@ -245,15 +250,17 @@ struct EventDetailsView: View {
                             Text(selectedTicketType?.formattedPrice ?? event.priceRange)
                                 .font(AppTypography.title3)
                                 .fontWeight(.bold)
+                                .lineLimit(1)
 
                             if let ticketType = selectedTicketType {
                                 Text(ticketType.name)
                                     .font(AppTypography.caption)
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
                             }
                         }
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
                         Button(action: {
                             showingTicketPurchase = true
@@ -261,6 +268,7 @@ struct EventDetailsView: View {
                             Text(event.isHappeningNow ? "Join Now" : "Buy Ticket")
                                 .font(AppTypography.headline)
                                 .foregroundColor(.white)
+                                .lineLimit(1)
                                 .padding(.horizontal, AppSpacing.xl)
                                 .padding(.vertical, AppSpacing.md)
                                 .background(RoleConfig.attendeePrimary)
@@ -316,6 +324,7 @@ struct InfoRow: View {
                 Text(value)
                     .font(AppTypography.body)
                     .foregroundColor(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -333,6 +342,8 @@ struct TicketTypeCard: View {
                     Text(ticketType.name)
                         .font(AppTypography.headline)
                         .foregroundColor(.primary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     if let description = ticketType.description {
                         Text(description)
@@ -345,6 +356,7 @@ struct TicketTypeCard: View {
                         .font(AppTypography.caption)
                         .foregroundColor(ticketType.isSoldOut ? .red : .secondary)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Spacer()
 

@@ -34,6 +34,24 @@ struct User: Identifiable, Codable, Equatable {
         "\(firstName) \(lastName)"
     }
 
+    // Role capabilities - for future dual-role support
+    var availableRoles: [UserRole] {
+        // Currently single role, but structure allows for future expansion
+        [role]
+    }
+
+    var isAttendee: Bool {
+        availableRoles.contains(.attendee)
+    }
+
+    var isOrganizer: Bool {
+        availableRoles.contains(.organizer)
+    }
+
+    var hasBothRoles: Bool {
+        availableRoles.contains(.attendee) && availableRoles.contains(.organizer)
+    }
+
     init(
         id: UUID = UUID(),
         firstName: String,

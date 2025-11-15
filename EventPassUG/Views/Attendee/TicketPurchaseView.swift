@@ -16,9 +16,10 @@ struct TicketPurchaseView: View {
     @EnvironmentObject var authService: MockAuthService
 
     @State private var quantity = 1
-    @State private var selectedPaymentMethod: PaymentMethod = .mobileMoney
+    @State private var selectedPaymentMethod: PaymentMethod = .mtnMomo
     @State private var isProcessing = false
     @State private var purchaseComplete = false
+    @State private var purchasedTickets: [Ticket] = []
     @State private var errorMessage: String?
 
     var totalAmount: Double {
@@ -28,36 +29,13 @@ struct TicketPurchaseView: View {
     var body: some View {
         NavigationView {
             if purchaseComplete {
-                // Success screen
-                VStack(spacing: AppSpacing.xl) {
-                    Spacer()
-
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(.green)
-
-                    Text("Purchase Successful!")
-                        .font(AppTypography.title1)
-                        .fontWeight(.bold)
-
-                    Text("Your ticket\(quantity > 1 ? "s have" : " has") been sent to your email")
-                        .font(AppTypography.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-
-                    Spacer()
-
-                    Button(action: { dismiss() }) {
-                        Text("View My Tickets")
-                            .font(AppTypography.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(RoleConfig.attendeePrimary)
-                            .cornerRadius(AppCornerRadius.medium)
-                    }
-                }
-                .padding(AppSpacing.xl)
+                // Show success view with QR codes
+                TicketSuccessView(
+                    event: event,
+                    ticketType: ticketType,
+                    quantity: quantity,
+                    tickets: purchasedTickets
+                )
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: AppSpacing.lg) {
@@ -265,14 +243,18 @@ struct TicketPurchaseView: View {
 
                 if status == .completed {
                     // Purchase tickets
-                    _ = try await services.ticketService.purchaseTicket(
+                    let tickets = try await services.ticketService.purchaseTicket(
                         eventId: event.id,
                         ticketTypeId: ticketType.id,
-                        quantity: quantity
+                        quantity: quantity,
+                        event: event,
+                        ticketType: ticketType,
+                        userId: userId
                     )
 
                     await MainActor.run {
                         HapticFeedback.success()
+                        purchasedTickets = tickets
                         purchaseComplete = true
                         isProcessing = false
                     }

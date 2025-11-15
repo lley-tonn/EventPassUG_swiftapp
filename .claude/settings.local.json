@@ -10,7 +10,10 @@
       "Bash(ruby generate_project.rb:*)",
       "Bash(xcodebuild:*)",
       "Bash(tee:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(ruby -e:*)",
+      "Bash(git checkout:*)",
+      "Bash([ -f \"/Users/lleyton/Library/Developer/Xcode/DerivedData/EventPassUG-gaemsfvkxebuzehepmaroxkhueom/Build/Products/Debug-iphonesimulator/EventPassUG.app/EventPassUG\" ])"
     ],
     "deny": [],
     "ask": []

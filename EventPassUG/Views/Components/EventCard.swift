@@ -14,11 +14,7 @@ struct EventCard: View {
     let onCardTap: () -> Void
 
     var body: some View {
-        Button(action: {
-            HapticFeedback.light()
-            onCardTap()
-        }) {
-            VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
                 // Poster image
                 ZStack(alignment: .topLeading) {
                     // Poster
@@ -121,11 +117,10 @@ struct EventCard: View {
             .background(Color(UIColor.systemBackground))
             .cornerRadius(AppCornerRadius.medium)
             .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(event.title), \(DateUtilities.formatEventDateTime(event.startDate)), \(event.venue.name)")
-        .accessibilityHint("Double tap to view event details")
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(event.title), \(DateUtilities.formatEventDateTime(event.startDate)), \(event.venue.name)")
+            .accessibilityHint("Double tap to view event details")
     }
 }
 

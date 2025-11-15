@@ -14,38 +14,133 @@ struct TicketsView: View {
     @State private var tickets: [Ticket] = []
     @State private var isLoading = true
     @State private var selectedTicket: Ticket?
-    @State private var showingQRCode = false
+    @State private var showingTicketDetail = false
+    @State private var selectedFilter: TicketFilter = .active
+    @State private var showingShareSheet = false
+    @State private var shareTicket: Ticket?
+    @State private var sharePdfURL: URL?
+    @State private var scrollOffset: CGFloat = 0
+
+    enum TicketFilter {
+        case all
+        case active
+        case expired
+    }
+
+    var activeTickets: [Ticket] {
+        tickets.filter { !$0.isExpired && $0.scanStatus == .unused }
+    }
+
+    var expiredTickets: [Ticket] {
+        tickets.filter { $0.isExpired || $0.scanStatus == .scanned }
+    }
+
+    var filteredTickets: [Ticket] {
+        switch selectedFilter {
+        case .all:
+            return tickets.sorted { $0.eventDate > $1.eventDate }
+        case .active:
+            return activeTickets.sorted { $0.eventDate < $1.eventDate }
+        case .expired:
+            return expiredTickets.sorted { $0.eventDate > $1.eventDate }
+        }
+    }
 
     var body: some View {
         NavigationView {
-            Group {
+            VStack(spacing: 0) {
                 if isLoading {
                     LoadingView()
                 } else if tickets.isEmpty {
                     EmptyTicketsView()
                 } else {
-                    ScrollView {
+                    // Collapsible header with filters
+                    CollapsibleHeader(title: "My Tickets", scrollOffset: scrollOffset) {
+                        VStack(spacing: AppSpacing.md) {
+                            Text("My Tickets")
+                                .font(AppTypography.largeTitle)
+                                .fontWeight(.bold)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            // Filter buttons
+                            HStack(spacing: AppSpacing.md) {
+                                TicketFilterButton(
+                                    title: "All",
+                                    count: tickets.count,
+                                    isSelected: selectedFilter == .all,
+                                    color: .gray,
+                                    onTap: {
+                                        selectedFilter = .all
+                                        HapticFeedback.selection()
+                                    }
+                                )
+
+                                TicketFilterButton(
+                                    title: "Active",
+                                    count: activeTickets.count,
+                                    isSelected: selectedFilter == .active,
+                                    color: .green,
+                                    onTap: {
+                                        selectedFilter = .active
+                                        HapticFeedback.selection()
+                                    }
+                                )
+
+                                TicketFilterButton(
+                                    title: "Expired",
+                                    count: expiredTickets.count,
+                                    isSelected: selectedFilter == .expired,
+                                    color: .red,
+                                    onTap: {
+                                        selectedFilter = .expired
+                                        HapticFeedback.selection()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Tickets list with scroll tracking
+                    ScrollOffsetReader(content: {
                         LazyVStack(spacing: AppSpacing.md) {
-                            ForEach(tickets) { ticket in
-                                TicketCard(ticket: ticket) {
-                                    selectedTicket = ticket
-                                    showingQRCode = true
-                                    HapticFeedback.light()
-                                }
+                            ForEach(filteredTickets) { ticket in
+                                TicketCard(
+                                    ticket: ticket,
+                                    onTap: {
+                                        selectedTicket = ticket
+                                        showingTicketDetail = true
+                                        HapticFeedback.light()
+                                    },
+                                    onShare: {
+                                        shareTicketAsPDF(ticket)
+                                    }
+                                )
                             }
                         }
                         .padding(AppSpacing.md)
-                    }
+                    }, onOffsetChange: { offset in
+                        scrollOffset = offset
+                    })
                 }
             }
-            .navigationTitle("My Tickets")
+            .navigationBarHidden(true)
             .background(Color(UIColor.systemGroupedBackground))
         }
         .onAppear {
             loadTickets()
         }
         .sheet(item: $selectedTicket) { ticket in
-            TicketQRView(ticket: ticket)
+            TicketDetailView(ticket: ticket)
+                .environmentObject(services)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = sharePdfURL {
+                ShareSheet(items: [url]) { completed in
+                    if completed {
+                        HapticFeedback.success()
+                    }
+                }
+            }
         }
     }
 
@@ -56,7 +151,13 @@ struct TicketsView: View {
 
                 let fetchedTickets = try await services.ticketService.fetchUserTickets(userId: userId)
                 await MainActor.run {
-                    tickets = fetchedTickets.sorted { $0.eventDate > $1.eventDate }
+                    // Mark newly expired tickets
+                    tickets = markExpiredTickets(fetchedTickets)
+
+                    // Auto-delete tickets older than 60 days
+                    cleanupOldTickets()
+
+                    tickets = tickets.sorted { $0.eventDate > $1.eventDate }
                     isLoading = false
                 }
             } catch {
@@ -67,125 +168,220 @@ struct TicketsView: View {
             }
         }
     }
+
+    private func markExpiredTickets(_ ticketList: [Ticket]) -> [Ticket] {
+        var updatedTickets = ticketList
+        for (index, ticket) in updatedTickets.enumerated() {
+            if ticket.isExpired && updatedTickets[index].expiredAt == nil {
+                updatedTickets[index].expiredAt = Date()
+            }
+        }
+        return updatedTickets
+    }
+
+    private func cleanupOldTickets() {
+        let ticketsToKeep = tickets.filter { !$0.shouldBeDeleted }
+        if ticketsToKeep.count != tickets.count {
+            tickets = ticketsToKeep
+            print("🗑️ Cleaned up \(tickets.count - ticketsToKeep.count) expired tickets older than 60 days")
+        }
+    }
+
+    private func shareTicketAsPDF(_ ticket: Ticket) {
+        HapticFeedback.light()
+
+        Task {
+            let url = await Task.detached(priority: .userInitiated) {
+                PDFGenerator.generateTicketPDF(ticket: ticket)
+            }.value
+
+            await MainActor.run {
+                if let url = url {
+                    sharePdfURL = url
+                    showingShareSheet = true
+                } else {
+                    HapticFeedback.error()
+                }
+            }
+        }
+    }
+}
+
+struct TicketFilterButton: View {
+    let title: String
+    let count: Int
+    let isSelected: Bool
+    let color: Color
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                Text(title)
+                    .font(AppTypography.callout)
+                    .fontWeight(isSelected ? .semibold : .regular)
+
+                Text("\(count)")
+                    .font(AppTypography.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(isSelected ? color : Color.gray.opacity(0.2))
+                    )
+                    .foregroundColor(isSelected ? .white : .secondary)
+            }
+            .foregroundColor(isSelected ? color : .primary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(
+                Capsule()
+                    .fill(isSelected ? color.opacity(0.15) : Color.clear)
+            )
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? color : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 struct TicketCard: View {
     let ticket: Ticket
-    let onViewQR: () -> Void
+    let onTap: () -> Void
+    let onShare: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Status banner
-            if ticket.scanStatus == .scanned {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Scanned")
-                        .font(AppTypography.caption)
-                        .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(Color.green)
-            } else if ticket.isExpired {
-                HStack {
-                    Image(systemName: "clock.fill")
-                    Text("Expired")
-                        .font(AppTypography.caption)
-                        .fontWeight(.semibold)
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(Color.gray)
-            }
-
-            VStack(alignment: .leading, spacing: AppSpacing.md) {
-                // Event title
-                Text(ticket.eventTitle)
-                    .font(AppTypography.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-
-                // Ticket type and price
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Ticket Type")
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: 0) {
+                // Status banner
+                if ticket.scanStatus == .scanned {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Scanned")
                             .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
-
-                        Text(ticket.ticketType.name)
-                            .font(AppTypography.callout)
                             .fontWeight(.semibold)
                     }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("Price")
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Color.green)
+                } else if ticket.isExpired {
+                    HStack {
+                        Image(systemName: "clock.fill")
+                        Text("Event Ended")
                             .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
-
-                        Text(ticket.ticketType.formattedPrice)
-                            .font(AppTypography.callout)
                             .fontWeight(.semibold)
-                            .foregroundColor(RoleConfig.attendeePrimary)
                     }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Color.gray)
+                } else {
+                    HStack {
+                        Image(systemName: "checkmark.seal.fill")
+                        Text("Active")
+                            .font(AppTypography.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(RoleConfig.attendeePrimary)
                 }
 
-                Divider()
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    // Event title
+                    Text(ticket.eventTitle)
+                        .font(AppTypography.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                // Event details
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "calendar")
-                            .font(.caption)
-                        Text(DateUtilities.formatEventDateTime(ticket.eventDate))
-                            .font(AppTypography.subheadline)
+                    // Ticket type and price
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Ticket Type")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+
+                            Text(ticket.ticketType.name)
+                                .font(AppTypography.callout)
+                                .fontWeight(.semibold)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text("Price")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+
+                            Text(ticket.ticketType.formattedPrice)
+                                .font(AppTypography.callout)
+                                .fontWeight(.semibold)
+                                .foregroundColor(RoleConfig.attendeePrimary)
+                        }
                     }
-                    .foregroundColor(.secondary)
 
-                    HStack(spacing: 4) {
-                        Image(systemName: "location.fill")
-                            .font(.caption)
-                        Text(ticket.eventVenue)
-                            .font(AppTypography.subheadline)
-                    }
-                    .foregroundColor(.secondary)
+                    Divider()
 
-                    if let seatNumber = ticket.seatNumber {
+                    // Event details
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         HStack(spacing: 4) {
-                            Image(systemName: "person.fill")
+                            Image(systemName: "calendar")
                                 .font(.caption)
-                            Text("Seat: \(seatNumber)")
+                            Text(DateUtilities.formatEventDateTime(ticket.eventDate))
                                 .font(AppTypography.subheadline)
                         }
                         .foregroundColor(.secondary)
-                    }
-                }
 
-                // View QR button
-                if ticket.canBeScanned {
-                    Button(action: onViewQR) {
-                        HStack {
-                            Image(systemName: "qrcode")
-                            Text("View QR Code")
+                        HStack(spacing: 4) {
+                            Image(systemName: "location.fill")
+                                .font(.caption)
+                            Text(ticket.eventVenue)
+                                .font(AppTypography.subheadline)
+                                .lineLimit(1)
                         }
-                        .font(AppTypography.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(RoleConfig.attendeePrimary)
-                        .cornerRadius(AppCornerRadius.medium)
+                        .foregroundColor(.secondary)
+                    }
+
+                    // Bottom actions
+                    HStack {
+                        Button(action: onShare) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.caption)
+                                Text("Share")
+                                    .font(AppTypography.caption)
+                            }
+                            .foregroundColor(RoleConfig.attendeePrimary)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule()
+                                    .fill(RoleConfig.attendeePrimary.opacity(0.1))
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
+                .padding(AppSpacing.md)
             }
-            .padding(AppSpacing.md)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2)
+            .opacity(ticket.isExpired ? 0.85 : 1.0)
         }
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppCornerRadius.medium)
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2)
-        .opacity(ticket.isExpired ? 0.7 : 1.0)
+        .buttonStyle(.plain)
     }
 }
 
