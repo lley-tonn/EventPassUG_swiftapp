@@ -10,12 +10,30 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var authService: MockAuthService
     @State private var showOnboarding = false
+    @State private var showPreferencesOnboarding = false
 
     var body: some View {
         Group {
             if authService.isAuthenticated {
                 if let user = authService.currentUser {
-                    MainTabView(userRole: user.role)
+                    // Use currentActiveRole for navigation (supports dual-role switching)
+                    MainTabView(userRole: user.currentActiveRole)
+                        .id(user.currentActiveRole) // Force view refresh when role changes
+                        .fullScreenCover(isPresented: $showPreferencesOnboarding) {
+                            OnboardingFlowView(showOnboarding: $showPreferencesOnboarding)
+                                .environmentObject(authService)
+                        }
+                        .onAppear {
+                            // Check if user needs to complete onboarding
+                            if !user.hasCompletedOnboarding {
+                                showPreferencesOnboarding = true
+                            }
+                        }
+                        .onChange(of: authService.currentUser?.hasCompletedOnboarding) { completed in
+                            if completed == true {
+                                showPreferencesOnboarding = false
+                            }
+                        }
                 } else {
                     OnboardingView()
                 }

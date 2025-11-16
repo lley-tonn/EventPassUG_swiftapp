@@ -252,6 +252,11 @@ struct TicketPurchaseView: View {
                         userId: userId
                     )
 
+                    // Send ticket confirmation notification
+                    if let user = authService.currentUser {
+                        try? await services.notificationService.sendTicketConfirmation(to: user, tickets: tickets)
+                    }
+
                     await MainActor.run {
                         HapticFeedback.success()
                         purchasedTickets = tickets

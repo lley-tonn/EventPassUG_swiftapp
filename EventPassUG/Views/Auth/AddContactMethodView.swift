@@ -7,10 +7,7 @@
 
 import SwiftUI
 
-enum ContactMethod {
-    case email
-    case phone
-}
+// ContactMethod enum is now defined in User.swift
 
 struct AddContactMethodView: View {
     @Environment(\.dismiss) var dismiss

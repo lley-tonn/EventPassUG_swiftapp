@@ -16,10 +16,35 @@ struct OrganizerHomeView: View {
     @State private var showingCreateEvent = false
     @State private var selectedFilter: EventStatus = .published
     @State private var unreadNotifications = 2
+    @State private var showingVerificationSheet = false
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
+            ZStack {
+                mainContent
+
+                // Verification Required Overlay
+                if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                    VerificationRequiredOverlay(
+                        showingVerificationSheet: $showingVerificationSheet
+                    )
+                }
+            }
+            .sheet(isPresented: $showingVerificationSheet) {
+                NationalIDVerificationView()
+                    .environmentObject(authService)
+            }
+        }
+        .onAppear {
+            loadEvents()
+        }
+        .sheet(isPresented: $showingCreateEvent) {
+            CreateEventWizard()
+        }
+    }
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
                 // Header
                 HeaderBar(
                     firstName: authService.currentUser?.firstName ?? "Organizer",
@@ -80,13 +105,6 @@ struct OrganizerHomeView: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            loadEvents()
-        }
-        .sheet(isPresented: $showingCreateEvent) {
-            CreateEventWizard()
-        }
     }
 
     private var filteredEvents: [Event] {

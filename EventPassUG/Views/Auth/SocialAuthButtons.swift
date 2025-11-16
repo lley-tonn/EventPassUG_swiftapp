@@ -26,8 +26,8 @@ struct SocialAuthButtons: View {
             // Google Sign In
             Button(action: onGoogleTap) {
                 HStack(spacing: AppSpacing.sm) {
-                    Image(systemName: "g.circle.fill") // In real app, use Google logo
-                        .font(.system(size: 20))
+                    GoogleLogoView()
+                        .frame(width: 20, height: 20)
 
                     Text("Continue with Google")
                         .font(AppTypography.headline)

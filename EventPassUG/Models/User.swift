@@ -19,6 +19,30 @@ enum UserRole: String, Codable, CaseIterable {
     }
 }
 
+enum ContactMethod: String, Codable {
+    case email
+    case phone
+
+    var displayName: String {
+        switch self {
+        case .email: return "Email"
+        case .phone: return "Phone"
+        }
+    }
+}
+
+enum VerificationDocumentType: String, Codable {
+    case nationalID = "national_id"
+    case passport = "passport"
+
+    var displayName: String {
+        switch self {
+        case .nationalID: return "National ID"
+        case .passport: return "Passport"
+        }
+    }
+}
+
 struct User: Identifiable, Codable, Equatable {
     let id: UUID
     var firstName: String
@@ -43,6 +67,27 @@ struct User: Identifiable, Codable, Equatable {
     var nationalIDFrontImageURL: String?
     var nationalIDBackImageURL: String?
     var verificationDate: Date?
+    var verificationDocumentType: VerificationDocumentType?
+
+    // Contact Preferences
+    var primaryContactMethod: ContactMethod?
+
+    // Pending contact changes (awaiting verification)
+    var pendingEmail: String?
+    var pendingPhoneNumber: String?
+
+    // User Preferences
+    var favoriteEventTypes: [String]
+    var hasCompletedOnboarding: Bool
+
+    // Dual-Role Support (single account supports both roles)
+    var isAttendeeRole: Bool // Can act as attendee
+    var isOrganizerRole: Bool // Can act as organizer (completed onboarding)
+    var isVerifiedOrganizer: Bool // ID verification completed
+    var currentActiveRole: UserRole // Currently active role for UI
+
+    // Organizer-specific data
+    var organizerProfile: OrganizerProfile?
 
     var fullName: String {
         "\(firstName) \(lastName)"
@@ -53,22 +98,28 @@ struct User: Identifiable, Codable, Equatable {
         isOrganizer && !isVerified
     }
 
-    // Role capabilities - for future dual-role support
+    // Role capabilities - dual-role support
     var availableRoles: [UserRole] {
-        // Currently single role, but structure allows for future expansion
-        [role]
+        var roles: [UserRole] = []
+        if isAttendeeRole { roles.append(.attendee) }
+        if isOrganizerRole { roles.append(.organizer) }
+        return roles.isEmpty ? [role] : roles // Fallback to legacy role field
     }
 
     var isAttendee: Bool {
-        availableRoles.contains(.attendee)
+        isAttendeeRole || role == .attendee
     }
 
     var isOrganizer: Bool {
-        availableRoles.contains(.organizer)
+        isOrganizerRole || role == .organizer
     }
 
     var hasBothRoles: Bool {
-        availableRoles.contains(.attendee) && availableRoles.contains(.organizer)
+        isAttendeeRole && isOrganizerRole
+    }
+
+    var canBecomeOrganizer: Bool {
+        !isOrganizerRole
     }
 
     init(
@@ -88,7 +139,18 @@ struct User: Identifiable, Codable, Equatable {
         nationalIDNumber: String? = nil,
         nationalIDFrontImageURL: String? = nil,
         nationalIDBackImageURL: String? = nil,
-        verificationDate: Date? = nil
+        verificationDate: Date? = nil,
+        verificationDocumentType: VerificationDocumentType? = nil,
+        primaryContactMethod: ContactMethod? = nil,
+        pendingEmail: String? = nil,
+        pendingPhoneNumber: String? = nil,
+        favoriteEventTypes: [String] = [],
+        hasCompletedOnboarding: Bool = false,
+        isAttendeeRole: Bool? = nil,
+        isOrganizerRole: Bool = false,
+        isVerifiedOrganizer: Bool = false,
+        currentActiveRole: UserRole? = nil,
+        organizerProfile: OrganizerProfile? = nil
     ) {
         self.id = id
         self.firstName = firstName
@@ -107,6 +169,18 @@ struct User: Identifiable, Codable, Equatable {
         self.nationalIDFrontImageURL = nationalIDFrontImageURL
         self.nationalIDBackImageURL = nationalIDBackImageURL
         self.verificationDate = verificationDate
+        self.verificationDocumentType = verificationDocumentType
+        self.primaryContactMethod = primaryContactMethod
+        self.pendingEmail = pendingEmail
+        self.pendingPhoneNumber = pendingPhoneNumber
+        self.favoriteEventTypes = favoriteEventTypes
+        self.hasCompletedOnboarding = hasCompletedOnboarding
+        // Dual-role support: default to attendee role if role == .attendee, else based on passed value
+        self.isAttendeeRole = isAttendeeRole ?? (role == .attendee)
+        self.isOrganizerRole = isOrganizerRole || (role == .organizer)
+        self.isVerifiedOrganizer = isVerifiedOrganizer
+        self.currentActiveRole = currentActiveRole ?? role
+        self.organizerProfile = organizerProfile
     }
 }
 

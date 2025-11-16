@@ -7,15 +7,27 @@
 
 import Foundation
 import CoreLocation
+import SwiftUI
 
-enum EventCategory: String, Codable, CaseIterable {
+enum EventCategory: String, Codable, CaseIterable, Identifiable {
     case music = "Music"
     case artsCulture = "Arts & Culture"
     case concerts = "Concerts"
     case sportsWellness = "Sports & Wellness"
     case technology = "Technology"
     case fundraising = "Fundraising"
+    case comedy = "Comedy"
+    case poetry = "Poetry"
+    case drama = "Drama"
+    case exhibitions = "Exhibitions"
+    case networking = "Networking"
+    case education = "Education"
+    case food = "Food & Drinks"
+    case nightlife = "Nightlife"
+    case festivals = "Festivals"
     case other = "Other"
+
+    var id: String { rawValue }
 
     var iconName: String {
         switch self {
@@ -25,7 +37,37 @@ enum EventCategory: String, Codable, CaseIterable {
         case .sportsWellness: return "figure.run"
         case .technology: return "laptopcomputer"
         case .fundraising: return "heart.circle"
+        case .comedy: return "theatermasks.fill"
+        case .poetry: return "text.book.closed.fill"
+        case .drama: return "film.fill"
+        case .exhibitions: return "building.columns.fill"
+        case .networking: return "person.3.fill"
+        case .education: return "graduationcap.fill"
+        case .food: return "fork.knife"
+        case .nightlife: return "moon.stars.fill"
+        case .festivals: return "party.popper.fill"
         case .other: return "star"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .music: return .purple
+        case .artsCulture: return .cyan
+        case .concerts: return .pink
+        case .sportsWellness: return .green
+        case .technology: return .blue
+        case .fundraising: return .pink
+        case .comedy: return .orange
+        case .poetry: return .brown
+        case .drama: return .red
+        case .exhibitions: return .indigo
+        case .networking: return .teal
+        case .education: return .yellow
+        case .food: return Color(red: 0.8, green: 0.4, blue: 0.2)
+        case .nightlife: return .purple
+        case .festivals: return .orange
+        case .other: return .gray
         }
     }
 }

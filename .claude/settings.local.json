@@ -13,7 +13,11 @@
       "Bash(open:*)",
       "Bash(ruby -e:*)",
       "Bash(git checkout:*)",
-      "Bash([ -f \"/Users/lleyton/Library/Developer/Xcode/DerivedData/EventPassUG-gaemsfvkxebuzehepmaroxkhueom/Build/Products/Debug-iphonesimulator/EventPassUG.app/EventPassUG\" ])"
+      "Bash([ -f \"/Users/lleyton/Library/Developer/Xcode/DerivedData/EventPassUG-gaemsfvkxebuzehepmaroxkhueom/Build/Products/Debug-iphonesimulator/EventPassUG.app/EventPassUG\" ])",
+      "Bash(ruby add_files_to_project.rb:*)",
+      "Bash(ruby add_support_files.rb:*)",
+      "Bash(ruby add_organizer_files.rb:*)",
+      "Bash(ruby add_google_logo.rb:*)"
     ],
     "deny": [],
     "ask": []

@@ -12,6 +12,7 @@ struct NationalIDVerificationView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authService: MockAuthService
 
+    @State private var documentType: VerificationDocumentType = .nationalID
     @State private var fullName: String = ""
     @State private var nationalIDNumber: String = ""
     @State private var frontImageItem: PhotosPickerItem?
@@ -40,7 +41,7 @@ struct NationalIDVerificationView: View {
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity, alignment: .center)
 
-                        Text("To access organizer features, we need to verify your National ID. This helps ensure the safety and security of our event community.")
+                        Text("To access organizer features, we need to verify your identity. This helps ensure the safety and security of our event community.")
                             .font(AppTypography.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -53,6 +54,20 @@ struct NationalIDVerificationView: View {
 
                     // Form
                     VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                        // Document Type Selection
+                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                            Text("Document Type")
+                                .font(AppTypography.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.secondary)
+
+                            Picker("Document Type", selection: $documentType) {
+                                Text("National ID").tag(VerificationDocumentType.nationalID)
+                                Text("Passport").tag(VerificationDocumentType.passport)
+                            }
+                            .pickerStyle(.segmented)
+                        }
+
                         // Full Name
                         VStack(alignment: .leading, spacing: AppSpacing.xs) {
                             Text("Full Name")
@@ -60,7 +75,7 @@ struct NationalIDVerificationView: View {
                                 .fontWeight(.semibold)
                                 .foregroundColor(.secondary)
 
-                            TextField("As shown on your National ID", text: $fullName)
+                            TextField("As shown on your \(documentType.displayName)", text: $fullName)
                                 .textFieldStyle(.plain)
                                 .padding()
                                 .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -68,14 +83,14 @@ struct NationalIDVerificationView: View {
                                 .autocapitalization(.words)
                         }
 
-                        // National ID Number
+                        // Document Number
                         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                            Text("National ID Number")
+                            Text(documentType == .nationalID ? "National ID Number" : "Passport Number")
                                 .font(AppTypography.caption)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.secondary)
 
-                            TextField("e.g., CM12345678901234", text: $nationalIDNumber)
+                            TextField(documentType == .nationalID ? "e.g., CM12345678901234" : "e.g., A12345678", text: $nationalIDNumber)
                                 .textFieldStyle(.plain)
                                 .padding()
                                 .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -86,7 +101,7 @@ struct NationalIDVerificationView: View {
 
                         // Front Image Upload
                         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                            Text("National ID (Front)")
+                            Text(documentType == .nationalID ? "National ID (Front)" : "Passport Photo Page")
                                 .font(AppTypography.caption)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.secondary)
@@ -95,7 +110,7 @@ struct NationalIDVerificationView: View {
                                 HStack {
                                     Image(systemName: frontImageData != nil ? "checkmark.circle.fill" : "camera.fill")
                                         .foregroundColor(frontImageData != nil ? .green : RoleConfig.organizerPrimary)
-                                    Text(frontImageData != nil ? "Front Image Selected" : "Upload Front of ID")
+                                    Text(frontImageData != nil ? "Image Selected" : documentType == .nationalID ? "Upload Front of ID" : "Upload Photo Page")
                                         .foregroundColor(.primary)
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -125,44 +140,46 @@ struct NationalIDVerificationView: View {
                             }
                         }
 
-                        // Back Image Upload
-                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                            Text("National ID (Back)")
-                                .font(AppTypography.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.secondary)
+                        // Back Image Upload (only for National ID)
+                        if documentType == .nationalID {
+                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                                Text("National ID (Back)")
+                                    .font(AppTypography.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
 
-                            PhotosPicker(selection: $backImageItem, matching: .images) {
-                                HStack {
-                                    Image(systemName: backImageData != nil ? "checkmark.circle.fill" : "camera.fill")
-                                        .foregroundColor(backImageData != nil ? .green : RoleConfig.organizerPrimary)
-                                    Text(backImageData != nil ? "Back Image Selected" : "Upload Back of ID")
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                                PhotosPicker(selection: $backImageItem, matching: .images) {
+                                    HStack {
+                                        Image(systemName: backImageData != nil ? "checkmark.circle.fill" : "camera.fill")
+                                            .foregroundColor(backImageData != nil ? .green : RoleConfig.organizerPrimary)
+                                        Text(backImageData != nil ? "Back Image Selected" : "Upload Back of ID")
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                    .cornerRadius(AppCornerRadius.medium)
                                 }
-                                .padding()
-                                .background(Color(UIColor.secondarySystemGroupedBackground))
-                                .cornerRadius(AppCornerRadius.medium)
-                            }
-                            .onChange(of: backImageItem) { newValue in
-                                Task {
-                                    if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                                        backImageData = data
+                                .onChange(of: backImageItem) { newValue in
+                                    Task {
+                                        if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                                            backImageData = data
+                                        }
                                     }
                                 }
-                            }
 
-                            if let backImageData = backImageData,
-                               let uiImage = UIImage(data: backImageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxHeight: 200)
-                                    .cornerRadius(AppCornerRadius.medium)
-                                    .padding(.top, AppSpacing.xs)
+                                if let backImageData = backImageData,
+                                   let uiImage = UIImage(data: backImageData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxHeight: 200)
+                                        .cornerRadius(AppCornerRadius.medium)
+                                        .padding(.top, AppSpacing.xs)
+                                }
                             }
                         }
 
@@ -218,7 +235,7 @@ struct NationalIDVerificationView: View {
                 dismiss()
             }
         } message: {
-            Text("Your National ID has been submitted for verification. You'll be notified once approved.")
+            Text("Your \(documentType.displayName) has been submitted for verification. You'll be notified once approved.")
         }
         .alert("Error", isPresented: $showError) {
             Button("OK") {}
@@ -234,11 +251,17 @@ struct NationalIDVerificationView: View {
     }
 
     private var isFormValid: Bool {
-        !fullName.isEmpty &&
-        !nationalIDNumber.isEmpty &&
-        nationalIDNumber.count >= 10 &&
-        frontImageData != nil &&
-        backImageData != nil
+        let baseValidation = !fullName.isEmpty &&
+            !nationalIDNumber.isEmpty &&
+            nationalIDNumber.count >= 6 &&
+            frontImageData != nil
+
+        if documentType == .nationalID {
+            return baseValidation && backImageData != nil
+        } else {
+            // Passport only requires front (photo page)
+            return baseValidation
+        }
     }
 
     private func submitVerification() {
@@ -249,9 +272,10 @@ struct NationalIDVerificationView: View {
         Task {
             do {
                 try await authService.submitVerification(
-                    nationalIDNumber: nationalIDNumber,
+                    documentType: documentType,
+                    documentNumber: nationalIDNumber,
                     frontImageData: frontImageData,
-                    backImageData: backImageData
+                    backImageData: documentType == .nationalID ? backImageData : nil
                 )
 
                 await MainActor.run {

@@ -24,6 +24,9 @@ struct ProfileView: View {
     @State private var showingAccountLinking = false
     @State private var isVerifyingEmail = false
 
+    // Organizer Onboarding
+    @State private var showingBecomeOrganizer = false
+
     private var progress: CGFloat {
         let threshold: CGFloat = 60
         return max(0, min(1, -scrollOffset / threshold))
@@ -51,35 +54,57 @@ struct ProfileView: View {
                             )
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(authService.currentUser?.fullName ?? "Guest")
-                                .font(progress > 0.5 ? AppTypography.headline : AppTypography.title2)
-                                .fontWeight(.bold)
-                                .lineLimit(1)
+                            HStack(spacing: 6) {
+                                Text(authService.currentUser?.fullName ?? "Guest")
+                                    .font(progress > 0.5 ? AppTypography.headline : AppTypography.title2)
+                                    .fontWeight(.bold)
+                                    .lineLimit(1)
+
+                                // Account Verified Badge
+                                if authService.currentUser?.isVerified == true {
+                                    Image(systemName: "checkmark.seal.fill")
+                                        .font(.system(size: progress > 0.5 ? 14 : 18))
+                                        .foregroundColor(.green)
+                                }
+                            }
 
                             Group {
-                                Text(authService.currentUser?.email ?? "")
-                                    .foregroundColor(Color.secondary)
-                                    .lineLimit(1)
+                                if authService.currentUser?.isVerified == true {
+                                    Text("Account Verified")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.green)
+                                } else {
+                                    Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
+                                        .foregroundColor(Color.secondary)
+                                        .lineLimit(1)
+                                }
                             }
                             .opacity(progress < 0.8 ? max(0, 1.0 - (progress * 1.5)) : 0)
 
-                            // Role badge
+                            // Role badge - shows current active role
                             Group {
                                 HStack(spacing: 4) {
-                                    Image(systemName: authService.currentUser?.role == .organizer
+                                    Image(systemName: currentActiveRole == .organizer
                                           ? "briefcase.fill"
                                           : "person.fill"
                                     )
                                     .font(.caption)
 
-                                    Text(authService.currentUser?.role.displayName ?? "")
+                                    Text(currentActiveRole.displayName)
                                         .font(.caption)
+
+                                    // Show dual-role indicator if user has both roles
+                                    if authService.currentUser?.hasBothRoles == true {
+                                        Text("(Can Switch)")
+                                            .font(.system(size: 8))
+                                            .opacity(0.8)
+                                    }
                                 }
                                 .foregroundColor(Color.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(
-                                    RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
+                                    RoleConfig.getPrimaryColor(for: currentActiveRole)
                                 )
                                 .cornerRadius(AppCornerRadius.small)
                             }
@@ -185,16 +210,16 @@ struct ProfileView: View {
                                 if authService.currentUser?.hasBothRoles == true {
                                     // User has both roles - show switch (only if verified)
                                     Button(action: {
-                                        if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                                        if authService.currentUser?.isVerifiedOrganizer != true && currentActiveRole == .attendee {
                                             showingVerificationRequired = true
                                         } else {
-                                            showingRoleSwitch = true
+                                            toggleActiveRole()
                                         }
                                     }) {
                                         HStack {
                                             Image(systemName: "arrow.left.arrow.right")
                                                 .foregroundColor(
-                                                    RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
+                                                    RoleConfig.getPrimaryColor(for: currentActiveRole)
                                                 )
 
                                             Text("Switch Role")
@@ -202,7 +227,7 @@ struct ProfileView: View {
 
                                             Spacer()
 
-                                            Text(authService.currentUser?.role == .attendee ? "To Organizer" : "To Attendee")
+                                            Text(currentActiveRole == .attendee ? "To Organizer" : "To Attendee")
                                                 .font(AppTypography.caption)
                                                 .foregroundColor(.secondary)
 
@@ -212,15 +237,21 @@ struct ProfileView: View {
                                         }
                                         .padding()
                                     }
-                                } else if authService.currentUser?.isAttendee == true {
+                                } else if authService.currentUser?.canBecomeOrganizer == true {
                                     // User is only attendee - show become organizer
-                                    NavigationLink(destination: Text("Become Organizer Form")) {
+                                    Button(action: { showingBecomeOrganizer = true }) {
                                         HStack {
                                             Image(systemName: "briefcase")
                                                 .foregroundColor(RoleConfig.organizerPrimary)
 
-                                            Text("Become an Organizer")
-                                                .foregroundColor(.primary)
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text("Become an Organizer")
+                                                    .foregroundColor(.primary)
+
+                                                Text("Host events and sell tickets")
+                                                    .font(AppTypography.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
 
                                             Spacer()
 
@@ -256,10 +287,10 @@ struct ProfileView: View {
                                 .padding(.horizontal, AppSpacing.md)
 
                             VStack(spacing: 1) {
-                                settingsRow(icon: "person", title: "Edit Profile", destination: AnyView(Text("Edit Profile")))
-                                settingsRow(icon: "heart", title: "Favorite Events", destination: AnyView(Text("Favorites")))
-                                settingsRow(icon: "bell", title: "Notifications", destination: AnyView(Text("Notifications Settings")))
-                                settingsRow(icon: "creditcard", title: "Payment Methods", destination: AnyView(Text("Payment Methods")))
+                                settingsRow(icon: "person", title: "Edit Profile", destination: AnyView(EditProfileView().environmentObject(authService)))
+                                settingsRow(icon: "sparkles", title: "Interests", destination: AnyView(FavoriteEventCategoriesView(isOnboarding: false).environmentObject(authService)))
+                                settingsRow(icon: "bell", title: "Notifications", destination: AnyView(NotificationSettingsView().environmentObject(authService)))
+                                settingsRow(icon: "creditcard", title: "Payment Methods", destination: AnyView(PaymentMethodsView().environmentObject(authService)))
                             }
                             .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(AppCornerRadius.medium)
@@ -331,9 +362,9 @@ struct ProfileView: View {
                                 .padding(.horizontal, AppSpacing.md)
 
                             VStack(spacing: 1) {
-                                settingsRow(icon: "questionmark.circle", title: "Help Center", destination: AnyView(Text("Help Center")))
-                                settingsRow(icon: "envelope", title: "Contact Support", destination: AnyView(Text("Contact Support")))
-                                settingsRow(icon: "doc.text", title: "Terms & Privacy", destination: AnyView(Text("Terms & Privacy")))
+                                settingsRow(icon: "questionmark.circle", title: "Help Center", destination: AnyView(HelpCenterView().environmentObject(authService)))
+                                settingsRow(icon: "envelope", title: "Contact Support", destination: AnyView(SupportCenterView().environmentObject(authService)))
+                                settingsRow(icon: "doc.text", title: "Terms & Privacy", destination: AnyView(TermsAndPrivacyView()))
                             }
                             .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(AppCornerRadius.medium)
@@ -438,6 +469,15 @@ struct ProfileView: View {
         } message: {
             Text("You must complete National ID verification before accessing organizer features.")
         }
+        .fullScreenCover(isPresented: $showingBecomeOrganizer) {
+            BecomeOrganizerFlow()
+                .environmentObject(authService)
+        }
+    }
+
+    // Computed property for current active role
+    private var currentActiveRole: UserRole {
+        authService.currentUser?.currentActiveRole ?? authService.currentUser?.role ?? .attendee
     }
 
     @ViewBuilder
@@ -549,6 +589,24 @@ struct ProfileView: View {
                 HapticFeedback.success()
             } catch {
                 print("Error switching role: \(error)")
+                HapticFeedback.error()
+            }
+        }
+    }
+
+    private func toggleActiveRole() {
+        guard var user = authService.currentUser else { return }
+
+        // Toggle between attendee and organizer active role
+        let newActiveRole: UserRole = currentActiveRole == .attendee ? .organizer : .attendee
+        user.currentActiveRole = newActiveRole
+
+        Task {
+            do {
+                try await authService.updateProfile(user)
+                HapticFeedback.success()
+            } catch {
+                print("Error toggling role: \(error)")
                 HapticFeedback.error()
             }
         }

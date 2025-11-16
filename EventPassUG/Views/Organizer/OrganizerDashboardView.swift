@@ -18,6 +18,7 @@ struct OrganizerDashboardView: View {
     @State private var showingQRScanner = false
     @State private var events: [Event] = []
     @State private var showingVerification = false
+    @State private var showingVerificationSheet = false
 
     var body: some View {
         NavigationView {
@@ -191,6 +192,13 @@ struct OrganizerDashboardView: View {
                     }
                     .background(Color.black.opacity(0.3))
                 }
+
+                // Verification Required Overlay
+                if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                    VerificationRequiredOverlay(
+                        showingVerificationSheet: $showingVerificationSheet
+                    )
+                }
             }
         }
         .onAppear {
@@ -200,6 +208,10 @@ struct OrganizerDashboardView: View {
             QRScannerView()
         }
         .sheet(isPresented: $showingVerification) {
+            NationalIDVerificationView()
+                .environmentObject(authService)
+        }
+        .sheet(isPresented: $showingVerificationSheet) {
             NationalIDVerificationView()
                 .environmentObject(authService)
         }

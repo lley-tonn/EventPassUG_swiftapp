@@ -14,6 +14,7 @@ struct OnboardingView: View {
     @State private var lastName = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingRoleSelection = false
@@ -70,6 +71,22 @@ struct OnboardingView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .textContentType(.newPassword)
 
+                            SecureField("Confirm Password", text: $confirmPassword)
+                                .textFieldStyle(.roundedBorder)
+                                .textContentType(.newPassword)
+
+                            // Password mismatch validation
+                            if !confirmPassword.isEmpty && password != confirmPassword {
+                                HStack {
+                                    Image(systemName: "exclamationmark.circle.fill")
+                                        .foregroundColor(.red)
+                                    Text("Passwords do not match")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.red)
+                                }
+                                .padding(.horizontal)
+                            }
+
                             if let error = errorMessage {
                                 Text(error)
                                     .font(AppTypography.caption)
@@ -88,8 +105,8 @@ struct OnboardingView: View {
                                     .background(RoleConfig.getPrimaryColor(for: selectedRole))
                                     .cornerRadius(AppCornerRadius.medium)
                             }
-                            .disabled(firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty)
-                            .opacity((firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) ? 0.5 : 1.0)
+                            .disabled(!isSignupFormValid)
+                            .opacity(isSignupFormValid ? 1.0 : 0.5)
 
                             // Social Auth Buttons
                             SocialAuthButtons(
@@ -202,6 +219,18 @@ struct OnboardingView: View {
             )
             .environmentObject(authService)
         }
+    }
+
+    // MARK: - Validation
+
+    private var isSignupFormValid: Bool {
+        !firstName.isEmpty &&
+        !lastName.isEmpty &&
+        !email.isEmpty &&
+        !password.isEmpty &&
+        !confirmPassword.isEmpty &&
+        password == confirmPassword &&
+        password.count >= 6 // Minimum password length
     }
 
     private func signUp() {
@@ -370,8 +399,13 @@ struct SocialAuthRoleSheet: View {
                         .padding()
                 } else {
                     Button(action: onContinue) {
-                        HStack {
-                            Image(systemName: selectedAuthMethod == "google" ? "g.circle.fill" : "applelogo")
+                        HStack(spacing: AppSpacing.sm) {
+                            if selectedAuthMethod == "google" {
+                                GoogleLogoView()
+                                    .frame(width: 20, height: 20)
+                            } else {
+                                Image(systemName: "applelogo")
+                            }
                             Text("Continue with \(selectedAuthMethod.capitalized)")
                         }
                         .font(AppTypography.headline)

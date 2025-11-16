@@ -12,16 +12,22 @@ class ServiceContainer: ObservableObject {
     let eventService: EventServiceProtocol
     let ticketService: TicketServiceProtocol
     let paymentService: PaymentServiceProtocol
+    let notificationService: NotificationServiceProtocol
+    let userPreferencesService: UserPreferencesServiceProtocol
 
     init(
         authService: AuthServiceProtocol,
         eventService: EventServiceProtocol,
         ticketService: TicketServiceProtocol,
-        paymentService: PaymentServiceProtocol
+        paymentService: PaymentServiceProtocol,
+        notificationService: NotificationServiceProtocol = MockNotificationService(),
+        userPreferencesService: UserPreferencesServiceProtocol = MockUserPreferencesService()
     ) {
         self.authService = authService
         self.eventService = eventService
         self.ticketService = ticketService
         self.paymentService = paymentService
+        self.notificationService = notificationService
+        self.userPreferencesService = userPreferencesService
     }
 }

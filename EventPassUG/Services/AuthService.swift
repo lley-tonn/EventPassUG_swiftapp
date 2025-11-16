@@ -20,7 +20,7 @@ protocol AuthServiceProtocol: AnyObject {
     func signOut() throws
     func updateProfile(_ user: User) async throws
     func switchRole(to role: UserRole) async throws
-    func submitVerification(nationalIDNumber: String, frontImageData: Data?, backImageData: Data?) async throws
+    func submitVerification(documentType: VerificationDocumentType, documentNumber: String, frontImageData: Data?, backImageData: Data?) async throws
 
     // Social Auth
     func signInWithGoogle(firstName: String, lastName: String, role: UserRole) async throws -> User
@@ -43,6 +43,11 @@ protocol AuthServiceProtocol: AnyObject {
     func linkGoogleAccount() async throws
     func linkAppleAccount() async throws
     func linkEmailPassword(email: String, password: String) async throws
+
+    // Update Contact Info (with verification)
+    func updateEmail(newEmail: String, password: String) async throws
+    func updatePhoneNumber(newPhoneNumber: String) async throws -> String // Returns verification ID
+    func verifyPhoneUpdate(verificationId: String, code: String) async throws
 }
 
 // MARK: - Mock Implementation
@@ -128,7 +133,7 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
         persistUser(user)
     }
 
-    func submitVerification(nationalIDNumber: String, frontImageData: Data?, backImageData: Data?) async throws {
+    func submitVerification(documentType: VerificationDocumentType, documentNumber: String, frontImageData: Data?, backImageData: Data?) async throws {
         guard var user = currentUser else { return }
 
         // TODO: Replace with real API call to upload images and verify
@@ -137,8 +142,9 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
 
         // Mock success - update user verification status
         user.isVerified = true
-        user.nationalIDNumber = nationalIDNumber
+        user.nationalIDNumber = documentNumber
         user.verificationDate = Date()
+        user.verificationDocumentType = documentType
 
         // In real implementation, upload images to server and store URLs
         // For now, we'll just mark as verified
@@ -348,6 +354,77 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
         user.email = email
         if !user.authProviders.contains("email") {
             user.authProviders.append("email")
+        }
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    // MARK: - Update Contact Info
+
+    func updateEmail(newEmail: String, password: String) async throws {
+        guard var user = currentUser else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+
+        // TODO: Verify password first with Firebase
+        // TODO: Send verification email to new address with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Store pending email (in production, this would wait for verification)
+        user.pendingEmail = newEmail
+
+        // In mock implementation, we'll auto-verify after a delay
+        // In production, user would need to click verification link
+        user.email = newEmail
+        user.isEmailVerified = false // Needs verification
+        user.pendingEmail = nil
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+    }
+
+    func updatePhoneNumber(newPhoneNumber: String) async throws -> String {
+        guard var user = currentUser else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+
+        // TODO: Send SMS verification to new number with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Store pending phone number
+        user.pendingPhoneNumber = newPhoneNumber
+
+        await MainActor.run {
+            self.currentUser = user
+        }
+        persistUser(user)
+
+        // Return mock verification ID
+        return "mock-phone-update-\(UUID().uuidString)"
+    }
+
+    func verifyPhoneUpdate(verificationId: String, code: String) async throws {
+        guard var user = currentUser else {
+            throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+
+        // TODO: Verify code with Firebase
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Update phone number from pending
+        if let pendingPhone = user.pendingPhoneNumber {
+            user.phoneNumber = pendingPhone
+            user.isPhoneVerified = true
+            user.pendingPhoneNumber = nil
+
+            if !user.authProviders.contains("phone") {
+                user.authProviders.append("phone")
+            }
         }
 
         await MainActor.run {
