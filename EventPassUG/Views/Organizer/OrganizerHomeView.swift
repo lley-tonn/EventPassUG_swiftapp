@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct OrganizerHomeView: View {
     @EnvironmentObject var authService: MockAuthService
@@ -17,6 +18,10 @@ struct OrganizerHomeView: View {
     @State private var selectedFilter: EventStatus = .published
     @State private var unreadNotifications = 2
     @State private var showingVerificationSheet = false
+    @State private var showingNotifications = false
+    @State private var showingSearch = false
+    @State private var searchText = ""
+    @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
         NavigationView {
@@ -37,20 +42,120 @@ struct OrganizerHomeView: View {
         }
         .onAppear {
             loadEvents()
+            subscribeToTicketSales()
         }
         .sheet(isPresented: $showingCreateEvent) {
             CreateEventWizard()
         }
     }
 
+    // MARK: - Real-time Ticket Sales Subscription
+
+    private func subscribeToTicketSales() {
+        services.ticketService.ticketSalesPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { saleEvent in
+                // Update the event's sold count in real-time
+                if let index = events.firstIndex(where: { $0.id == saleEvent.eventId }) {
+                    // Find the ticket type and update its sold count
+                    for (typeIndex, ticketType) in events[index].ticketTypes.enumerated() {
+                        if ticketType.name == saleEvent.ticketType {
+                            events[index].ticketTypes[typeIndex].sold += saleEvent.quantity
+                        }
+                    }
+                }
+                // Increment notification count for new sale
+                unreadNotifications += 1
+                HapticFeedback.success()
+            }
+            .store(in: &cancellables)
+    }
+
     private var mainContent: some View {
         VStack(spacing: 0) {
-                // Header
-                HeaderBar(
-                    firstName: authService.currentUser?.firstName ?? "Organizer",
-                    notificationCount: unreadNotifications,
-                    onNotificationTap: {}
-                )
+                // Header with search and notifications
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Hello,")
+                            .font(AppTypography.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Text(authService.currentUser?.firstName ?? "Organizer")
+                            .font(AppTypography.title2)
+                            .fontWeight(.bold)
+                    }
+
+                    Spacer()
+
+                    // Search button
+                    AppIconButton(
+                        icon: "magnifyingglass",
+                        action: {
+                            showingSearch = true
+                            HapticFeedback.light()
+                        }
+                    )
+
+                    // Notifications button
+                    AppIconButton(
+                        icon: "bell.fill",
+                        badge: unreadNotifications > 0 ? unreadNotifications : nil,
+                        action: {
+                            showingNotifications = true
+                            HapticFeedback.light()
+                        }
+                    )
+                }
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.vertical, AppSpacing.sm)
+
+                // Search bar (when active)
+                if showingSearch {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+
+                        TextField("Search your events...", text: $searchText)
+                            .font(AppTypography.body)
+
+                        if !searchText.isEmpty {
+                            Button(action: { searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Button(action: { showingSearch = false; searchText = "" }) {
+                            Text("Cancel")
+                                .font(AppTypography.subheadline)
+                                .foregroundColor(RoleConfig.organizerPrimary)
+                        }
+                    }
+                    .padding(AppSpacing.sm)
+                    .background(Color(UIColor.tertiarySystemGroupedBackground))
+                    .cornerRadius(AppCornerRadius.small)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.bottom, AppSpacing.sm)
+                }
+
+                // Create Event Button
+                Button(action: {
+                    showingCreateEvent = true
+                    HapticFeedback.light()
+                }) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 20))
+                        Text("Create New Event")
+                            .font(AppTypography.headline)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppSpacing.md)
+                    .background(RoleConfig.organizerPrimary)
+                    .cornerRadius(AppCornerRadius.medium)
+                }
+                .padding(.horizontal, AppSpacing.md)
                 .padding(.bottom, AppSpacing.md)
 
                 // Filter tabs
@@ -59,7 +164,7 @@ struct OrganizerHomeView: View {
                         ForEach([EventStatus.published, .draft, .ongoing], id: \.self) { status in
                             FilterChip(
                                 title: status.rawValue.capitalized,
-                                count: events.filter { $0.status == status }.count,
+                                count: eventsWithAutoStatus.filter { $0.status == status }.count,
                                 isSelected: selectedFilter == status,
                                 onTap: {
                                     selectedFilter = status
@@ -94,21 +199,43 @@ struct OrganizerHomeView: View {
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationBarHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingCreateEvent = true
-                    }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(RoleConfig.organizerPrimary)
-                    }
-                }
+            .sheet(isPresented: $showingNotifications) {
+                OrganizerNotificationCenterView()
+                    .environmentObject(authService)
+                    .environmentObject(services)
             }
     }
 
+    // Auto-detect ongoing events based on current date
+    private var eventsWithAutoStatus: [Event] {
+        events.map { event in
+            var modifiedEvent = event
+            let now = Date()
+
+            // Auto-update status based on date
+            if event.status == .published {
+                if now >= event.startDate && now <= event.endDate {
+                    modifiedEvent.status = .ongoing
+                }
+            }
+
+            return modifiedEvent
+        }
+    }
+
     private var filteredEvents: [Event] {
-        events.filter { $0.status == selectedFilter }
+        let statusFiltered = eventsWithAutoStatus.filter { $0.status == selectedFilter }
+
+        // Apply search filter if active
+        if searchText.isEmpty {
+            return statusFiltered
+        } else {
+            return statusFiltered.filter { event in
+                event.title.localizedCaseInsensitiveContains(searchText) ||
+                event.description.localizedCaseInsensitiveContains(searchText) ||
+                event.venue.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
     }
 
     private func loadEvents() {

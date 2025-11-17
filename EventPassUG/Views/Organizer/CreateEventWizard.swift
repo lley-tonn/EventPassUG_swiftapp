@@ -446,19 +446,29 @@ struct TicketTypeEditor: View {
     @Binding var ticketType: TicketType
     let onDelete: () -> Void
 
+    @State private var showAdvancedOptions = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.md) {
             HStack {
-                Text("Ticket Type")
-                    .font(AppTypography.headline)
+                HStack(spacing: AppSpacing.xs) {
+                    Image(systemName: ticketType.availabilityStatus.iconName)
+                        .foregroundColor(ticketType.availabilityStatus.color)
+                        .font(.system(size: 14))
+
+                    Text("Ticket Type")
+                        .font(AppTypography.headline)
+                }
+
                 Spacer()
+
                 Button(action: onDelete) {
                     Image(systemName: "trash")
                         .foregroundColor(.red)
                 }
             }
 
-            TextField("Name (e.g., VIP, General)", text: $ticketType.name)
+            TextField("Name (e.g., Early Bird, VIP, Regular)", text: $ticketType.name)
                 .textFieldStyle(.roundedBorder)
 
             HStack(spacing: AppSpacing.md) {
@@ -472,18 +482,113 @@ struct TicketTypeEditor: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Quantity")
-                        .font(AppTypography.caption)
-                        .foregroundColor(.secondary)
-                    TextField("100", value: $ticketType.quantity, format: .number)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardType(.numberPad)
+                    HStack {
+                        Text("Quantity")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Toggle("", isOn: $ticketType.isUnlimitedQuantity)
+                            .labelsHidden()
+                            .scaleEffect(0.8)
+                        Text("Unlimited")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                    if !ticketType.isUnlimitedQuantity {
+                        TextField("100", value: $ticketType.quantity, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numberPad)
+                    } else {
+                        Text("∞")
+                            .font(AppTypography.title2)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 6)
+                            .background(Color(UIColor.tertiarySystemGroupedBackground))
+                            .cornerRadius(8)
+                    }
                 }
             }
+
+            // Availability Window Section
+            DisclosureGroup(
+                isExpanded: $showAdvancedOptions,
+                content: {
+                    VStack(alignment: .leading, spacing: AppSpacing.md) {
+                        // Sale Start Date
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: "calendar.badge.clock")
+                                    .foregroundColor(.green)
+                                Text("Sale Starts")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            DatePicker(
+                                "",
+                                selection: $ticketType.saleStartDate,
+                                displayedComponents: [.date, .hourAndMinute]
+                            )
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                        }
+
+                        // Sale End Date
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: "calendar.badge.exclamationmark")
+                                    .foregroundColor(.orange)
+                                Text("Sale Ends")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            DatePicker(
+                                "",
+                                selection: $ticketType.saleEndDate,
+                                in: ticketType.saleStartDate...,
+                                displayedComponents: [.date, .hourAndMinute]
+                            )
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                        }
+
+                        // Status Preview
+                        HStack {
+                            Image(systemName: ticketType.availabilityStatus.iconName)
+                                .foregroundColor(ticketType.availabilityStatus.color)
+                            Text("Status: \(ticketType.availabilityStatus.rawValue)")
+                                .font(AppTypography.caption)
+                                .foregroundColor(ticketType.availabilityStatus.color)
+                            Spacer()
+                            Text(ticketType.availabilityText)
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(AppSpacing.xs)
+                        .background(ticketType.availabilityStatus.color.opacity(0.1))
+                        .cornerRadius(AppCornerRadius.small)
+                    }
+                    .padding(.top, AppSpacing.sm)
+                },
+                label: {
+                    HStack {
+                        Image(systemName: "clock.arrow.2.circlepath")
+                            .foregroundColor(RoleConfig.organizerPrimary)
+                        Text("Availability Window")
+                            .font(AppTypography.subheadline)
+                            .fontWeight(.medium)
+                    }
+                }
+            )
+            .tint(RoleConfig.organizerPrimary)
         }
         .padding(AppSpacing.md)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(AppCornerRadius.medium)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                .stroke(ticketType.availabilityStatus.color.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 
@@ -561,18 +666,52 @@ struct Step3Review: View {
                     }
 
                     ForEach(ticketTypes) { type in
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(type.name)
+                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: 4) {
+                                        Text(type.name)
+                                            .font(AppTypography.callout)
+                                            .fontWeight(.medium)
+
+                                        // Status badge
+                                        HStack(spacing: 2) {
+                                            Image(systemName: type.availabilityStatus.iconName)
+                                                .font(.system(size: 10))
+                                            Text(type.availabilityStatus.rawValue)
+                                                .font(.system(size: 10, weight: .medium))
+                                        }
+                                        .foregroundColor(type.availabilityStatus.color)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(type.availabilityStatus.color.opacity(0.15))
+                                        .cornerRadius(4)
+                                    }
+
+                                    if type.isUnlimitedQuantity {
+                                        Text("Unlimited quantity")
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(.secondary)
+                                    } else {
+                                        Text("\(type.quantity) available")
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                Text(type.formattedPrice)
                                     .font(AppTypography.callout)
-                                Text("\(type.quantity) available")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(.secondary)
+                                    .fontWeight(.semibold)
                             }
-                            Spacer()
-                            Text(type.formattedPrice)
-                                .font(AppTypography.callout)
-                                .fontWeight(.semibold)
+
+                            // Sale window info
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 10))
+                                Text(type.formattedSaleWindow)
+                                    .font(.system(size: 11))
+                            }
+                            .foregroundColor(.secondary)
                         }
                         .padding(AppSpacing.sm)
                         .background(Color(UIColor.tertiarySystemGroupedBackground))

@@ -230,6 +230,15 @@ struct TicketPurchaseView: View {
                     throw NSError(domain: "User not authenticated", code: 401)
                 }
 
+                // Validate ticket availability before purchase
+                guard ticketType.isPurchasable else {
+                    throw NSError(
+                        domain: "EventPassUG",
+                        code: 400,
+                        userInfo: [NSLocalizedDescriptionKey: "This ticket is no longer available for purchase. The sale window may have ended or tickets are sold out."]
+                    )
+                }
+
                 // Initiate payment
                 let payment = try await services.paymentService.initiatePayment(
                     amount: totalAmount,

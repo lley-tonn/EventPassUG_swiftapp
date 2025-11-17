@@ -51,84 +51,101 @@ struct OnboardingView: View {
                     if !showingRoleSelection {
                         // Sign up form
                         VStack(spacing: AppSpacing.md) {
-                            TextField("First Name", text: $firstName)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.givenName)
-                                .autocapitalization(.words)
+                            AppInputField(
+                                title: "First Name",
+                                text: $firstName,
+                                placeholder: "Enter your first name",
+                                icon: "person",
+                                autocapitalization: .words
+                            )
+                            .textContentType(.givenName)
 
-                            TextField("Last Name", text: $lastName)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.familyName)
-                                .autocapitalization(.words)
+                            AppInputField(
+                                title: "Last Name",
+                                text: $lastName,
+                                placeholder: "Enter your last name",
+                                icon: "person",
+                                autocapitalization: .words
+                            )
+                            .textContentType(.familyName)
 
-                            TextField("Email", text: $email)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.emailAddress)
-                                .autocapitalization(.none)
-                                .keyboardType(.emailAddress)
+                            AppInputField(
+                                title: "Email",
+                                text: $email,
+                                placeholder: "Enter your email",
+                                icon: "envelope",
+                                keyboardType: .emailAddress,
+                                autocapitalization: .none,
+                                errorMessage: ValidationUtils.emailValidationMessage(email)
+                            )
+                            .textContentType(.emailAddress)
 
-                            SecureField("Password", text: $password)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.newPassword)
+                            AppInputField(
+                                title: "Password",
+                                text: $password,
+                                placeholder: "Create a password",
+                                icon: "lock",
+                                isSecure: true,
+                                helperText: "Must be at least 6 characters"
+                            )
 
-                            SecureField("Confirm Password", text: $confirmPassword)
-                                .textFieldStyle(.roundedBorder)
-                                .textContentType(.newPassword)
-
-                            // Password mismatch validation
-                            if !confirmPassword.isEmpty && password != confirmPassword {
-                                HStack {
-                                    Image(systemName: "exclamationmark.circle.fill")
-                                        .foregroundColor(.red)
-                                    Text("Passwords do not match")
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(.red)
-                                }
-                                .padding(.horizontal)
-                            }
+                            AppInputField(
+                                title: "Confirm Password",
+                                text: $confirmPassword,
+                                placeholder: "Confirm your password",
+                                icon: "lock.fill",
+                                isSecure: true,
+                                errorMessage: (!confirmPassword.isEmpty && password != confirmPassword) ? "Passwords do not match" : nil
+                            )
 
                             if let error = errorMessage {
-                                Text(error)
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(.red)
-                                    .padding(.horizontal)
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(RoleConfig.error)
+                                    Text(error)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(RoleConfig.error)
+                                }
+                                .padding(AppSpacing.sm)
+                                .frame(maxWidth: .infinity)
+                                .background(RoleConfig.error.opacity(0.1))
+                                .cornerRadius(AppCornerRadius.small)
                             }
 
-                            Button(action: {
-                                showingRoleSelection = true
-                            }) {
-                                Text("Continue")
-                                    .font(AppTypography.headline)
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(RoleConfig.getPrimaryColor(for: selectedRole))
-                                    .cornerRadius(AppCornerRadius.medium)
-                            }
-                            .disabled(!isSignupFormValid)
-                            .opacity(isSignupFormValid ? 1.0 : 0.5)
+                            AppButton(
+                                title: "Continue",
+                                style: .primary,
+                                icon: "arrow.right",
+                                iconPosition: .trailing,
+                                isDisabled: !isSignupFormValid,
+                                role: selectedRole,
+                                action: {
+                                    showingRoleSelection = true
+                                }
+                            )
+
+                            AppDivider(padding: AppSpacing.sm)
+
+                            Text("Or continue with")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
 
                             // Social Auth Buttons
-                            SocialAuthButtons(
-                                onGoogleTap: {
-                                    selectedAuthMethod = "google"
-                                    showingSocialRoleSelection = true
-                                },
-                                onAppleTap: {
-                                    selectedAuthMethod = "apple"
-                                    showingSocialRoleSelection = true
-                                },
-                                isLoading: isLoading
-                            )
+                            SocialAuthButton(provider: .google, isLoading: isLoading) {
+                                selectedAuthMethod = "google"
+                                showingSocialRoleSelection = true
+                            }
 
-                            // Phone Auth Button
-                            PhoneAuthButton(
-                                onPhoneTap: {
-                                    selectedAuthMethod = "phone"
-                                    showingPhoneAuth = true
-                                },
-                                isLoading: isLoading
-                            )
+                            SocialAuthButton(provider: .apple, isLoading: isLoading) {
+                                selectedAuthMethod = "apple"
+                                showingSocialRoleSelection = true
+                            }
+
+                            SocialAuthButton(provider: .phone, isLoading: isLoading) {
+                                selectedAuthMethod = "phone"
+                                showingPhoneAuth = true
+                            }
                         }
                         .padding(.horizontal, AppSpacing.xl)
                     } else {
@@ -163,28 +180,25 @@ struct OnboardingView: View {
                                 )
                             }
 
-                            if isLoading {
-                                ProgressView()
-                                    .padding()
-                            } else {
-                                Button(action: signUp) {
-                                    Text("Get Started")
-                                        .font(AppTypography.headline)
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(RoleConfig.getPrimaryColor(for: selectedRole))
-                                        .cornerRadius(AppCornerRadius.medium)
-                                }
+                            AppButton(
+                                title: "Get Started",
+                                style: .primary,
+                                icon: "arrow.right",
+                                iconPosition: .trailing,
+                                isLoading: isLoading,
+                                role: selectedRole,
+                                action: signUp
+                            )
 
-                                Button(action: {
+                            AppButton(
+                                title: "Back",
+                                style: .ghost,
+                                size: .medium,
+                                role: selectedRole,
+                                action: {
                                     showingRoleSelection = false
-                                }) {
-                                    Text("Back")
-                                        .font(AppTypography.callout)
-                                        .foregroundColor(RoleConfig.getPrimaryColor(for: selectedRole))
                                 }
-                            }
+                            )
                         }
                         .padding(.horizontal, AppSpacing.xl)
                     }
@@ -226,7 +240,7 @@ struct OnboardingView: View {
     private var isSignupFormValid: Bool {
         !firstName.isEmpty &&
         !lastName.isEmpty &&
-        !email.isEmpty &&
+        ValidationUtils.isValidEmail(email) &&
         !password.isEmpty &&
         !confirmPassword.isEmpty &&
         password == confirmPassword &&

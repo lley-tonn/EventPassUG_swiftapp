@@ -17,12 +17,27 @@ protocol TicketServiceProtocol {
     func scanTicket(qrCode: String) async throws -> Ticket
     func validateTicket(qrCode: String) async throws -> Bool
     func rateTicket(ticketId: UUID, rating: Double) async throws
+    var ticketSalesPublisher: PassthroughSubject<TicketSaleEvent, Never> { get }
+}
+
+// MARK: - Ticket Sale Event (for real-time updates)
+
+struct TicketSaleEvent {
+    let eventId: UUID
+    let eventTitle: String
+    let ticketType: String
+    let quantity: Int
+    let totalAmount: Double
+    let timestamp: Date
 }
 
 // MARK: - Mock Implementation
 
 class MockTicketService: TicketServiceProtocol {
     @Published private var tickets: [Ticket] = []
+
+    // Publisher for real-time ticket sales notifications
+    let ticketSalesPublisher = PassthroughSubject<TicketSaleEvent, Never>()
 
     init() {
         loadPersistedTickets()
@@ -67,6 +82,18 @@ class MockTicketService: TicketServiceProtocol {
             tickets.append(contentsOf: newTickets)
         }
         persistTickets()
+
+        // Notify organizer of ticket sale (real-time update)
+        let saleEvent = TicketSaleEvent(
+            eventId: eventId,
+            eventTitle: event.title,
+            ticketType: ticketType.name,
+            quantity: quantity,
+            totalAmount: ticketType.price * Double(quantity),
+            timestamp: Date()
+        )
+        ticketSalesPublisher.send(saleEvent)
+
         return newTickets
     }
 

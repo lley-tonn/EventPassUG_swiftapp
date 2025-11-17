@@ -182,15 +182,39 @@ struct EventDetailsView: View {
                             .font(AppTypography.title3)
                             .fontWeight(.semibold)
 
-                        ForEach(event.ticketTypes) { ticketType in
-                            TicketTypeCard(
-                                ticketType: ticketType,
-                                isSelected: selectedTicketType?.id == ticketType.id,
-                                onTap: {
-                                    HapticFeedback.selection()
-                                    selectedTicketType = ticketType
-                                }
-                            )
+                        // Filter and sort tickets: Active first, then Upcoming, hide Expired
+                        let sortedTickets = event.ticketTypes
+                            .filter { $0.availabilityStatus != .expired } // Hide expired tickets
+                            .sorted { ticket1, ticket2 in
+                                // Sort by status: Active > Upcoming > SoldOut
+                                let statusOrder: [TicketAvailabilityStatus: Int] = [
+                                    .active: 0,
+                                    .upcoming: 1,
+                                    .soldOut: 2,
+                                    .expired: 3
+                                ]
+                                return (statusOrder[ticket1.availabilityStatus] ?? 3) < (statusOrder[ticket2.availabilityStatus] ?? 3)
+                            }
+
+                        if sortedTickets.isEmpty {
+                            Text("No tickets currently available")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.vertical, AppSpacing.lg)
+                        } else {
+                            ForEach(sortedTickets) { ticketType in
+                                TicketTypeCard(
+                                    ticketType: ticketType,
+                                    isSelected: selectedTicketType?.id == ticketType.id,
+                                    onTap: {
+                                        if ticketType.isPurchasable {
+                                            HapticFeedback.selection()
+                                            selectedTicketType = ticketType
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
 
@@ -242,28 +266,60 @@ struct EventDetailsView: View {
         }
         .safeAreaInset(edge: .bottom) {
             if !event.ticketTypes.isEmpty && event.startDate > Date() {
+                let hasActivePurchasableTickets = event.ticketTypes.contains { $0.isPurchasable }
+
                 VStack(spacing: 0) {
                     Divider()
 
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(selectedTicketType?.formattedPrice ?? event.priceRange)
-                                .font(AppTypography.title3)
-                                .fontWeight(.bold)
-                                .lineLimit(1)
-
                             if let ticketType = selectedTicketType {
-                                Text(ticketType.name)
+                                Text(ticketType.formattedPrice)
+                                    .font(AppTypography.title3)
+                                    .fontWeight(.bold)
+                                    .lineLimit(1)
+
+                                HStack(spacing: 4) {
+                                    Text(ticketType.name)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+
+                                    if ticketType.isPurchasable {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.green)
+                                    }
+                                }
+                            } else if hasActivePurchasableTickets {
+                                Text(event.priceRange)
+                                    .font(AppTypography.title3)
+                                    .fontWeight(.bold)
+                                    .lineLimit(1)
+
+                                Text("Select a ticket type")
                                     .font(AppTypography.caption)
                                     .foregroundColor(.secondary)
+                            } else {
+                                Text("No tickets on sale")
+                                    .font(AppTypography.title3)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.secondary)
                                     .lineLimit(1)
+
+                                Text("Check back later")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
 
                         Spacer(minLength: 8)
 
                         Button(action: {
-                            showingTicketPurchase = true
+                            // Double-check that ticket is still purchasable before opening purchase sheet
+                            if let ticket = selectedTicketType, ticket.isPurchasable {
+                                showingTicketPurchase = true
+                            }
                         }) {
                             Text(event.isHappeningNow ? "Join Now" : "Buy Ticket")
                                 .font(AppTypography.headline)
@@ -274,8 +330,8 @@ struct EventDetailsView: View {
                                 .background(RoleConfig.attendeePrimary)
                                 .cornerRadius(AppCornerRadius.medium)
                         }
-                        .disabled(selectedTicketType == nil)
-                        .opacity(selectedTicketType == nil ? 0.5 : 1.0)
+                        .disabled(selectedTicketType == nil || !(selectedTicketType?.isPurchasable ?? false))
+                        .opacity((selectedTicketType != nil && selectedTicketType?.isPurchasable == true) ? 1.0 : 0.5)
                     }
                     .padding(AppSpacing.md)
                     .background(Color(UIColor.systemBackground))
@@ -335,55 +391,110 @@ struct TicketTypeCard: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    private var isDisabled: Bool {
+        !ticketType.isPurchasable
+    }
+
     var body: some View {
         Button(action: onTap) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(ticketType.name)
-                        .font(AppTypography.headline)
-                        .foregroundColor(.primary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Text(ticketType.name)
+                                .font(AppTypography.headline)
+                                .foregroundColor(.primary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
 
-                    if let description = ticketType.description {
-                        Text(description)
-                            .font(AppTypography.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
+                            // Status badge
+                            HStack(spacing: 3) {
+                                Image(systemName: ticketType.availabilityStatus.iconName)
+                                    .font(.system(size: 10))
+                                Text(ticketType.availabilityStatus.rawValue)
+                                    .font(.system(size: 10, weight: .semibold))
+                            }
+                            .foregroundColor(ticketType.availabilityStatus.color)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(ticketType.availabilityStatus.color.opacity(0.15))
+                            .cornerRadius(4)
+                        }
+
+                        if let description = ticketType.description {
+                            Text(description)
+                                .font(AppTypography.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+
+                        // Quantity remaining
+                        if ticketType.isUnlimitedQuantity {
+                            Text("Unlimited tickets available")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("\(ticketType.remaining) of \(ticketType.quantity) remaining")
+                                .font(AppTypography.caption)
+                                .foregroundColor(ticketType.isSoldOut ? .red : .secondary)
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Text("\(ticketType.remaining) of \(ticketType.quantity) remaining")
-                        .font(AppTypography.caption)
-                        .foregroundColor(ticketType.isSoldOut ? .red : .secondary)
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(ticketType.formattedPrice)
+                            .font(AppTypography.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(isDisabled ? .gray : RoleConfig.attendeePrimary)
+
+                        if isSelected && !isDisabled {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(RoleConfig.attendeePrimary)
+                        }
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(ticketType.formattedPrice)
-                        .font(AppTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(RoleConfig.attendeePrimary)
-
-                    if isSelected {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(RoleConfig.attendeePrimary)
+                // Availability info
+                if ticketType.availabilityStatus == .upcoming {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 11))
+                        Text(ticketType.availabilityText)
+                            .font(.system(size: 11, weight: .medium))
                     }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(6)
+                } else if ticketType.availabilityStatus == .active {
+                    HStack(spacing: 4) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 11))
+                        Text(ticketType.availabilityText)
+                            .font(.system(size: 11))
+                    }
+                    .foregroundColor(.secondary)
                 }
             }
             .padding(AppSpacing.md)
             .background(
                 RoundedRectangle(cornerRadius: AppCornerRadius.medium)
                     .stroke(
-                        isSelected ? RoleConfig.attendeePrimary : Color.gray.opacity(0.3),
-                        lineWidth: isSelected ? 2 : 1
+                        isSelected && !isDisabled ? RoleConfig.attendeePrimary : Color.gray.opacity(0.3),
+                        lineWidth: isSelected && !isDisabled ? 2 : 1
                     )
             )
-            .opacity(ticketType.isSoldOut ? 0.5 : 1.0)
+            .background(
+                RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                    .fill(isDisabled ? Color(UIColor.systemGray6) : Color.clear)
+            )
+            .opacity(isDisabled ? 0.7 : 1.0)
         }
         .buttonStyle(.plain)
-        .disabled(ticketType.isSoldOut)
+        .disabled(isDisabled)
     }
 }
 

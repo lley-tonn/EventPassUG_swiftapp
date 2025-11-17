@@ -213,8 +213,22 @@ extension Event {
                 coordinate: Venue.Coordinate(latitude: 0.3136, longitude: 32.5811)
             ),
             ticketTypes: [
-                TicketType(name: "General Admission", price: 50000, quantity: 500, sold: 320),
-                TicketType(name: "VIP", price: 150000, quantity: 100, sold: 75)
+                TicketType(
+                    name: "General Admission",
+                    price: 50000,
+                    quantity: 500,
+                    sold: 320,
+                    saleStartDate: Date().addingTimeInterval(-86400 * 30), // Started 30 days ago
+                    saleEndDate: Date().addingTimeInterval(3600) // Ends in 1 hour
+                ),
+                TicketType(
+                    name: "VIP",
+                    price: 150000,
+                    quantity: 100,
+                    sold: 75,
+                    saleStartDate: Date().addingTimeInterval(-86400 * 30),
+                    saleEndDate: Date().addingTimeInterval(3600)
+                )
             ],
             status: .published,
             rating: 4.5,
@@ -237,8 +251,33 @@ extension Event {
                 coordinate: Venue.Coordinate(latitude: 0.3301, longitude: 32.5729)
             ),
             ticketTypes: [
-                TicketType(name: "Early Bird", price: 75000, quantity: 200, sold: 150),
-                TicketType(name: "Regular", price: 100000, quantity: 300, sold: 50)
+                // Early Bird - ends soon
+                TicketType(
+                    name: "Early Bird",
+                    price: 75000,
+                    quantity: 200,
+                    sold: 150,
+                    saleStartDate: Date().addingTimeInterval(-86400 * 14), // Started 2 weeks ago
+                    saleEndDate: Date().addingTimeInterval(86400 * 2) // Ends in 2 days
+                ),
+                // Regular - starts after Early Bird ends
+                TicketType(
+                    name: "Regular",
+                    price: 100000,
+                    quantity: 300,
+                    sold: 50,
+                    saleStartDate: Date().addingTimeInterval(86400 * 2), // Starts in 2 days (Upcoming)
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+                ),
+                // Last Minute - future sale
+                TicketType(
+                    name: "Last Minute",
+                    price: 125000,
+                    quantity: 50,
+                    sold: 0,
+                    saleStartDate: Calendar.current.date(byAdding: .day, value: 5, to: Date())!, // Upcoming
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+                )
             ],
             status: .published,
             rating: 4.8,
@@ -261,8 +300,31 @@ extension Event {
                 coordinate: Venue.Coordinate(latitude: 0.3270, longitude: 32.5970)
             ),
             ticketTypes: [
-                TicketType(name: "5K Run", price: 20000, quantity: 1000, sold: 650),
-                TicketType(name: "10K Run", price: 35000, quantity: 500, sold: 280)
+                TicketType(
+                    name: "5K Run",
+                    price: 20000,
+                    quantity: 1000,
+                    sold: 650,
+                    saleStartDate: Date().addingTimeInterval(-86400 * 7),
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!
+                ),
+                TicketType(
+                    name: "10K Run",
+                    price: 35000,
+                    quantity: 500,
+                    sold: 280,
+                    saleStartDate: Date().addingTimeInterval(-86400 * 7),
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!
+                ),
+                // Student discount - limited time
+                TicketType(
+                    name: "Student Discount",
+                    price: 10000,
+                    quantity: 100,
+                    sold: 100, // Sold out!
+                    saleStartDate: Date().addingTimeInterval(-86400 * 7),
+                    saleEndDate: Date().addingTimeInterval(-86400) // Expired yesterday
+                )
             ],
             status: .published,
             rating: 4.7,
@@ -285,7 +347,25 @@ extension Event {
                 coordinate: Venue.Coordinate(latitude: 0.3324, longitude: 32.6003)
             ),
             ticketTypes: [
-                TicketType(name: "Single Entry", price: 15000, quantity: 2000, sold: 450)
+                TicketType(
+                    name: "Single Entry",
+                    price: 15000,
+                    quantity: 2000,
+                    sold: 450,
+                    saleStartDate: Date(), // Active now
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 45, to: Date())!,
+                    isUnlimitedQuantity: false
+                ),
+                // Unlimited season pass
+                TicketType(
+                    name: "Season Pass",
+                    price: 50000,
+                    quantity: 0, // Ignored when unlimited
+                    sold: 0,
+                    saleStartDate: Date(),
+                    saleEndDate: Calendar.current.date(byAdding: .day, value: 30, to: Date())!,
+                    isUnlimitedQuantity: true
+                )
             ],
             status: .published,
             rating: 4.3,

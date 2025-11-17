@@ -17,7 +17,8 @@
       "Bash(ruby add_files_to_project.rb:*)",
       "Bash(ruby add_support_files.rb:*)",
       "Bash(ruby add_organizer_files.rb:*)",
-      "Bash(ruby add_google_logo.rb:*)"
+      "Bash(ruby add_google_logo.rb:*)",
+      "Bash(ruby add_uicomponents.rb:*)"
     ],
     "deny": [],
     "ask": []
