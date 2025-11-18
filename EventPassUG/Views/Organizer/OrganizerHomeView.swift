@@ -22,6 +22,7 @@ struct OrganizerHomeView: View {
     @State private var showingSearch = false
     @State private var searchText = ""
     @State private var cancellables = Set<AnyCancellable>()
+    @State private var editingDraft: Event?
 
     var body: some View {
         NavigationView {
@@ -46,6 +47,18 @@ struct OrganizerHomeView: View {
         }
         .sheet(isPresented: $showingCreateEvent) {
             CreateEventWizard()
+                .environmentObject(authService)
+                .environmentObject(services)
+        }
+        .sheet(isPresented: Binding(
+            get: { editingDraft != nil },
+            set: { if !$0 { editingDraft = nil } }
+        )) {
+            if let draft = editingDraft {
+                CreateEventWizard(existingDraft: draft)
+                    .environmentObject(authService)
+                    .environmentObject(services)
+            }
         }
     }
 
@@ -73,14 +86,14 @@ struct OrganizerHomeView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-                // Header with search and notifications
+                // Header with greeting, date, search and notifications
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Hello,")
-                            .font(AppTypography.subheadline)
+                        Text(DateUtilities.formatHeaderDate(Date()))
+                            .font(AppTypography.caption)
                             .foregroundColor(.secondary)
 
-                        Text(authService.currentUser?.firstName ?? "Organizer")
+                        Text("\(DateUtilities.getGreeting()), \(authService.currentUser?.firstName ?? "Organizer")!")
                             .font(AppTypography.title2)
                             .fontWeight(.bold)
                     }
@@ -188,8 +201,17 @@ struct OrganizerHomeView: View {
                     ScrollView {
                         LazyVStack(spacing: AppSpacing.md) {
                             ForEach(filteredEvents) { event in
-                                NavigationLink(destination: OrganizerEventDetailView(event: event)) {
-                                    OrganizerEventCard(event: event)
+                                if event.status == .draft {
+                                    Button(action: {
+                                        editingDraft = event
+                                        HapticFeedback.light()
+                                    }) {
+                                        OrganizerEventCard(event: event)
+                                    }
+                                } else {
+                                    NavigationLink(destination: OrganizerEventDetailView(event: event)) {
+                                        OrganizerEventCard(event: event)
+                                    }
                                 }
                             }
                         }
@@ -300,61 +322,90 @@ struct FilterChip: View {
 struct OrganizerEventCard: View {
     let event: Event
 
+    private var isOngoing: Bool {
+        let now = Date()
+        return now >= event.startDate && now <= event.endDate
+    }
+
     var body: some View {
-        HStack(spacing: AppSpacing.md) {
-            // Poster thumbnail
-            if let posterURL = event.posterURL {
-                Image(posterURL)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 80, height: 80)
-                    .cornerRadius(AppCornerRadius.small)
-            } else {
-                Rectangle()
-                    .fill(Color(UIColor.systemGray5))
-                    .frame(width: 80, height: 80)
-                    .cornerRadius(AppCornerRadius.small)
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundColor(.gray)
-                    )
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(event.title)
-                    .font(AppTypography.headline)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-
-                Text(DateUtilities.formatEventDateTime(event.startDate))
-                    .font(AppTypography.subheadline)
-                    .foregroundColor(.secondary)
-
-                HStack(spacing: AppSpacing.md) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "ticket")
-                            .font(.caption)
-                        Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
-                            .font(AppTypography.caption)
-                    }
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "heart")
-                            .font(.caption)
-                        Text("\(event.likeCount)")
-                            .font(AppTypography.caption)
-                    }
+        VStack(spacing: 0) {
+            HStack(spacing: AppSpacing.md) {
+                // Poster thumbnail
+                if let posterURL = event.posterURL {
+                    Image(posterURL)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(AppCornerRadius.small)
+                } else {
+                    Rectangle()
+                        .fill(Color(UIColor.systemGray5))
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(AppCornerRadius.small)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                        )
                 }
-                .foregroundColor(.secondary)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(event.title)
+                        .font(AppTypography.headline)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+
+                    Text(DateUtilities.formatEventDateTime(event.startDate))
+                        .font(AppTypography.subheadline)
+                        .foregroundColor(.secondary)
+
+                    HStack(spacing: AppSpacing.md) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "ticket")
+                                .font(.caption)
+                            Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
+                                .font(AppTypography.caption)
+                        }
+
+                        HStack(spacing: 4) {
+                            Image(systemName: "heart")
+                                .font(.caption)
+                            Text("\(event.likeCount)")
+                                .font(AppTypography.caption)
+                        }
+                    }
+                    .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
+            .padding(AppSpacing.md)
 
-            Spacer()
+            // Scan Tickets button - only for ongoing events
+            if isOngoing {
+                Divider()
 
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                NavigationLink(destination: QRScannerView()) {
+                    HStack {
+                        Image(systemName: "qrcode.viewfinder")
+                            .font(.system(size: 16))
+                        Text("Scan Tickets")
+                            .font(AppTypography.subheadline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                    }
+                    .foregroundColor(RoleConfig.organizerPrimary)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(RoleConfig.organizerPrimary.opacity(0.1))
+                }
+            }
         }
-        .padding(AppSpacing.md)
         .background(Color(UIColor.systemBackground))
         .cornerRadius(AppCornerRadius.medium)
         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)

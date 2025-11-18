@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct OrganizerDashboardView: View {
     @EnvironmentObject var authService: MockAuthService
@@ -19,6 +20,7 @@ struct OrganizerDashboardView: View {
     @State private var events: [Event] = []
     @State private var showingVerification = false
     @State private var showingVerificationSheet = false
+    @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
         NavigationView {
@@ -60,19 +62,17 @@ struct OrganizerDashboardView: View {
                         }
                     }
 
-                    // QR Scanner button
-                    Button(action: {
-                        showingQRScanner = true
-                    }) {
+                    // Manage Scanner Devices button
+                    NavigationLink(destination: Text("Scanner Device Management - Coming Soon").navigationTitle("Scanner Devices")) {
                         HStack {
-                            Image(systemName: "qrcode.viewfinder")
+                            Image(systemName: "iphone.and.arrow.forward")
                                 .font(.system(size: 24))
 
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Scan Ticket")
+                                Text("Manage Scanner Devices")
                                     .font(AppTypography.headline)
 
-                                Text("Check in attendees with QR code scanner")
+                                Text("Authorize devices for ticket scanning")
                                     .font(AppTypography.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -144,6 +144,7 @@ struct OrganizerDashboardView: View {
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.large)
             .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
 
                 // Verification Required Overlay
@@ -203,6 +204,7 @@ struct OrganizerDashboardView: View {
         }
         .onAppear {
             loadAnalytics()
+            subscribeToTicketSales()
         }
         .sheet(isPresented: $showingQRScanner) {
             QRScannerView()
@@ -249,6 +251,28 @@ struct OrganizerDashboardView: View {
                 }
             }
         }
+    }
+
+    private func subscribeToTicketSales() {
+        services.ticketService.ticketSalesPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { saleEvent in
+                // Update event sold count
+                if let index = events.firstIndex(where: { $0.id == saleEvent.eventId }) {
+                    for (typeIndex, ticketType) in events[index].ticketTypes.enumerated() {
+                        if ticketType.name == saleEvent.ticketType {
+                            events[index].ticketTypes[typeIndex].sold += saleEvent.quantity
+                        }
+                    }
+                }
+
+                // Update total stats
+                totalTicketsSold += saleEvent.quantity
+                totalRevenue += saleEvent.totalAmount
+
+                HapticFeedback.success()
+            }
+            .store(in: &cancellables)
     }
 }
 

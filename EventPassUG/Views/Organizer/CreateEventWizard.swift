@@ -13,10 +13,13 @@ struct CreateEventWizard: View {
     @EnvironmentObject var authService: MockAuthService
     @EnvironmentObject var services: ServiceContainer
 
+    var existingDraft: Event? = nil
+
     @State private var currentStep = 1
     @State private var isLoading = false
     @State private var showingSuccessAlert = false
     @State private var showingVerification = false
+    @State private var draftId: UUID?
 
     // Step 1: Event Details
     @State private var title = ""
@@ -27,8 +30,13 @@ struct CreateEventWizard: View {
     @State private var venueName = ""
     @State private var venueAddress = ""
     @State private var venueCity = "Kampala"
+    @State private var venueLatitude: Double = 0.3163
+    @State private var venueLongitude: Double = 32.5822
     @State private var selectedPosterItem: PhotosPickerItem?
     @State private var posterImageName: String?
+    @State private var posterUIImage: UIImage?
+
+    @StateObject private var locationService = LocationService()
 
     // Step 2: Ticketing
     @State private var ticketTypes: [TicketType] = [
@@ -74,7 +82,11 @@ struct CreateEventWizard: View {
                         venueAddress: $venueAddress,
                         venueCity: $venueCity,
                         selectedPosterItem: $selectedPosterItem,
-                        posterImageName: $posterImageName
+                        posterImageName: $posterImageName,
+                        posterUIImage: $posterUIImage,
+                        venueLatitude: $venueLatitude,
+                        venueLongitude: $venueLongitude,
+                        locationService: locationService
                     )
                     .tag(1)
 
@@ -172,6 +184,11 @@ struct CreateEventWizard: View {
             if authService.currentUser?.needsVerificationForOrganizerActions == true {
                 showingVerification = true
             }
+
+            // Load draft if provided
+            if let draft = existingDraft {
+                loadDraft(draft)
+            }
         }
     }
 
@@ -207,9 +224,75 @@ struct CreateEventWizard: View {
     }
 
     private func saveDraft() {
-        // TODO: Implement Core Data draft saving
-        HapticFeedback.success()
-        dismiss()
+        Task {
+            do {
+                guard let organizerId = authService.currentUser?.id,
+                      let organizerName = authService.currentUser?.fullName else {
+                    return
+                }
+
+                let event = Event(
+                    id: draftId ?? UUID(),
+                    title: title.isEmpty ? "Untitled Event" : title,
+                    description: description,
+                    organizerId: organizerId,
+                    organizerName: organizerName,
+                    posterURL: posterImageName,
+                    category: selectedCategory,
+                    startDate: startDate,
+                    endDate: endDate,
+                    venue: Venue(
+                        name: venueName,
+                        address: venueAddress,
+                        city: venueCity,
+                        coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
+                    ),
+                    ticketTypes: ticketTypes,
+                    status: .draft
+                )
+
+                if draftId != nil {
+                    _ = try await services.eventService.updateEvent(event)
+                } else {
+                    _ = try await services.eventService.createEvent(event)
+                }
+
+                await MainActor.run {
+                    HapticFeedback.success()
+                    dismiss()
+                }
+            } catch {
+                print("Error saving draft: \(error)")
+                await MainActor.run {
+                    HapticFeedback.error()
+                }
+            }
+        }
+    }
+
+    private func loadDraft(_ draft: Event) {
+        draftId = draft.id
+        title = draft.title
+        description = draft.description
+        selectedCategory = draft.category
+        startDate = draft.startDate
+        endDate = draft.endDate
+        venueName = draft.venue.name
+        venueAddress = draft.venue.address
+        venueCity = draft.venue.city
+        venueLatitude = draft.venue.coordinate.latitude
+        venueLongitude = draft.venue.coordinate.longitude
+        posterImageName = draft.posterURL
+        ticketTypes = draft.ticketTypes
+
+        // Determine which step to resume
+        if !ticketTypes.isEmpty && ticketTypes.allSatisfy({ $0.quantity > 0 }) {
+            currentStep = 3  // Review step
+        } else if !title.isEmpty && !description.isEmpty {
+            currentStep = 2  // Tickets step
+        } else {
+            currentStep = 1  // Details step
+        }
     }
 
     private func publishEvent() {
@@ -235,7 +318,7 @@ struct CreateEventWizard: View {
                         name: venueName,
                         address: venueAddress,
                         city: venueCity,
-                        coordinate: Venue.Coordinate(latitude: 0.3163, longitude: 32.5822) // Default Kampala
+                        coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
                     ),
                     ticketTypes: ticketTypes,
                     status: .published
@@ -272,6 +355,12 @@ struct Step1EventDetails: View {
     @Binding var venueCity: String
     @Binding var selectedPosterItem: PhotosPickerItem?
     @Binding var posterImageName: String?
+    @Binding var posterUIImage: UIImage?
+    @Binding var venueLatitude: Double
+    @Binding var venueLongitude: Double
+    @ObservedObject var locationService: LocationService
+
+    @State private var showingPredictions = false
 
     var body: some View {
         ScrollView {
@@ -282,7 +371,13 @@ struct Step1EventDetails: View {
                         .font(AppTypography.headline)
 
                     PhotosPicker(selection: $selectedPosterItem, matching: .images) {
-                        if let posterName = posterImageName {
+                        if let uiImage = posterUIImage {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(16/9, contentMode: .fill)
+                                .frame(height: 180)
+                                .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
+                        } else if let posterName = posterImageName {
                             Image(posterName)
                                 .resizable()
                                 .aspectRatio(16/9, contentMode: .fill)
@@ -301,6 +396,17 @@ struct Step1EventDetails: View {
                                     }
                                     .foregroundColor(.secondary)
                                 )
+                        }
+                    }
+                    .onChange(of: selectedPosterItem) { newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                await MainActor.run {
+                                    posterUIImage = uiImage
+                                    posterImageName = "event_poster_\(UUID().uuidString)"
+                                }
+                            }
                         }
                     }
                 }
@@ -373,12 +479,53 @@ struct Step1EventDetails: View {
                         .datePickerStyle(.compact)
                 }
 
-                // Venue
+                // Venue with autocomplete
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
                     Text("Venue Name")
                         .font(AppTypography.headline)
+
                     TextField("Enter venue name", text: $venueName)
                         .textFieldStyle(.roundedBorder)
+                        .onChange(of: venueName) { newValue in
+                            locationService.searchLocations(query: newValue)
+                            showingPredictions = !newValue.isEmpty
+                        }
+
+                    // Autocomplete predictions
+                    if showingPredictions && !locationService.predictions.isEmpty {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(locationService.predictions.prefix(5)) { prediction in
+                                Button(action: {
+                                    let location = locationService.selectLocation(prediction)
+                                    venueName = location.name
+                                    venueAddress = location.address
+                                    venueCity = location.city
+                                    venueLatitude = location.coordinate.lat
+                                    venueLongitude = location.coordinate.lon
+                                    showingPredictions = false
+                                    HapticFeedback.selection()
+                                }) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(prediction.title)
+                                            .font(AppTypography.callout)
+                                            .foregroundColor(.primary)
+                                        Text(prediction.subtitle)
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(AppSpacing.sm)
+                                }
+
+                                if prediction.id != locationService.predictions.prefix(5).last?.id {
+                                    Divider()
+                                }
+                            }
+                        }
+                        .background(Color(UIColor.systemBackground))
+                        .cornerRadius(AppCornerRadius.small)
+                        .shadow(color: Color.black.opacity(0.1), radius: 8)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
