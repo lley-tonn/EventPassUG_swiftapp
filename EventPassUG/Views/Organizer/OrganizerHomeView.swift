@@ -85,7 +85,10 @@ struct OrganizerHomeView: View {
     }
 
     private var mainContent: some View {
-        VStack(spacing: 0) {
+        GeometryReader { geometry in
+            let isLandscape = geometry.size.width > geometry.size.height
+
+            VStack(spacing: 0) {
                 // Header with greeting, date, search and notifications
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -199,7 +202,7 @@ struct OrganizerHomeView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: AppSpacing.md) {
+                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 1, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
                             ForEach(filteredEvents) { event in
                                 if event.status == .draft {
                                     Button(action: {
@@ -215,7 +218,7 @@ struct OrganizerHomeView: View {
                                 }
                             }
                         }
-                        .padding(AppSpacing.md)
+                        .padding(ResponsiveSpacing.md(geometry))
                     }
                 }
             }
@@ -225,6 +228,7 @@ struct OrganizerHomeView: View {
                 OrganizerNotificationCenterView()
                     .environmentObject(authService)
                     .environmentObject(services)
+            }
             }
     }
 
@@ -328,87 +332,98 @@ struct OrganizerEventCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: AppSpacing.md) {
-                // Poster thumbnail
-                if let posterURL = event.posterURL {
-                    Image(posterURL)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 80, height: 80)
-                        .cornerRadius(AppCornerRadius.small)
-                } else {
-                    Rectangle()
-                        .fill(Color(UIColor.systemGray5))
-                        .frame(width: 80, height: 80)
-                        .cornerRadius(AppCornerRadius.small)
-                        .overlay(
-                            Image(systemName: "photo")
-                                .foregroundColor(.gray)
-                        )
-                }
+        GeometryReader { geometry in
+            let thumbnailSize = min(max(geometry.size.width * 0.2, 60), 90)
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(event.title)
-                        .font(AppTypography.headline)
-                        .foregroundColor(.primary)
-                        .lineLimit(2)
-
-                    Text(DateUtilities.formatEventDateTime(event.startDate))
-                        .font(AppTypography.subheadline)
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: AppSpacing.md) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "ticket")
-                                .font(.caption)
-                            Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
-                                .font(AppTypography.caption)
-                        }
-
-                        HStack(spacing: 4) {
-                            Image(systemName: "heart")
-                                .font(.caption)
-                            Text("\(event.likeCount)")
-                                .font(AppTypography.caption)
-                        }
+            VStack(spacing: 0) {
+                HStack(spacing: AppSpacing.md) {
+                    // Poster thumbnail
+                    if let posterURL = event.posterURL {
+                        Image(posterURL)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: thumbnailSize, height: thumbnailSize)
+                            .cornerRadius(AppCornerRadius.small)
+                            .clipped()
+                    } else {
+                        Rectangle()
+                            .fill(Color(UIColor.systemGray5))
+                            .frame(width: thumbnailSize, height: thumbnailSize)
+                            .cornerRadius(AppCornerRadius.small)
+                            .overlay(
+                                Image(systemName: "photo")
+                                    .font(.system(size: thumbnailSize * 0.4))
+                                    .foregroundColor(.gray)
+                            )
                     }
-                    .foregroundColor(.secondary)
-                }
 
-                Spacer()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(event.title)
+                            .font(AppTypography.headline)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.85)
 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(AppSpacing.md)
-
-            // Scan Tickets button - only for ongoing events
-            if isOngoing {
-                Divider()
-
-                NavigationLink(destination: QRScannerView()) {
-                    HStack {
-                        Image(systemName: "qrcode.viewfinder")
-                            .font(.system(size: 16))
-                        Text("Scan Tickets")
+                        Text(DateUtilities.formatEventDateTime(event.startDate))
                             .font(AppTypography.subheadline)
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Image(systemName: "arrow.right")
-                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+
+                        HStack(spacing: max(8, geometry.size.width * 0.03)) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "ticket")
+                                    .font(.caption)
+                                Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
+                                    .font(AppTypography.caption)
+                            }
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "heart")
+                                    .font(.caption)
+                                Text("\(event.likeCount)")
+                                    .font(AppTypography.caption)
+                            }
+                        }
+                        .foregroundColor(.secondary)
                     }
-                    .foregroundColor(RoleConfig.organizerPrimary)
-                    .padding(.horizontal, AppSpacing.md)
-                    .padding(.vertical, AppSpacing.sm)
-                    .background(RoleConfig.organizerPrimary.opacity(0.1))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                .padding(.vertical, AppSpacing.md)
+
+                // Scan Tickets button - only for ongoing events
+                if isOngoing {
+                    Divider()
+
+                    NavigationLink(destination: QRScannerView()) {
+                        HStack {
+                            Image(systemName: "qrcode.viewfinder")
+                                .font(.system(size: 16))
+                            Text("Scan Tickets")
+                                .font(AppTypography.subheadline)
+                                .fontWeight(.semibold)
+                                .minimumScaleFactor(0.85)
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .font(.caption)
+                        }
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                        .padding(.vertical, AppSpacing.sm)
+                        .background(RoleConfig.organizerPrimary.opacity(0.1))
+                    }
                 }
             }
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .frame(height: max(100, thumbnailSize + 40))
         }
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppCornerRadius.medium)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 

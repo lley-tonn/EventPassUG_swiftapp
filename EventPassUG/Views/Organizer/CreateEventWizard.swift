@@ -363,7 +363,10 @@ struct Step1EventDetails: View {
     @State private var showingPredictions = false
 
     var body: some View {
-        ScrollView {
+        GeometryReader { geometry in
+            let isLandscape = geometry.size.width > geometry.size.height
+
+            ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.lg) {
                 // Poster picker
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
@@ -374,19 +377,24 @@ struct Step1EventDetails: View {
                         if let uiImage = posterUIImage {
                             Image(uiImage: uiImage)
                                 .resizable()
-                                .aspectRatio(16/9, contentMode: .fill)
-                                .frame(height: 180)
-                                .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
+                                .scaledToFill()
+                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
+                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
+                                .clipped()
+                                .cornerRadius(AppCornerRadius.medium)
                         } else if let posterName = posterImageName {
                             Image(posterName)
                                 .resizable()
-                                .aspectRatio(16/9, contentMode: .fill)
-                                .frame(height: 180)
+                                .scaledToFill()
+                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
+                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
+                                .clipped()
                                 .cornerRadius(AppCornerRadius.medium)
                         } else {
                             RoundedRectangle(cornerRadius: AppCornerRadius.medium)
                                 .fill(Color(UIColor.systemGray6))
-                                .frame(height: 180)
+                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
+                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
                                 .overlay(
                                     VStack(spacing: 8) {
                                         Image(systemName: "photo.badge.plus")
@@ -542,7 +550,8 @@ struct Step1EventDetails: View {
                         .textFieldStyle(.roundedBorder)
                 }
             }
-            .padding(AppSpacing.md)
+            .padding(ResponsiveSpacing.md(geometry))
+            }
         }
     }
 }

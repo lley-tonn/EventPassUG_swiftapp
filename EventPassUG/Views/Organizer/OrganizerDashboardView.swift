@@ -25,11 +25,14 @@ struct OrganizerDashboardView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                    // Analytics cards
-                    VStack(spacing: AppSpacing.md) {
-                        HStack(spacing: AppSpacing.md) {
+                GeometryReader { geometry in
+                    let isLandscape = geometry.size.width > geometry.size.height
+                    let columns = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
+
+                    ScrollView {
+                    VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {
+                        // Analytics cards - responsive grid
+                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 2, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
                             AnalyticsCard(
                                 title: "Total Revenue",
                                 value: "UGX \(Int(totalRevenue).formatted())",
@@ -43,9 +46,7 @@ struct OrganizerDashboardView: View {
                                 icon: "ticket.fill",
                                 color: RoleConfig.organizerPrimary
                             )
-                        }
 
-                        HStack(spacing: AppSpacing.md) {
                             AnalyticsCard(
                                 title: "Active Events",
                                 value: "\(activeEvents)",
@@ -60,7 +61,6 @@ struct OrganizerDashboardView: View {
                                 color: .purple
                             )
                         }
-                    }
 
                     // Manage Scanner Devices button
                     NavigationLink(destination: Text("Scanner Device Management - Coming Soon").navigationTitle("Scanner Devices")) {
@@ -140,12 +140,14 @@ struct OrganizerDashboardView: View {
                         .cornerRadius(AppCornerRadius.medium)
                     }
                 }
-                .padding(AppSpacing.md)
-            }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Dashboard")
-            .navigationBarTitleDisplayMode(.large)
-            .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
+                .padding(.horizontal, ResponsiveSpacing.md(geometry))
+                .padding(.vertical, ResponsiveSpacing.sm(geometry))
+                    }
+                }
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationTitle("Dashboard")
+                .navigationBarTitleDisplayMode(.large)
+                .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
 
                 // Verification Required Overlay
                 if authService.currentUser?.needsVerificationForOrganizerActions == true {
@@ -201,22 +203,22 @@ struct OrganizerDashboardView: View {
                     )
                 }
             }
-        }
-        .onAppear {
-            loadAnalytics()
-            subscribeToTicketSales()
-        }
-        .sheet(isPresented: $showingQRScanner) {
-            QRScannerView()
-        }
-        .sheet(isPresented: $showingVerification) {
-            NationalIDVerificationView()
-                .environmentObject(authService)
-        }
-        .sheet(isPresented: $showingVerificationSheet) {
-            NationalIDVerificationView()
-                .environmentObject(authService)
-        }
+            }
+            .onAppear {
+                loadAnalytics()
+                subscribeToTicketSales()
+            }
+            .sheet(isPresented: $showingQRScanner) {
+                QRScannerView()
+            }
+            .sheet(isPresented: $showingVerification) {
+                NationalIDVerificationView()
+                    .environmentObject(authService)
+            }
+            .sheet(isPresented: $showingVerificationSheet) {
+                NationalIDVerificationView()
+                    .environmentObject(authService)
+            }
     }
 
     private func loadAnalytics() {

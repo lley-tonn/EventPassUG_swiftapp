@@ -55,9 +55,6 @@ struct CollapsibleHeader<Content: View>: View {
     let scrollOffset: CGFloat
     let content: Content
 
-    private let minHeight: CGFloat = 44
-    private let maxHeight: CGFloat = 140
-
     init(title: String, scrollOffset: CGFloat, @ViewBuilder content: () -> Content) {
         self.title = title
         self.scrollOffset = scrollOffset
@@ -70,52 +67,51 @@ struct CollapsibleHeader<Content: View>: View {
         return progress
     }
 
-    private var currentHeight: CGFloat {
-        maxHeight - (maxHeight - minHeight) * progress
-    }
-
-    private var titleOpacity: CGFloat {
-        1 - progress
-    }
-
-    private var navTitleOpacity: CGFloat {
-        progress
-    }
-
     var body: some View {
-        VStack(spacing: 0) {
-            // Large title area (collapses)
-            ZStack {
-                Color(UIColor.systemBackground)
+        GeometryReader { geometry in
+            let minHeight: CGFloat = 44
+            let maxHeight: CGFloat = min(max(geometry.size.width * 0.35, 120), 160)
+            let currentHeight = maxHeight - (maxHeight - minHeight) * progress
+            let titleOpacity = 1 - progress
+            let navTitleOpacity = progress
 
-                VStack(spacing: AppSpacing.md) {
-                    Spacer()
+            VStack(spacing: 0) {
+                // Large title area (collapses)
+                ZStack {
+                    Color(UIColor.systemBackground)
 
-                    // Custom content (shown when expanded)
-                    content
-                        .opacity(titleOpacity)
-                        .scaleEffect(1 - (progress * 0.1))
+                    VStack(spacing: max(8, geometry.size.width * 0.03)) {
+                        Spacer()
 
+                        // Custom content (shown when expanded)
+                        content
+                            .opacity(titleOpacity)
+                            .scaleEffect(1 - (progress * 0.1))
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                }
+                .frame(height: currentHeight)
+
+                Divider()
+            }
+            .overlay(
+                // Navigation title (appears when collapsed)
+                HStack {
+                    Text(title)
+                        .font(AppTypography.headline)
+                        .fontWeight(.semibold)
+                        .minimumScaleFactor(0.85)
+                        .lineLimit(1)
+                        .opacity(navTitleOpacity)
                     Spacer()
                 }
-                .padding(.horizontal, AppSpacing.md)
-            }
-            .frame(height: currentHeight)
-
-            Divider()
+                .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                .frame(height: minHeight)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+            )
         }
-        .overlay(
-            // Navigation title (appears when collapsed)
-            HStack {
-                Text(title)
-                    .font(AppTypography.headline)
-                    .fontWeight(.semibold)
-                    .opacity(navTitleOpacity)
-                Spacer()
-            }
-            .padding(.horizontal, AppSpacing.md)
-            .frame(height: minHeight)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-        )
+        .frame(height: min(max(UIScreen.main.bounds.width * 0.35, 120), 160))
     }
 }

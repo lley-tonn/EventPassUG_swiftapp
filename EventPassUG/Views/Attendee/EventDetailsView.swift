@@ -30,7 +30,11 @@ struct EventDetailsView: View {
     }
 
     var body: some View {
-        ScrollView {
+        GeometryReader { geometry in
+            let isLandscape = geometry.size.width > geometry.size.height
+            let posterHeight = ResponsiveHeight.posterImage(isLandscape: isLandscape, context: geometry)
+
+            ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 // Poster image
                 ZStack(alignment: .topLeading) {
@@ -38,14 +42,14 @@ struct EventDetailsView: View {
                         Image(posterURL)
                             .resizable()
                             .aspectRatio(16/9, contentMode: .fill)
-                            .frame(height: 280)
+                            .frame(height: posterHeight)
                             .frame(maxWidth: .infinity)
                             .clipped()
                     } else {
                         Rectangle()
                             .fill(Color(UIColor.systemGray5))
                             .frame(maxWidth: .infinity)
-                            .frame(height: 280)
+                            .frame(height: posterHeight)
                             .overlay(
                                 Image(systemName: "photo")
                                     .font(.system(size: 60))
@@ -76,14 +80,16 @@ struct EventDetailsView: View {
                     // Title and actions
                     VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text(event.title)
-                            .font(AppTypography.largeTitle)
-                            .fontWeight(.bold)
+                            .font(.system(size: min(geometry.size.width * 0.08, 34), weight: .bold))
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
 
                         Text("by \(event.organizerName)")
                             .font(AppTypography.callout)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
+                            .minimumScaleFactor(0.85)
 
                         // Actions
                         HStack(spacing: AppSpacing.lg) {
@@ -149,7 +155,7 @@ struct EventDetailsView: View {
                             )
                         }
                         .frame(maxWidth: .infinity)
-                        .frame(height: 200)
+                        .frame(height: min(max(geometry.size.width * 0.5, 160), 220))
                         .cornerRadius(AppCornerRadius.medium)
                         .allowsHitTesting(false)
 
@@ -253,7 +259,9 @@ struct EventDetailsView: View {
                         }
                     }
                 }
-                .padding(AppSpacing.md)
+                .padding(.horizontal, ResponsiveSpacing.md(geometry))
+                .padding(.vertical, ResponsiveSpacing.sm(geometry))
+            }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -271,19 +279,21 @@ struct EventDetailsView: View {
                 VStack(spacing: 0) {
                     Divider()
 
-                    HStack {
+                    HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 4) {
                             if let ticketType = selectedTicketType {
                                 Text(ticketType.formattedPrice)
                                     .font(AppTypography.title3)
                                     .fontWeight(.bold)
                                     .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
 
                                 HStack(spacing: 4) {
                                     Text(ticketType.name)
                                         .font(AppTypography.caption)
                                         .foregroundColor(.secondary)
                                         .lineLimit(1)
+                                        .minimumScaleFactor(0.85)
 
                                     if ticketType.isPurchasable {
                                         Image(systemName: "checkmark.circle.fill")
@@ -296,9 +306,11 @@ struct EventDetailsView: View {
                                     .font(AppTypography.title3)
                                     .fontWeight(.bold)
                                     .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
 
                                 Text("Select a ticket type")
                                     .font(AppTypography.caption)
+                                    .minimumScaleFactor(0.85)
                                     .foregroundColor(.secondary)
                             } else {
                                 Text("No tickets on sale")

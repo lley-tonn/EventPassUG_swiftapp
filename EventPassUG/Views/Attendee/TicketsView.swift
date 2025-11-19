@@ -215,36 +215,44 @@ struct TicketFilterButton: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 8) {
-                Text(title)
-                    .font(AppTypography.callout)
-                    .fontWeight(isSelected ? .semibold : .regular)
+        GeometryReader { geometry in
+            let horizontalPadding = max(12, geometry.size.width * 0.04)
 
-                Text("\(count)")
-                    .font(AppTypography.caption)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(isSelected ? color : Color.gray.opacity(0.2))
-                    )
-                    .foregroundColor(isSelected ? .white : .secondary)
+            Button(action: onTap) {
+                HStack(spacing: max(6, geometry.size.width * 0.02)) {
+                    Text(title)
+                        .font(AppTypography.callout)
+                        .fontWeight(isSelected ? .semibold : .regular)
+                        .minimumScaleFactor(0.85)
+                        .lineLimit(1)
+
+                    Text("\(count)")
+                        .font(AppTypography.caption)
+                        .fontWeight(.semibold)
+                        .minimumScaleFactor(0.85)
+                        .padding(.horizontal, max(6, geometry.size.width * 0.02))
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(isSelected ? color : Color.gray.opacity(0.2))
+                        )
+                        .foregroundColor(isSelected ? .white : .secondary)
+                }
+                .foregroundColor(isSelected ? color : .primary)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? color.opacity(0.15) : Color.clear)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? color : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                )
             }
-            .foregroundColor(isSelected ? color : .primary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(
-                Capsule()
-                    .fill(isSelected ? color.opacity(0.15) : Color.clear)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(isSelected ? color : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-            )
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .frame(height: 36)
     }
 }
 
@@ -254,87 +262,105 @@ struct TicketCard: View {
     let onShare: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Status banner
-                if ticket.scanStatus == .scanned {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                        Text("Scanned")
-                            .font(AppTypography.caption)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .background(Color.green)
-                } else if ticket.isExpired {
-                    HStack {
-                        Image(systemName: "clock.fill")
-                        Text("Event Ended")
-                            .font(AppTypography.caption)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .background(Color.gray)
-                } else {
-                    HStack {
-                        Image(systemName: "checkmark.seal.fill")
-                        Text("Active")
-                            .font(AppTypography.caption)
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .background(RoleConfig.attendeePrimary)
-                }
-
-                VStack(alignment: .leading, spacing: AppSpacing.md) {
-                    // Event title
-                    Text(ticket.eventTitle)
-                        .font(AppTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    // Ticket type and price
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Ticket Type")
+        GeometryReader { geometry in
+            Button(action: onTap) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Status banner
+                    if ticket.scanStatus == .scanned {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                            Text("Scanned")
                                 .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-
-                            Text(ticket.ticketType.name)
-                                .font(AppTypography.callout)
                                 .fontWeight(.semibold)
+                                .minimumScaleFactor(0.8)
                         }
-
-                        Spacer()
-
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text("Price")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(Color.green)
+                    } else if ticket.isExpired {
+                        HStack {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 12))
+                            Text("Event Ended")
                                 .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-
-                            Text(ticket.ticketType.formattedPrice)
-                                .font(AppTypography.callout)
                                 .fontWeight(.semibold)
-                                .foregroundColor(RoleConfig.attendeePrimary)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(Color.gray)
+                    } else {
+                        HStack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.system(size: 12))
+                            Text("Active")
+                                .font(AppTypography.caption)
+                                .fontWeight(.semibold)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(RoleConfig.attendeePrimary)
+                    }
+
+                    VStack(alignment: .leading, spacing: max(8, geometry.size.width * 0.03)) {
+                        // Event title
+                        Text(ticket.eventTitle)
+                            .font(AppTypography.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        // Ticket type and price
+                        HStack(spacing: max(8, geometry.size.width * 0.03)) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Ticket Type")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.secondary)
+                                    .minimumScaleFactor(0.85)
+
+                                Text(ticket.ticketType.name)
+                                    .font(AppTypography.callout)
+                                    .fontWeight(.semibold)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("Price")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.secondary)
+                                    .minimumScaleFactor(0.85)
+
+                                Text(ticket.ticketType.formattedPrice)
+                                    .font(AppTypography.callout)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(RoleConfig.attendeePrimary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
+                            }
                         }
                     }
+                    .padding(max(12, geometry.size.width * 0.04))
 
                     Divider()
 
                     // Event details
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(alignment: .leading, spacing: max(6, geometry.size.width * 0.02)) {
                         HStack(spacing: 4) {
                             Image(systemName: "calendar")
                                 .font(.caption)
                             Text(DateUtilities.formatEventDateTime(ticket.eventDate))
                                 .font(AppTypography.subheadline)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
                         }
                         .foregroundColor(.secondary)
 
@@ -344,9 +370,12 @@ struct TicketCard: View {
                             Text(ticket.eventVenue)
                                 .font(AppTypography.subheadline)
                                 .lineLimit(1)
+                                .minimumScaleFactor(0.85)
                         }
                         .foregroundColor(.secondary)
                     }
+                    .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                    .padding(.vertical, AppSpacing.sm)
 
                     // Bottom actions
                     HStack {
@@ -356,9 +385,10 @@ struct TicketCard: View {
                                     .font(.caption)
                                 Text("Share")
                                     .font(AppTypography.caption)
+                                    .minimumScaleFactor(0.85)
                             }
                             .foregroundColor(RoleConfig.attendeePrimary)
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, max(10, geometry.size.width * 0.03))
                             .padding(.vertical, 6)
                             .background(
                                 Capsule()
@@ -373,8 +403,9 @@ struct TicketCard: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    .padding(.horizontal, max(12, geometry.size.width * 0.04))
+                    .padding(.bottom, max(12, geometry.size.width * 0.04))
                 }
-                .padding(AppSpacing.md)
             }
             .background(Color(UIColor.systemBackground))
             .cornerRadius(AppCornerRadius.medium)

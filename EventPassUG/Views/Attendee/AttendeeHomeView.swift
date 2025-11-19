@@ -25,10 +25,14 @@ struct AttendeeHomeView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
+            GeometryReader { geometry in
+                let isLandscape = geometry.size.width > geometry.size.height
+
+                GeometryReader { screenGeometry in
+                ScrollView {
                 VStack(spacing: 0) {
                     // Header with action buttons and inline search
-                    VStack(spacing: AppSpacing.md) {
+                    VStack(spacing: max(8, screenGeometry.size.width * 0.03)) {
                         // Top row: Greeting + Action Buttons
                         HStack(alignment: .top) {
                             if !isSearchExpanded {
@@ -36,17 +40,21 @@ struct AttendeeHomeView: View {
                                     Text(DateUtilities.formatHeaderDate(Date()))
                                         .font(AppTypography.caption)
                                         .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.85)
 
                                     Text("\(DateUtilities.getGreeting()), \(authService.currentUser?.firstName ?? "Guest")!")
                                         .font(AppTypography.title2)
                                         .fontWeight(.bold)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.75)
                                 }
                                 .transition(.opacity.combined(with: .move(edge: .leading)))
                             }
 
-                            Spacer()
+                            Spacer(minLength: 8)
 
-                            HStack(spacing: AppSpacing.md) {
+                            HStack(spacing: max(8, screenGeometry.size.width * 0.025)) {
                                 // Search button - toggles inline search
                                 Button(action: {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -61,9 +69,10 @@ struct AttendeeHomeView: View {
                                     HapticFeedback.light()
                                 }) {
                                     Image(systemName: isSearchExpanded ? "xmark" : "magnifyingglass")
-                                        .font(.system(size: 20))
+                                        .font(.system(size: min(max(screenGeometry.size.width * 0.05, 18), 20)))
                                         .foregroundColor(.primary)
-                                        .frame(width: 40, height: 40)
+                                        .frame(width: min(max(screenGeometry.size.width * 0.1, 36), 40),
+                                               height: min(max(screenGeometry.size.width * 0.1, 36), 40))
                                         .background(Color(UIColor.secondarySystemGroupedBackground))
                                         .clipShape(Circle())
                                 }
@@ -217,16 +226,16 @@ struct AttendeeHomeView: View {
                     }
                     .padding(.bottom, AppSpacing.lg)
 
-                    // Events feed
+                    // Events feed - responsive grid
                     if isLoading {
                         VStack(spacing: AppSpacing.md) {
                             ForEach(0..<3, id: \.self) { _ in
                                 SkeletonEventCard()
                             }
                         }
-                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.horizontal, ResponsiveSpacing.md(geometry))
                     } else {
-                        LazyVStack(spacing: AppSpacing.md) {
+                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 1, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
                             ForEach(filteredEvents) { event in
                                 NavigationLink(destination: EventDetailsView(event: event)) {
                                     EventCard(
@@ -241,24 +250,25 @@ struct AttendeeHomeView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, AppSpacing.md)
-                        .padding(.bottom, AppSpacing.xl)
+                        .padding(.horizontal, ResponsiveSpacing.md(geometry))
+                        .padding(.bottom, ResponsiveSpacing.xl(geometry))
                     }
+                }
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationBarHidden(true)
-        }
-        .onAppear {
-            loadEvents()
-        }
-        .sheet(isPresented: $showingNotifications) {
-            NotificationsView(unreadCount: $unreadNotifications)
-        }
-        .sheet(isPresented: $showingFavorites) {
-            FavoriteEventsView()
-                .environmentObject(services)
-        }
+            }
+            .onAppear {
+                loadEvents()
+            }
+            .sheet(isPresented: $showingNotifications) {
+                NotificationsView(unreadCount: $unreadNotifications)
+            }
+            .sheet(isPresented: $showingFavorites) {
+                FavoriteEventsView()
+                    .environmentObject(services)
+            }
     }
 
     private var filteredEvents: [Event] {
