@@ -27,28 +27,15 @@ struct ProfileView: View {
     // Organizer Onboarding
     @State private var showingBecomeOrganizer = false
 
-    private var progress: CGFloat {
-        let threshold: CGFloat = 60
-        return max(0, min(1, -scrollOffset / threshold))
-    }
-
-    private var headerHeight: CGFloat {
-        let minHeight: CGFloat = 80
-        let maxHeight: CGFloat = 160
-        return maxHeight - (maxHeight - minHeight) * progress
-    }
-
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 // Collapsible Profile Header
-                ZStack {
-                    Color(UIColor.systemBackground)
-
+                CollapsibleHeader(title: authService.currentUser?.fullName ?? "Profile", scrollOffset: scrollOffset) {
                     HStack(spacing: AppSpacing.md) {
                         // Profile image
                         Image(systemName: "person.circle.fill")
-                            .font(.system(size: 60 - (progress * 20)))
+                            .font(.system(size: 60))
                             .foregroundColor(
                                 RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
                             )
@@ -56,69 +43,59 @@ struct ProfileView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 6) {
                                 Text(authService.currentUser?.fullName ?? "Guest")
-                                    .font(progress > 0.5 ? AppTypography.headline : AppTypography.title2)
+                                    .font(AppTypography.title2)
                                     .fontWeight(.bold)
                                     .lineLimit(1)
 
                                 // Account Verified Badge
                                 if authService.currentUser?.isVerified == true {
                                     Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: progress > 0.5 ? 14 : 18))
+                                        .font(.system(size: 18))
                                         .foregroundColor(.green)
                                 }
                             }
 
-                            Group {
-                                if authService.currentUser?.isVerified == true {
-                                    Text("Account Verified")
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(.green)
-                                } else {
-                                    Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
-                                        .foregroundColor(Color.secondary)
-                                        .lineLimit(1)
-                                }
+                            if authService.currentUser?.isVerified == true {
+                                Text("Account Verified")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(.green)
+                            } else {
+                                Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(Color.secondary)
+                                    .lineLimit(1)
                             }
-                            .opacity(progress < 0.8 ? max(0, 1.0 - (progress * 1.5)) : 0)
 
                             // Role badge - shows current active role
-                            Group {
-                                HStack(spacing: 4) {
-                                    Image(systemName: currentActiveRole == .organizer
-                                          ? "briefcase.fill"
-                                          : "person.fill"
-                                    )
+                            HStack(spacing: 4) {
+                                Image(systemName: currentActiveRole == .organizer
+                                      ? "briefcase.fill"
+                                      : "person.fill"
+                                )
+                                .font(.caption)
+
+                                Text(currentActiveRole.displayName)
                                     .font(.caption)
 
-                                    Text(currentActiveRole.displayName)
-                                        .font(.caption)
-
-                                    // Show dual-role indicator if user has both roles
-                                    if authService.currentUser?.hasBothRoles == true {
-                                        Text("(Can Switch)")
-                                            .font(.system(size: 8))
-                                            .opacity(0.8)
-                                    }
+                                // Show dual-role indicator if user has both roles
+                                if authService.currentUser?.hasBothRoles == true {
+                                    Text("(Can Switch)")
+                                        .font(.system(size: 8))
+                                        .opacity(0.8)
                                 }
-                                .foregroundColor(Color.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    RoleConfig.getPrimaryColor(for: currentActiveRole)
-                                )
-                                .cornerRadius(AppCornerRadius.small)
                             }
-                            .opacity(progress < 0.5 ? max(0, 1.0 - (progress * 2.0)) : 0)
+                            .foregroundColor(Color.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoleConfig.getPrimaryColor(for: currentActiveRole)
+                            )
+                            .cornerRadius(AppCornerRadius.small)
                         }
 
                         Spacer()
                     }
-                    .padding(.horizontal, AppSpacing.md)
                 }
-                .frame(height: headerHeight)
-                .animation(.easeInOut(duration: 0.2), value: progress)
-
-                Divider()
 
                 // Settings List
                 ScrollOffsetReader(content: {

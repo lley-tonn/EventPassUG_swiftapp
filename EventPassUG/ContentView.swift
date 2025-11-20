@@ -18,7 +18,6 @@ struct ContentView: View {
                 if let user = authService.currentUser {
                     // Use currentActiveRole for navigation (supports dual-role switching)
                     MainTabView(userRole: user.currentActiveRole)
-                        .id(user.currentActiveRole) // Force view refresh when role changes
                         .fullScreenCover(isPresented: $showPreferencesOnboarding) {
                             OnboardingFlowView(showOnboarding: $showPreferencesOnboarding)
                                 .environmentObject(authService)

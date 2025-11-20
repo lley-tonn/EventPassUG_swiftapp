@@ -21,16 +21,34 @@ struct OrganizerDashboardView: View {
     @State private var showingVerification = false
     @State private var showingVerificationSheet = false
     @State private var cancellables = Set<AnyCancellable>()
+    @State private var scrollOffset: CGFloat = 0
 
     var body: some View {
         NavigationView {
             ZStack {
-                GeometryReader { geometry in
-                    let isLandscape = geometry.size.width > geometry.size.height
-                    let columns = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
+                VStack(spacing: 0) {
+                    // Collapsible header
+                    CollapsibleHeader(title: "Dashboard", scrollOffset: scrollOffset) {
+                        VStack(spacing: AppSpacing.md) {
+                            Text("Dashboard")
+                                .font(AppTypography.largeTitle)
+                                .fontWeight(.bold)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                    ScrollView {
-                    VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {
+                            Text("Track your events and earnings")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+
+                    // Content with scroll tracking
+                    GeometryReader { geometry in
+                        let isLandscape = geometry.size.width > geometry.size.height
+                        let columns = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
+
+                        ScrollOffsetReader(content: {
+                            VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {
                         // Analytics cards - responsive grid
                         LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 2, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
                             AnalyticsCard(
@@ -142,11 +160,13 @@ struct OrganizerDashboardView: View {
                 }
                 .padding(.horizontal, ResponsiveSpacing.md(geometry))
                 .padding(.vertical, ResponsiveSpacing.sm(geometry))
+                        }, onOffsetChange: { offset in
+                            scrollOffset = offset
+                        })
                     }
+                    .background(Color(UIColor.systemGroupedBackground))
                 }
-                .background(Color(UIColor.systemGroupedBackground))
-                .navigationTitle("Dashboard")
-                .navigationBarTitleDisplayMode(.large)
+                .navigationBarHidden(true)
                 .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
 
                 // Verification Required Overlay

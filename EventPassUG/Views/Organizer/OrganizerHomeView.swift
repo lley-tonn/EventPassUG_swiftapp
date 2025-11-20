@@ -332,45 +332,42 @@ struct OrganizerEventCard: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            let thumbnailSize = min(max(geometry.size.width * 0.2, 60), 90)
+        VStack(spacing: 0) {
+            HStack(spacing: AppSpacing.md) {
+                // Poster thumbnail
+                if let posterURL = event.posterURL {
+                    Image(posterURL)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(AppCornerRadius.small)
+                        .clipped()
+                } else {
+                    Rectangle()
+                        .fill(Color(UIColor.systemGray5))
+                        .frame(width: 80, height: 80)
+                        .cornerRadius(AppCornerRadius.small)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .font(.system(size: 32))
+                                .foregroundColor(.gray)
+                        )
+                }
 
-            VStack(spacing: 0) {
-                HStack(spacing: AppSpacing.md) {
-                    // Poster thumbnail
-                    if let posterURL = event.posterURL {
-                        Image(posterURL)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: thumbnailSize, height: thumbnailSize)
-                            .cornerRadius(AppCornerRadius.small)
-                            .clipped()
-                    } else {
-                        Rectangle()
-                            .fill(Color(UIColor.systemGray5))
-                            .frame(width: thumbnailSize, height: thumbnailSize)
-                            .cornerRadius(AppCornerRadius.small)
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .font(.system(size: thumbnailSize * 0.4))
-                                    .foregroundColor(.gray)
-                            )
-                    }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(event.title)
+                        .font(AppTypography.headline)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(event.title)
-                            .font(AppTypography.headline)
-                            .foregroundColor(.primary)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.85)
+                    Text(DateUtilities.formatEventDateTime(event.startDate))
+                        .font(AppTypography.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
-                        Text(DateUtilities.formatEventDateTime(event.startDate))
-                            .font(AppTypography.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-
-                        HStack(spacing: max(8, geometry.size.width * 0.03)) {
+                    HStack(spacing: 8) {
                             HStack(spacing: 4) {
                                 Image(systemName: "ticket")
                                     .font(.caption)
@@ -384,46 +381,44 @@ struct OrganizerEventCard: View {
                                 Text("\(event.likeCount)")
                                     .font(AppTypography.caption)
                             }
-                        }
-                        .foregroundColor(.secondary)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, max(12, geometry.size.width * 0.04))
-                .padding(.vertical, AppSpacing.md)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Scan Tickets button - only for ongoing events
-                if isOngoing {
-                    Divider()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, AppSpacing.md)
 
-                    NavigationLink(destination: QRScannerView()) {
-                        HStack {
-                            Image(systemName: "qrcode.viewfinder")
-                                .font(.system(size: 16))
-                            Text("Scan Tickets")
-                                .font(AppTypography.subheadline)
-                                .fontWeight(.semibold)
-                                .minimumScaleFactor(0.85)
-                            Spacer()
-                            Image(systemName: "arrow.right")
-                                .font(.caption)
-                        }
-                        .foregroundColor(RoleConfig.organizerPrimary)
-                        .padding(.horizontal, max(12, geometry.size.width * 0.04))
-                        .padding(.vertical, AppSpacing.sm)
-                        .background(RoleConfig.organizerPrimary.opacity(0.1))
+            // Scan Tickets button - only for ongoing events
+            if isOngoing {
+                Divider()
+
+                NavigationLink(destination: QRScannerView()) {
+                    HStack {
+                        Image(systemName: "qrcode.viewfinder")
+                            .font(.system(size: 16))
+                        Text("Scan Tickets")
+                            .font(AppTypography.subheadline)
+                            .fontWeight(.semibold)
+                            .minimumScaleFactor(0.85)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
                     }
+                    .foregroundColor(RoleConfig.organizerPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(RoleConfig.organizerPrimary.opacity(0.1))
                 }
             }
-            .background(Color(UIColor.systemBackground))
-            .cornerRadius(AppCornerRadius.medium)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-            .frame(height: max(100, thumbnailSize + 40))
         }
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(AppCornerRadius.medium)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 
