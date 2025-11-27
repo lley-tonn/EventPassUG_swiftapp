@@ -18,22 +18,7 @@ struct EventCard: View {
             // Poster image
             ZStack(alignment: .topLeading) {
                 // Poster
-                if let posterURL = event.posterURL {
-                    Image(posterURL)
-                        .resizable()
-                        .aspectRatio(16/9, contentMode: .fill)
-                        .frame(height: 200)
-                        .clipped()
-                } else {
-                    Rectangle()
-                        .fill(Color(UIColor.systemGray5))
-                        .frame(height: 200)
-                        .overlay(
-                            Image(systemName: "photo")
-                                .font(.system(size: 40))
-                                .foregroundColor(.gray)
-                        )
-                }
+                EventPosterImage(posterURL: event.posterURL, height: 200)
 
                 // Happening now indicator
                 if event.isHappeningNow {

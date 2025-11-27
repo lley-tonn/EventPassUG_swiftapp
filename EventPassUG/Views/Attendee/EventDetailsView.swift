@@ -30,32 +30,11 @@ struct EventDetailsView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            let isLandscape = geometry.size.width > geometry.size.height
-            let posterHeight = ResponsiveHeight.posterImage(isLandscape: isLandscape, context: geometry)
-
-            ScrollView {
+        ScrollView(.vertical, showsIndicators: true) {
             VStack(alignment: .leading, spacing: 0) {
                 // Poster image
                 ZStack(alignment: .topLeading) {
-                    if let posterURL = event.posterURL {
-                        Image(posterURL)
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fill)
-                            .frame(height: posterHeight)
-                            .frame(maxWidth: .infinity)
-                            .clipped()
-                    } else {
-                        Rectangle()
-                            .fill(Color(UIColor.systemGray5))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: posterHeight)
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.gray)
-                            )
-                    }
+                    EventPosterImage(posterURL: event.posterURL, height: 250)
 
                     // Happening now banner
                     if event.isHappeningNow {
@@ -80,19 +59,21 @@ struct EventDetailsView: View {
                     // Title and actions
                     VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text(event.title)
-                            .font(.system(size: min(geometry.size.width * 0.08, 34), weight: .bold))
+                            .font(.system(size: 28, weight: .bold))
                             .minimumScaleFactor(0.7)
                             .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                         Text("by \(event.organizerName)")
                             .font(AppTypography.callout)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
                             .minimumScaleFactor(0.85)
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
                         // Actions
-                        HStack(spacing: AppSpacing.lg) {
+                        HStack(spacing: 12) {
                             AnimatedLikeButton(isLiked: $isLiked) {
                                 isLiked.toggle()
                             }
@@ -111,21 +92,25 @@ struct EventDetailsView: View {
                                     .foregroundColor(.primary)
                             }
 
-                            Spacer()
+                            Spacer(minLength: 4)
 
                             // Rating
                             if event.totalRatings > 0 {
                                 HStack(spacing: 4) {
                                     Image(systemName: "star.fill")
                                         .foregroundColor(.yellow)
+                                        .font(.system(size: 16))
                                     Text(String(format: "%.1f", event.rating))
                                         .font(AppTypography.headline)
+                                        .lineLimit(1)
                                     Text("(\(event.totalRatings))")
                                         .font(AppTypography.subheadline)
                                         .foregroundColor(.secondary)
+                                        .lineLimit(1)
                                 }
                             }
                         }
+                        .frame(maxWidth: .infinity)
                     }
 
                     Divider()
@@ -155,7 +140,7 @@ struct EventDetailsView: View {
                             )
                         }
                         .frame(maxWidth: .infinity)
-                        .frame(height: min(max(geometry.size.width * 0.5, 160), 220))
+                        .frame(height: 200)
                         .cornerRadius(AppCornerRadius.medium)
                         .allowsHitTesting(false)
 
@@ -259,11 +244,12 @@ struct EventDetailsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, ResponsiveSpacing.md(geometry))
-                .padding(.vertical, ResponsiveSpacing.sm(geometry))
+                .padding(.horizontal, AppSpacing.md)
+                .padding(.vertical, AppSpacing.sm)
             }
-            }
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -312,18 +298,22 @@ struct EventDetailsView: View {
                                     .font(AppTypography.caption)
                                     .minimumScaleFactor(0.85)
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
                             } else {
                                 Text("No tickets on sale")
                                     .font(AppTypography.title3)
                                     .fontWeight(.bold)
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
 
                                 Text("Check back later")
                                     .font(AppTypography.caption)
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
                             }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                         Spacer(minLength: 8)
 
@@ -337,7 +327,8 @@ struct EventDetailsView: View {
                                 .font(AppTypography.headline)
                                 .foregroundColor(.white)
                                 .lineLimit(1)
-                                .padding(.horizontal, AppSpacing.xl)
+                                .minimumScaleFactor(0.8)
+                                .padding(.horizontal, 20)
                                 .padding(.vertical, AppSpacing.md)
                                 .background(RoleConfig.attendeePrimary)
                                 .cornerRadius(AppCornerRadius.medium)
@@ -345,6 +336,7 @@ struct EventDetailsView: View {
                         .disabled(selectedTicketType == nil || !(selectedTicketType?.isPurchasable ?? false))
                         .opacity((selectedTicketType != nil && selectedTicketType?.isPurchasable == true) ? 1.0 : 0.5)
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(AppSpacing.md)
                     .background(Color(UIColor.systemBackground))
                 }
@@ -394,6 +386,7 @@ struct InfoRow: View {
                     .foregroundColor(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
@@ -410,13 +403,14 @@ struct TicketTypeCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                HStack {
+                HStack(alignment: .top, spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
                             Text(ticketType.name)
                                 .font(AppTypography.headline)
                                 .foregroundColor(.primary)
                                 .lineLimit(2)
+                                .minimumScaleFactor(0.85)
                                 .fixedSize(horizontal: false, vertical: true)
 
                             // Status badge
@@ -438,6 +432,7 @@ struct TicketTypeCard: View {
                                 .font(AppTypography.subheadline)
                                 .foregroundColor(.secondary)
                                 .lineLimit(2)
+                                .minimumScaleFactor(0.9)
                         }
 
                         // Quantity remaining
@@ -453,20 +448,22 @@ struct TicketTypeCard: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Spacer()
-
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(ticketType.formattedPrice)
                             .font(AppTypography.title3)
                             .fontWeight(.bold)
                             .foregroundColor(isDisabled ? .gray : RoleConfig.attendeePrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
 
                         if isSelected && !isDisabled {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(RoleConfig.attendeePrimary)
                         }
                     }
+                    .frame(minWidth: 60)
                 }
+                .frame(maxWidth: .infinity)
 
                 // Availability info
                 if ticketType.availabilityStatus == .upcoming {

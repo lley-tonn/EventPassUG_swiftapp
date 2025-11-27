@@ -593,7 +593,7 @@ struct PhoneAuthFlowView: View {
             }
         }
         .sheet(isPresented: $showingVerification) {
-            if let verificationId = verificationId {
+            if verificationId != nil {
                 PhoneVerificationView(phoneNumber: phoneNumber) {
                     // Verification completed
                     showingVerification = false

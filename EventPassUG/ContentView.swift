@@ -11,10 +11,19 @@ struct ContentView: View {
     @EnvironmentObject var authService: MockAuthService
     @State private var showOnboarding = false
     @State private var showPreferencesOnboarding = false
+    @State private var hasCompletedAppIntro = AppStorageManager.shared.hasCompletedOnboarding
 
     var body: some View {
         Group {
-            if authService.isAuthenticated {
+            // Show app intro slides on first launch
+            if !hasCompletedAppIntro {
+                AppIntroSlidesView(isComplete: $hasCompletedAppIntro)
+                    .onChange(of: hasCompletedAppIntro) { completed in
+                        if completed {
+                            AppStorageManager.shared.hasCompletedOnboarding = true
+                        }
+                    }
+            } else if authService.isAuthenticated {
                 if let user = authService.currentUser {
                     // Use currentActiveRole for navigation (supports dual-role switching)
                     MainTabView(userRole: user.currentActiveRole)

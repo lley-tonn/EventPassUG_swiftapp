@@ -283,7 +283,7 @@ struct EditProfileView: View {
         user.lastName = lastName
 
         // Handle profile image
-        if let imageData = profileImageData {
+        if profileImageData != nil {
             // In production, upload to storage and get URL
             // For now, we'll store a mock URL
             user.profileImageURL = "mock://profile-image-\(user.id.uuidString)"

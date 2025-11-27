@@ -21,7 +21,11 @@
       "Bash(ruby add_uicomponents.rb:*)",
       "Bash(awk:*)",
       "Bash(tr:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash([ -f \"EventPassUG/Utilities/ImageStorageManager.swift\" ])",
+      "Bash([ -f \"EventPassUG/Utilities/AppStorage.swift\" ])",
+      "Bash(gem install:*)",
+      "Bash(ruby add_appstorage.rb:*)"
     ],
     "deny": [],
     "ask": []

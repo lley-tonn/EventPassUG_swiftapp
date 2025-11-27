@@ -364,7 +364,7 @@ struct Step1EventDetails: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let isLandscape = geometry.size.width > geometry.size.height
+            let _ = geometry.size.width > geometry.size.height
 
             ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.lg) {
@@ -383,13 +383,12 @@ struct Step1EventDetails: View {
                                 .clipped()
                                 .cornerRadius(AppCornerRadius.medium)
                         } else if let posterName = posterImageName {
-                            Image(posterName)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
-                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
-                                .clipped()
-                                .cornerRadius(AppCornerRadius.medium)
+                            EventPosterImage(
+                                posterURL: posterName,
+                                height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56,
+                                cornerRadius: AppCornerRadius.medium
+                            )
+                            .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
                         } else {
                             RoundedRectangle(cornerRadius: AppCornerRadius.medium)
                                 .fill(Color(UIColor.systemGray6))
@@ -410,9 +409,19 @@ struct Step1EventDetails: View {
                         Task {
                             if let data = try? await newItem?.loadTransferable(type: Data.self),
                                let uiImage = UIImage(data: data) {
+                                let imageName = "event_poster_\(UUID().uuidString).jpg"
+
+                                // Save image to documents directory
+                                let saveSuccess = ImageStorageManager.shared.saveImage(uiImage, withName: imageName)
+
                                 await MainActor.run {
                                     posterUIImage = uiImage
-                                    posterImageName = "event_poster_\(UUID().uuidString)"
+                                    if saveSuccess {
+                                        posterImageName = imageName
+                                        print("✅ Poster saved successfully: \(imageName)")
+                                    } else {
+                                        print("❌ Failed to save poster")
+                                    }
                                 }
                             }
                         }
@@ -772,10 +781,10 @@ struct Step3Review: View {
                 // Event preview card
                 VStack(alignment: .leading, spacing: AppSpacing.md) {
                     if let posterName = posterImageName {
-                        Image(posterName)
-                            .resizable()
-                            .aspectRatio(16/9, contentMode: .fill)
-                            .cornerRadius(AppCornerRadius.medium)
+                        EventPosterImage(
+                            posterURL: posterName,
+                            cornerRadius: AppCornerRadius.medium
+                        )
                     }
 
                     Text(title)

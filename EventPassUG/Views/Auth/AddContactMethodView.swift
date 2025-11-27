@@ -125,7 +125,7 @@ struct AddContactMethodView: View {
             }
         }
         .sheet(isPresented: $showPhoneVerification) {
-            if let verId = verificationId {
+            if verificationId != nil {
                 PhoneVerificationView(phoneNumber: phoneNumber) {
                     // On verified
                     Task {

@@ -27,7 +27,7 @@ struct AttendeeHomeView: View {
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                let isLandscape = geometry.size.width > geometry.size.height
+                let _ = geometry.size.width > geometry.size.height
 
                 VStack(spacing: 0) {
                     // Header with action buttons and inline search (FIXED OUTSIDE ScrollView)
@@ -227,7 +227,7 @@ struct AttendeeHomeView: View {
                     .padding(.bottom, AppSpacing.sm)
 
                     // Events feed - responsive grid (NOW INSIDE SCROLLVIEW)
-                    ScrollView {
+                    ScrollView(.vertical, showsIndicators: true) {
                         if isLoading {
                             VStack(spacing: AppSpacing.md) {
                                 ForEach(0..<3, id: \.self) { _ in
@@ -236,8 +236,8 @@ struct AttendeeHomeView: View {
                             }
                             .padding(.horizontal, ResponsiveSpacing.md(geometry))
                         } else {
-                            LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 1, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
-                                ForEach(filteredEvents) { event in
+                            LazyVStack(spacing: ResponsiveSpacing.md(geometry)) {
+                                ForEach(filteredEvents, id: \.id) { event in
                                     NavigationLink(destination: EventDetailsView(event: event)) {
                                         EventCard(
                                             event: event,
@@ -249,6 +249,7 @@ struct AttendeeHomeView: View {
                                             onCardTap: {}
                                         )
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal, ResponsiveSpacing.md(geometry))

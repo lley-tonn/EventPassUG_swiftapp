@@ -177,7 +177,7 @@ struct OrganizerHomeView: View {
                 // Filter tabs
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: AppSpacing.md) {
-                        ForEach([EventStatus.published, .draft, .ongoing], id: \.self) { status in
+                        ForEach([EventStatus.published, .draft, .ongoing, .completed], id: \.self) { status in
                             FilterChip(
                                 title: status.rawValue.capitalized,
                                 count: eventsWithAutoStatus.filter { $0.status == status }.count,
@@ -232,18 +232,36 @@ struct OrganizerHomeView: View {
             }
     }
 
-    // Auto-detect ongoing events based on current date
+    // Auto-detect event status based on current date
     private var eventsWithAutoStatus: [Event] {
         events.map { event in
             var modifiedEvent = event
             let now = Date()
 
-            // Auto-update status based on date
-            if event.status == .published {
+            // Auto-update status based on date and current status
+            if event.status == .draft {
+                // Drafts that have passed should be marked as completed
+                if now > event.endDate {
+                    modifiedEvent.status = .completed
+                }
+                // Keep drafts as drafts if not expired
+            } else if event.status == .published {
+                // Check if event should be ongoing
                 if now >= event.startDate && now <= event.endDate {
                     modifiedEvent.status = .ongoing
                 }
+                // Check if event should be completed
+                else if now > event.endDate {
+                    modifiedEvent.status = .completed
+                }
+                // Otherwise keep as published (upcoming)
+            } else if event.status == .ongoing {
+                // Check if ongoing event has ended
+                if now > event.endDate {
+                    modifiedEvent.status = .completed
+                }
             }
+            // Completed and cancelled events stay as-is
 
             return modifiedEvent
         }
@@ -335,24 +353,8 @@ struct OrganizerEventCard: View {
         VStack(spacing: 0) {
             HStack(spacing: AppSpacing.md) {
                 // Poster thumbnail
-                if let posterURL = event.posterURL {
-                    Image(posterURL)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 80, height: 80)
-                        .cornerRadius(AppCornerRadius.small)
-                        .clipped()
-                } else {
-                    Rectangle()
-                        .fill(Color(UIColor.systemGray5))
-                        .frame(width: 80, height: 80)
-                        .cornerRadius(AppCornerRadius.small)
-                        .overlay(
-                            Image(systemName: "photo")
-                                .font(.system(size: 32))
-                                .foregroundColor(.gray)
-                        )
-                }
+                EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: AppCornerRadius.small)
+                    .frame(width: 80)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(event.title)
@@ -465,6 +467,7 @@ struct EmptyEventsView: View {
         case .draft: return "doc.text"
         case .published: return "calendar.badge.clock"
         case .ongoing: return "play.circle"
+        case .completed: return "checkmark.circle"
         default: return "calendar"
         }
     }
@@ -474,6 +477,7 @@ struct EmptyEventsView: View {
         case .draft: return "No Drafts"
         case .published: return "No Published Events"
         case .ongoing: return "No Ongoing Events"
+        case .completed: return "No Completed Events"
         default: return "No Events"
         }
     }
@@ -483,6 +487,7 @@ struct EmptyEventsView: View {
         case .draft: return "Start creating an event and save it as a draft"
         case .published: return "Create and publish your first event"
         case .ongoing: return "No events are currently happening"
+        case .completed: return "No completed events yet"
         default: return "You haven't created any events yet"
         }
     }
@@ -491,18 +496,283 @@ struct EmptyEventsView: View {
 struct OrganizerEventDetailView: View {
     let event: Event
 
+    private var totalTicketsSold: Int {
+        event.ticketTypes.reduce(0) { $0 + $1.sold }
+    }
+
+    private var totalRevenue: Double {
+        event.ticketTypes.reduce(0.0) { $0 + (Double($1.sold) * $1.price) }
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                Text("Event detail view - TODO")
-                    .font(AppTypography.title2)
+                // Event poster
+                EventPosterImage(posterURL: event.posterURL, height: 250, cornerRadius: AppCornerRadius.medium)
 
-                Text(event.title)
-                    .font(AppTypography.headline)
+                // Event title and status
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text(event.title)
+                        .font(AppTypography.title2)
+                        .fontWeight(.bold)
+
+                    HStack {
+                        Image(systemName: statusIcon)
+                            .foregroundColor(statusColor)
+                        Text(event.status.rawValue.capitalized)
+                            .font(AppTypography.callout)
+                            .foregroundColor(statusColor)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(statusColor.opacity(0.1))
+                    .cornerRadius(AppCornerRadius.small)
+                }
+
+                Divider()
+
+                // Event details
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text("Event Details")
+                        .font(AppTypography.headline)
+
+                    InfoRow(
+                        icon: "calendar",
+                        title: "Start",
+                        value: DateUtilities.formatEventDateTime(event.startDate)
+                    )
+
+                    InfoRow(
+                        icon: "calendar.badge.clock",
+                        title: "End",
+                        value: DateUtilities.formatEventDateTime(event.endDate)
+                    )
+
+                    InfoRow(
+                        icon: "location.fill",
+                        title: "Venue",
+                        value: "\(event.venue.name)\n\(event.venue.address), \(event.venue.city)"
+                    )
+                }
+
+                Divider()
+
+                // Analytics Overview
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    Text("Analytics")
+                        .font(AppTypography.headline)
+
+                    // Stats cards
+                    HStack(spacing: AppSpacing.md) {
+                        StatCard(
+                            icon: "heart.fill",
+                            title: "Impressions",
+                            value: "\(event.likeCount)",
+                            color: .pink
+                        )
+
+                        StatCard(
+                            icon: "ticket.fill",
+                            title: "Tickets Sold",
+                            value: "\(totalTicketsSold)",
+                            color: RoleConfig.organizerPrimary
+                        )
+                    }
+
+                    StatCard(
+                        icon: "dollarsign.circle.fill",
+                        title: "Total Revenue",
+                        value: "UGX \(Int(totalRevenue).formatted())",
+                        color: .green
+                    )
+                }
+
+                Divider()
+
+                // Ticket sales breakdown
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    Text("Ticket Sales Breakdown")
+                        .font(AppTypography.headline)
+
+                    ForEach(event.ticketTypes) { ticketType in
+                        TicketSalesRow(ticketType: ticketType)
+                    }
+                }
+
+                Divider()
+
+                // Additional metrics
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text("Engagement")
+                        .font(AppTypography.headline)
+
+                    HStack {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                        Text("Average Rating:")
+                            .font(AppTypography.body)
+                        Spacer()
+                        if event.totalRatings > 0 {
+                            Text(String(format: "%.1f (%d reviews)", event.rating, event.totalRatings))
+                                .font(AppTypography.body)
+                                .fontWeight(.semibold)
+                        } else {
+                            Text("No ratings yet")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    if totalTicketsSold > 0 {
+                        HStack {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .foregroundColor(.blue)
+                            Text("Conversion Rate:")
+                                .font(AppTypography.body)
+                            Spacer()
+                            let conversionRate = (Double(totalTicketsSold) / Double(event.likeCount > 0 ? event.likeCount : 1)) * 100
+                            Text(String(format: "%.1f%%", min(conversionRate, 100)))
+                                .font(AppTypography.body)
+                                .fontWeight(.semibold)
+                        }
+                    }
+                }
             }
-            .padding()
+            .padding(AppSpacing.md)
         }
-        .navigationTitle("Event Details")
+        .navigationTitle("Event Analytics")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var statusIcon: String {
+        switch event.status {
+        case .draft: return "doc.text"
+        case .published: return "checkmark.circle.fill"
+        case .ongoing: return "play.circle.fill"
+        case .completed: return "checkmark.circle"
+        case .cancelled: return "xmark.circle"
+        }
+    }
+
+    private var statusColor: Color {
+        switch event.status {
+        case .draft: return .orange
+        case .published: return .green
+        case .ongoing: return .blue
+        case .completed: return .gray
+        case .cancelled: return .red
+        }
+    }
+}
+
+// MARK: - Supporting Views
+
+struct StatCard: View {
+    let icon: String
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                    .foregroundColor(color)
+                Spacer()
+            }
+
+            Text(value)
+                .font(AppTypography.title3)
+                .fontWeight(.bold)
+
+            Text(title)
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.medium)
+    }
+}
+
+struct TicketSalesRow: View {
+    let ticketType: TicketType
+
+    private var salesPercentage: Double {
+        guard ticketType.quantity > 0 else { return 0 }
+        return Double(ticketType.sold) / Double(ticketType.quantity)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(ticketType.name)
+                        .font(AppTypography.callout)
+                        .fontWeight(.semibold)
+
+                    Text(ticketType.formattedPrice)
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "ticket.fill")
+                            .font(.caption)
+                            .foregroundColor(RoleConfig.organizerPrimary)
+                        Text("\(ticketType.sold)")
+                            .font(AppTypography.callout)
+                            .fontWeight(.bold)
+                    }
+
+                    if ticketType.isUnlimitedQuantity {
+                        Text("Unlimited")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("\(ticketType.sold) / \(ticketType.quantity)")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
+            // Progress bar
+            if !ticketType.isUnlimitedQuantity {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color(UIColor.systemGray5))
+                            .frame(height: 8)
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(RoleConfig.organizerPrimary)
+                            .frame(width: geometry.size.width * salesPercentage, height: 8)
+                    }
+                }
+                .frame(height: 8)
+            }
+
+            // Revenue for this ticket type
+            HStack {
+                Text("Revenue:")
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("UGX \(Int(Double(ticketType.sold) * ticketType.price).formatted())")
+                    .font(AppTypography.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.green)
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.tertiarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.small)
     }
 }
 

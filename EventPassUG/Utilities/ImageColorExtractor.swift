@@ -33,7 +33,7 @@ struct ImageColorExtractor {
     }
 
     static func extractColors(from image: UIImage) -> ColorScheme {
-        guard let cgImage = image.cgImage else {
+        guard image.cgImage != nil else {
             return .default
         }
 

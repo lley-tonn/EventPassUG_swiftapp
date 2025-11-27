@@ -49,12 +49,12 @@ class MockEventService: EventServiceProtocol {
         // TODO: Replace with real API call
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        var newEvent = event
-        newEvent.createdAt = Date()
-        newEvent.updatedAt = Date()
-
-        await MainActor.run {
-            events.append(newEvent)
+        let newEvent = await MainActor.run { () -> Event in
+            var createdEvent = event
+            createdEvent.createdAt = Date()
+            createdEvent.updatedAt = Date()
+            events.append(createdEvent)
+            return createdEvent
         }
         persistEvents()
         return newEvent

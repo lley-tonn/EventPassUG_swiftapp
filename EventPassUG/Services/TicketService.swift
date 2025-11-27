@@ -51,12 +51,10 @@ class MockTicketService: TicketServiceProtocol {
         let orderNumber = generateOrderNumber()
 
         // Generate tickets with full event data
-        var newTickets: [Ticket] = []
-
-        for i in 0..<quantity {
+        let newTickets: [Ticket] = (0..<quantity).map { _ in
             let ticketNumber = generateTicketNumber()
 
-            let ticket = Ticket(
+            return Ticket(
                 ticketNumber: ticketNumber,
                 orderNumber: orderNumber,
                 eventId: event.id,
@@ -75,7 +73,6 @@ class MockTicketService: TicketServiceProtocol {
                 userId: userId,
                 qrCodeData: "TKT:\(ticketNumber)|ORD:\(orderNumber)|EVT:\(event.id)|USR:\(userId)"
             )
-            newTickets.append(ticket)
         }
 
         await MainActor.run {

@@ -45,7 +45,7 @@ struct OrganizerDashboardView: View {
                     // Content with scroll tracking
                     GeometryReader { geometry in
                         let isLandscape = geometry.size.width > geometry.size.height
-                        let columns = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
+                        let _ = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
 
                         ScrollOffsetReader(content: {
                             VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {

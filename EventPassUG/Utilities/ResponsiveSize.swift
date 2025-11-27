@@ -83,7 +83,7 @@ struct ResponsiveSpacing {
     }
 
     private static func adaptiveSpacing(base: CGFloat, context: GeometryProxy?) -> CGFloat {
-        let width = context?.size.width ?? ScreenSize.width
+        let _ = context?.size.width ?? ScreenSize.width
 
         switch ScreenSize.DeviceSize.current {
         case .small:
@@ -141,7 +141,7 @@ struct ResponsiveFontSize {
     }
 
     private static func adaptiveSize(base: CGFloat, context: GeometryProxy?) -> CGFloat {
-        let width = context?.size.width ?? ScreenSize.width
+        let _ = context?.size.width ?? ScreenSize.width
 
         switch ScreenSize.DeviceSize.current {
         case .small:
@@ -159,7 +159,7 @@ struct ResponsiveFontSize {
 // Responsive image/card heights
 struct ResponsiveHeight {
     static func eventCard(_ context: GeometryProxy? = nil) -> CGFloat {
-        let width = context?.size.width ?? ScreenSize.width
+        let _ = context?.size.width ?? ScreenSize.width
 
         switch ScreenSize.DeviceSize.current {
         case .small:

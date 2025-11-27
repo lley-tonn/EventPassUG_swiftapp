@@ -37,28 +37,28 @@ struct TicketPurchaseView: View {
                     tickets: purchasedTickets
                 )
             } else {
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: true) {
                     VStack(alignment: .leading, spacing: AppSpacing.lg) {
                         // Event summary
                         HStack(spacing: AppSpacing.md) {
-                            if let posterURL = event.posterURL {
-                                Image(posterURL)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 80, height: 80)
-                                    .cornerRadius(AppCornerRadius.small)
-                            }
+                            EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: AppCornerRadius.small)
+                                .frame(width: 80)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(event.title)
                                     .font(AppTypography.headline)
                                     .lineLimit(2)
+                                    .minimumScaleFactor(0.8)
 
                                 Text(DateUtilities.formatEventDateTime(event.startDate))
                                     .font(AppTypography.subheadline)
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(AppCornerRadius.medium)
@@ -68,7 +68,7 @@ struct TicketPurchaseView: View {
                             Text("Ticket Type")
                                 .font(AppTypography.headline)
 
-                            HStack {
+                            VStack(spacing: AppSpacing.md) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(ticketType.name)
                                         .font(AppTypography.body)
@@ -78,11 +78,10 @@ struct TicketPurchaseView: View {
                                         .fontWeight(.bold)
                                         .foregroundColor(RoleConfig.attendeePrimary)
                                 }
-
-                                Spacer()
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
                                 // Quantity selector
-                                HStack(spacing: AppSpacing.md) {
+                                HStack(spacing: 16) {
                                     Button(action: {
                                         if quantity > 1 {
                                             quantity -= 1
@@ -116,6 +115,7 @@ struct TicketPurchaseView: View {
                                     }
                                     .disabled(quantity >= min(ticketType.remaining, 10))
                                 }
+                                .frame(maxWidth: .infinity)
                             }
                         }
 
@@ -126,17 +126,20 @@ struct TicketPurchaseView: View {
                             Text("Payment Method")
                                 .font(AppTypography.headline)
 
-                            ForEach(PaymentMethod.allCases, id: \.self) { method in
-                                PaymentMethodCard(
-                                    method: method,
-                                    isSelected: selectedPaymentMethod == method,
-                                    onTap: {
-                                        selectedPaymentMethod = method
-                                        HapticFeedback.selection()
-                                    }
-                                )
+                            VStack(spacing: AppSpacing.sm) {
+                                ForEach(PaymentMethod.allCases, id: \.self) { method in
+                                    PaymentMethodCard(
+                                        method: method,
+                                        isSelected: selectedPaymentMethod == method,
+                                        onTap: {
+                                            selectedPaymentMethod = method
+                                            HapticFeedback.selection()
+                                        }
+                                    )
+                                }
                             }
                         }
+                        .frame(maxWidth: .infinity)
 
                         Divider()
 
@@ -293,7 +296,7 @@ struct PaymentMethodCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack {
+            HStack(spacing: AppSpacing.sm) {
                 Image(systemName: method.iconName)
                     .font(.system(size: 24))
                     .foregroundColor(isSelected ? RoleConfig.attendeePrimary : .primary)
@@ -302,8 +305,10 @@ struct PaymentMethodCard: View {
                 Text(method.rawValue)
                     .font(AppTypography.body)
                     .foregroundColor(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
@@ -311,6 +316,7 @@ struct PaymentMethodCard: View {
                 }
             }
             .padding(AppSpacing.md)
+            .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: AppCornerRadius.medium)
                     .stroke(

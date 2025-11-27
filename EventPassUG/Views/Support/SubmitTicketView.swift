@@ -177,7 +177,7 @@ struct SubmitTicketView: View {
     private func submitTicket() {
         isSubmitting = true
 
-        let ticket = SupportTicket(
+        let _ = SupportTicket(
             name: name,
             contactInfo: contactInfo,
             category: selectedCategory,

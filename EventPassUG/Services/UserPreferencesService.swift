@@ -56,26 +56,27 @@ class MockUserPreferencesService: UserPreferencesServiceProtocol, ObservableObje
         // TODO: Replace with real API call
         try await Task.sleep(nanoseconds: 500_000_000)
 
-        var updatedMethods = savedPaymentMethods
+        let updatedMethods = await MainActor.run { () -> [SavedPaymentMethod] in
+            var methods = savedPaymentMethods
 
-        // If this is set as default, unset others
-        if method.isDefault {
-            updatedMethods = updatedMethods.map { existingMethod in
-                var updated = existingMethod
-                updated.isDefault = false
-                return updated
+            // If this is set as default, unset others
+            if method.isDefault {
+                methods = methods.map { existingMethod in
+                    var updated = existingMethod
+                    updated.isDefault = false
+                    return updated
+                }
             }
-        }
 
-        // Add or update the method
-        if let index = updatedMethods.firstIndex(where: { $0.id == method.id }) {
-            updatedMethods[index] = method
-        } else {
-            updatedMethods.append(method)
-        }
+            // Add or update the method
+            if let index = methods.firstIndex(where: { $0.id == method.id }) {
+                methods[index] = method
+            } else {
+                methods.append(method)
+            }
 
-        await MainActor.run {
-            self.savedPaymentMethods = updatedMethods
+            self.savedPaymentMethods = methods
+            return methods
         }
         persistPaymentMethods(updatedMethods)
     }
@@ -84,15 +85,16 @@ class MockUserPreferencesService: UserPreferencesServiceProtocol, ObservableObje
         // TODO: Replace with real API call
         try await Task.sleep(nanoseconds: 500_000_000)
 
-        var updatedMethods = savedPaymentMethods.filter { $0.id != methodId }
+        let updatedMethods = await MainActor.run { () -> [SavedPaymentMethod] in
+            var methods = savedPaymentMethods.filter { $0.id != methodId }
 
-        // If removed method was default, set first remaining as default
-        if !updatedMethods.isEmpty && !updatedMethods.contains(where: { $0.isDefault }) {
-            updatedMethods[0].isDefault = true
-        }
+            // If removed method was default, set first remaining as default
+            if !methods.isEmpty && !methods.contains(where: { $0.isDefault }) {
+                methods[0].isDefault = true
+            }
 
-        await MainActor.run {
-            self.savedPaymentMethods = updatedMethods
+            self.savedPaymentMethods = methods
+            return methods
         }
         persistPaymentMethods(updatedMethods)
     }
@@ -101,14 +103,14 @@ class MockUserPreferencesService: UserPreferencesServiceProtocol, ObservableObje
         // TODO: Replace with real API call
         try await Task.sleep(nanoseconds: 500_000_000)
 
-        var updatedMethods = savedPaymentMethods.map { method in
-            var updated = method
-            updated.isDefault = (method.id == methodId)
-            return updated
-        }
-
-        await MainActor.run {
-            self.savedPaymentMethods = updatedMethods
+        let updatedMethods = await MainActor.run { () -> [SavedPaymentMethod] in
+            let methods = savedPaymentMethods.map { method in
+                var updated = method
+                updated.isDefault = (method.id == methodId)
+                return updated
+            }
+            self.savedPaymentMethods = methods
+            return methods
         }
         persistPaymentMethods(updatedMethods)
     }

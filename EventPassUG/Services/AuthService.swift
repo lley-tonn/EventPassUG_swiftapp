@@ -124,41 +124,45 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
     }
 
     func switchRole(to role: UserRole) async throws {
-        guard var user = currentUser else { return }
-        user.role = role
+        guard let user = currentUser else { return }
 
-        await MainActor.run {
-            self.currentUser = user
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            modifiedUser.role = role
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func submitVerification(documentType: VerificationDocumentType, documentNumber: String, frontImageData: Data?, backImageData: Data?) async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Replace with real API call to upload images and verify
         // Simulate network delay
         try await Task.sleep(nanoseconds: 2_000_000_000)
 
-        // Mock success - update user verification status
-        user.isVerified = true
-        user.nationalIDNumber = documentNumber
-        user.verificationDate = Date()
-        user.verificationDocumentType = documentType
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            // Mock success - update user verification status
+            modifiedUser.isVerified = true
+            modifiedUser.nationalIDNumber = documentNumber
+            modifiedUser.verificationDate = Date()
+            modifiedUser.verificationDocumentType = documentType
 
-        // In real implementation, upload images to server and store URLs
-        // For now, we'll just mark as verified
-        if frontImageData != nil {
-            user.nationalIDFrontImageURL = "mock://front-image-url"
-        }
-        if backImageData != nil {
-            user.nationalIDBackImageURL = "mock://back-image-url"
-        }
+            // In real implementation, upload images to server and store URLs
+            // For now, we'll just mark as verified
+            if frontImageData != nil {
+                modifiedUser.nationalIDFrontImageURL = "mock://front-image-url"
+            }
+            if backImageData != nil {
+                modifiedUser.nationalIDBackImageURL = "mock://back-image-url"
+            }
 
-        await MainActor.run {
-            self.currentUser = user
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     // MARK: - Social Auth
@@ -236,20 +240,21 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
     // MARK: - Email/Phone Verification
 
     func sendEmailVerification() async throws {
-        guard var user = currentUser, user.email != nil else {
+        guard let user = currentUser, user.email != nil else {
             throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "No email address found"])
         }
 
         // TODO: Send email verification with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        // Mock: Automatically verify for now
-        user.isEmailVerified = true
-
-        await MainActor.run {
-            self.currentUser = user
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            // Mock: Automatically verify for now
+            modifiedUser.isEmailVerified = true
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func sendPhoneVerification(phoneNumber: String) async throws -> String {
@@ -264,36 +269,38 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
     }
 
     func verifyPhone(verificationId: String, code: String) async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Verify code with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        user.isPhoneVerified = true
-
-        await MainActor.run {
-            self.currentUser = user
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            modifiedUser.isPhoneVerified = true
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     // MARK: - Add Contact Methods
 
     func addEmail(email: String, password: String) async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Add email/password to Firebase account
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        user.email = email
-        if !user.authProviders.contains("email") {
-            user.authProviders.append("email")
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            modifiedUser.email = email
+            if !modifiedUser.authProviders.contains("email") {
+                modifiedUser.authProviders.append("email")
+            }
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-
-        await MainActor.run {
-            self.currentUser = user
-        }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func addPhoneNumber(phoneNumber: String) async throws -> String {
@@ -310,62 +317,65 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
     // MARK: - Account Linking
 
     func linkGoogleAccount() async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Link Google account with Firebase auth().link(with:)
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        if !user.authProviders.contains("google.com") {
-            user.authProviders.append("google.com")
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            if !modifiedUser.authProviders.contains("google.com") {
+                modifiedUser.authProviders.append("google.com")
+            }
+            if modifiedUser.email == nil {
+                modifiedUser.email = "linked@gmail.com" // Mock
+                modifiedUser.isEmailVerified = true
+            }
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        if user.email == nil {
-            user.email = "linked@gmail.com" // Mock
-            user.isEmailVerified = true
-        }
-
-        await MainActor.run {
-            self.currentUser = user
-        }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func linkAppleAccount() async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Link Apple account with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        if !user.authProviders.contains("apple.com") {
-            user.authProviders.append("apple.com")
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            if !modifiedUser.authProviders.contains("apple.com") {
+                modifiedUser.authProviders.append("apple.com")
+            }
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-
-        await MainActor.run {
-            self.currentUser = user
-        }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func linkEmailPassword(email: String, password: String) async throws {
-        guard var user = currentUser else { return }
+        guard let user = currentUser else { return }
 
         // TODO: Link email/password with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        user.email = email
-        if !user.authProviders.contains("email") {
-            user.authProviders.append("email")
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            modifiedUser.email = email
+            if !modifiedUser.authProviders.contains("email") {
+                modifiedUser.authProviders.append("email")
+            }
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-
-        await MainActor.run {
-            self.currentUser = user
-        }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     // MARK: - Update Contact Info
 
     func updateEmail(newEmail: String, password: String) async throws {
-        guard var user = currentUser else {
+        guard let user = currentUser else {
             throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
 
@@ -373,64 +383,68 @@ class MockAuthService: AuthServiceProtocol, ObservableObject {
         // TODO: Send verification email to new address with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        // Store pending email (in production, this would wait for verification)
-        user.pendingEmail = newEmail
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            // Store pending email (in production, this would wait for verification)
+            modifiedUser.pendingEmail = newEmail
 
-        // In mock implementation, we'll auto-verify after a delay
-        // In production, user would need to click verification link
-        user.email = newEmail
-        user.isEmailVerified = false // Needs verification
-        user.pendingEmail = nil
+            // In mock implementation, we'll auto-verify after a delay
+            // In production, user would need to click verification link
+            modifiedUser.email = newEmail
+            modifiedUser.isEmailVerified = false // Needs verification
+            modifiedUser.pendingEmail = nil
 
-        await MainActor.run {
-            self.currentUser = user
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     func updatePhoneNumber(newPhoneNumber: String) async throws -> String {
-        guard var user = currentUser else {
+        guard let user = currentUser else {
             throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
 
         // TODO: Send SMS verification to new number with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        // Store pending phone number
-        user.pendingPhoneNumber = newPhoneNumber
-
-        await MainActor.run {
-            self.currentUser = user
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            // Store pending phone number
+            modifiedUser.pendingPhoneNumber = newPhoneNumber
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-        persistUser(user)
+        persistUser(updatedUser)
 
         // Return mock verification ID
         return "mock-phone-update-\(UUID().uuidString)"
     }
 
     func verifyPhoneUpdate(verificationId: String, code: String) async throws {
-        guard var user = currentUser else {
+        guard let user = currentUser else {
             throw NSError(domain: "AuthService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
 
         // TODO: Verify code with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
-        // Update phone number from pending
-        if let pendingPhone = user.pendingPhoneNumber {
-            user.phoneNumber = pendingPhone
-            user.isPhoneVerified = true
-            user.pendingPhoneNumber = nil
+        let updatedUser = await MainActor.run { () -> User in
+            var modifiedUser = user
+            // Update phone number from pending
+            if let pendingPhone = modifiedUser.pendingPhoneNumber {
+                modifiedUser.phoneNumber = pendingPhone
+                modifiedUser.isPhoneVerified = true
+                modifiedUser.pendingPhoneNumber = nil
 
-            if !user.authProviders.contains("phone") {
-                user.authProviders.append("phone")
+                if !modifiedUser.authProviders.contains("phone") {
+                    modifiedUser.authProviders.append("phone")
+                }
             }
+            self.currentUser = modifiedUser
+            return modifiedUser
         }
-
-        await MainActor.run {
-            self.currentUser = user
-        }
-        persistUser(user)
+        persistUser(updatedUser)
     }
 
     // MARK: - Persistence
