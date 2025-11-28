@@ -3,6 +3,7 @@
 //  EventPassUG
 //
 //  Attendee home screen with categories and event feed
+//  FIXED: No auto-scrolling on first load
 //
 
 import SwiftUI
@@ -12,319 +13,319 @@ struct AttendeeHomeView: View {
     @EnvironmentObject var services: ServiceContainer
     @StateObject private var favoriteManager = FavoriteManager.shared
 
-    @State private var events: [Event] = []
-    @State private var selectedTimeCategory: TimeCategory? = nil
-    @State private var selectedEventCategory: EventCategory? = nil
-    @State private var isLoading = true
+    // MVVM: Use StateObject for stable ViewModel reference
+    // Note: We can't use @EnvironmentObject in init, so we create the ViewModel lazily
+    @StateObject private var viewModel = AttendeeHomeViewModel(
+        eventService: MockEventService() // Will be replaced with injected service
+    )
+
+    // Local UI state only (not data state)
     @State private var unreadNotifications = 3
     @State private var showingNotifications = false
     @State private var showingFavorites = false
-    @State private var isSearchExpanded = false
-    @State private var searchText = ""
-    @State private var hasLoadedEvents = false
     @FocusState private var isSearchFocused: Bool
+
+    // Scroll position anchor - critical for preventing auto-scroll
+    @State private var scrollViewID = UUID()
+
+    // MARK: - Body
 
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                let _ = geometry.size.width > geometry.size.height
-
                 VStack(spacing: 0) {
                     // Header with action buttons and inline search (FIXED OUTSIDE ScrollView)
-                    VStack(spacing: max(8, geometry.size.width * 0.03)) {
-                        // Top row: Greeting + Action Buttons
-                        HStack(alignment: .top) {
-                            if !isSearchExpanded {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(DateUtilities.formatHeaderDate(Date()))
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(.secondary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.85)
-
-                                    Text("\(DateUtilities.getGreeting()), \(authService.currentUser?.firstName ?? "Guest")!")
-                                        .font(AppTypography.title2)
-                                        .fontWeight(.bold)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.75)
-                                }
-                                .transition(.opacity.combined(with: .move(edge: .leading)))
-                            }
-
-                            Spacer(minLength: 8)
-
-                            HStack(spacing: max(8, geometry.size.width * 0.025)) {
-                                // Search button - toggles inline search
-                                Button(action: {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                        isSearchExpanded.toggle()
-                                        if isSearchExpanded {
-                                            isSearchFocused = true
-                                        } else {
-                                            searchText = ""
-                                            isSearchFocused = false
-                                        }
-                                    }
-                                    HapticFeedback.light()
-                                }) {
-                                    Image(systemName: isSearchExpanded ? "xmark" : "magnifyingglass")
-                                        .font(.system(size: min(max(geometry.size.width * 0.05, 18), 20)))
-                                        .foregroundColor(.primary)
-                                        .frame(width: min(max(geometry.size.width * 0.1, 36), 40),
-                                               height: min(max(geometry.size.width * 0.1, 36), 40))
-                                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                                        .clipShape(Circle())
-                                }
-
-                                if !isSearchExpanded {
-                                    // Favorites button
-                                    Button(action: {
-                                        showingFavorites = true
-                                        HapticFeedback.light()
-                                    }) {
-                                        ZStack(alignment: .topTrailing) {
-                                            Image(systemName: "heart.fill")
-                                                .font(.system(size: 20))
-                                                .foregroundColor(RoleConfig.attendeePrimary)
-                                                .frame(width: 40, height: 40)
-                                                .background(Color(UIColor.secondarySystemGroupedBackground))
-                                                .clipShape(Circle())
-
-                                            if !favoriteManager.favoriteEventIds.isEmpty {
-                                                Text("\(favoriteManager.favoriteEventIds.count)")
-                                                    .font(.system(size: 10, weight: .bold))
-                                                    .foregroundColor(.white)
-                                                    .padding(4)
-                                                    .background(Color.red)
-                                                    .clipShape(Circle())
-                                                    .offset(x: 6, y: -6)
-                                            }
-                                        }
-                                    }
-                                    .transition(.scale.combined(with: .opacity))
-
-                                    // Notifications button
-                                    Button(action: {
-                                        showingNotifications = true
-                                        HapticFeedback.light()
-                                    }) {
-                                        ZStack(alignment: .topTrailing) {
-                                            Image(systemName: "bell.fill")
-                                                .font(.system(size: 20))
-                                                .foregroundColor(.primary)
-                                                .frame(width: 40, height: 40)
-                                                .background(Color(UIColor.secondarySystemGroupedBackground))
-                                                .clipShape(Circle())
-
-                                            if unreadNotifications > 0 {
-                                                Text("\(min(unreadNotifications, 99))")
-                                                    .font(.system(size: 10, weight: .bold))
-                                                    .foregroundColor(.white)
-                                                    .frame(minWidth: 16, minHeight: 16)
-                                                    .padding(4)
-                                                    .background(Color.red)
-                                                    .clipShape(Circle())
-                                                    .offset(x: 8, y: -8)
-                                            }
-                                        }
-                                    }
-                                    .padding(.trailing, 4)
-                                    .transition(.scale.combined(with: .opacity))
-                                }
-                            }
-                        }
-
-                        // Inline Search Bar (expands when search is tapped)
-                        if isSearchExpanded {
-                            HStack(spacing: AppSpacing.sm) {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-
-                                TextField("Search events, organizers, locations...", text: $searchText)
-                                    .textFieldStyle(.plain)
-                                    .autocorrectionDisabled()
-                                    .focused($isSearchFocused)
-
-                                if !searchText.isEmpty {
-                                    Button(action: {
-                                        searchText = ""
-                                        HapticFeedback.light()
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                            }
-                            .padding(AppSpacing.md)
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                        }
-                    }
-                    .padding(.horizontal, AppSpacing.md)
-                    .padding(.top, AppSpacing.sm)
-                    .padding(.bottom, AppSpacing.sm)
+                    headerView(geometry: geometry)
 
                     // Combined filters (single line)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: AppSpacing.sm) {
-                            // Time filters
-                            CategoryTile(
-                                title: "Today",
-                                icon: "calendar",
-                                isSelected: selectedTimeCategory == .today,
-                                onTap: {
-                                    selectedTimeCategory = selectedTimeCategory == .today ? nil : .today
-                                    selectedEventCategory = nil
-                                    HapticFeedback.selection()
-                                }
-                            )
+                    filterScrollView
 
-                            CategoryTile(
-                                title: "This week",
-                                icon: "calendar.badge.clock",
-                                isSelected: selectedTimeCategory == .thisWeek,
-                                onTap: {
-                                    selectedTimeCategory = selectedTimeCategory == .thisWeek ? nil : .thisWeek
-                                    selectedEventCategory = nil
-                                    HapticFeedback.selection()
-                                }
-                            )
-
-                            CategoryTile(
-                                title: "This month",
-                                icon: "calendar.circle",
-                                isSelected: selectedTimeCategory == .thisMonth,
-                                onTap: {
-                                    selectedTimeCategory = selectedTimeCategory == .thisMonth ? nil : .thisMonth
-                                    selectedEventCategory = nil
-                                    HapticFeedback.selection()
-                                }
-                            )
-
-                            // Divider
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 1, height: 30)
-                                .padding(.horizontal, 4)
-
-                            // Event category filters
-                            ForEach(EventCategory.allCases, id: \.self) { category in
-                                CategoryTile(
-                                    title: category.rawValue,
-                                    icon: category.iconName,
-                                    isSelected: selectedEventCategory == category,
-                                    onTap: {
-                                        selectedEventCategory = selectedEventCategory == category ? nil : category
-                                        selectedTimeCategory = nil
-                                        HapticFeedback.selection()
-                                    }
-                                )
-                            }
-                        }
-                        .padding(.horizontal, AppSpacing.md)
-                    }
-                    .padding(.bottom, AppSpacing.sm)
-
-                    // Events feed - responsive grid (NOW INSIDE SCROLLVIEW)
-                    ScrollView(.vertical, showsIndicators: true) {
-                        if isLoading {
-                            VStack(spacing: AppSpacing.md) {
-                                ForEach(0..<3, id: \.self) { _ in
-                                    SkeletonEventCard()
-                                }
-                            }
-                            .padding(.horizontal, ResponsiveSpacing.md(geometry))
-                        } else {
-                            LazyVStack(spacing: ResponsiveSpacing.md(geometry)) {
-                                ForEach(filteredEvents, id: \.id) { event in
-                                    NavigationLink(destination: EventDetailsView(event: event)) {
-                                        EventCard(
-                                            event: event,
-                                            isLiked: favoriteManager.isFavorite(eventId: event.id),
-                                            onLikeTap: {
-                                                favoriteManager.toggleFavorite(eventId: event.id)
-                                                HapticFeedback.light()
-                                            },
-                                            onCardTap: {}
-                                        )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal, ResponsiveSpacing.md(geometry))
-                            .padding(.bottom, ResponsiveSpacing.xl(geometry))
-                        }
-                    }
+                    // Events feed - SCROLL STABILIZED
+                    stableScrollView(geometry: geometry)
                 }
                 .background(Color(UIColor.systemGroupedBackground))
                 .navigationBarHidden(true)
-                .onAppear {
-                    // Only load events once per view lifecycle
-                    if !hasLoadedEvents {
-                        loadEvents()
-                        hasLoadedEvents = true
+            }
+        }
+        .navigationViewStyle(.stack)
+        .onAppear {
+            // Inject the environment service into the ViewModel on first appear
+            if viewModel.eventService is MockEventService {
+                viewModel.updateEventService(services.eventService)
+            }
+        }
+        // CRITICAL: Load data in task, not onAppear
+        // This prevents animations from affecting scroll position
+        .task {
+            viewModel.loadEventsIfNeeded()
+        }
+        .sheet(isPresented: $showingNotifications) {
+            NotificationsView(unreadCount: $unreadNotifications)
+        }
+        .sheet(isPresented: $showingFavorites) {
+            FavoriteEventsView()
+                .environmentObject(services)
+        }
+    }
+
+    // MARK: - Header View
+
+    @ViewBuilder
+    private func headerView(geometry: GeometryProxy) -> some View {
+        VStack(spacing: max(8, geometry.size.width * 0.03)) {
+            // Top row: Greeting + Action Buttons
+            HStack(alignment: .top) {
+                if !viewModel.isSearchExpanded {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(DateUtilities.formatHeaderDate(Date()))
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+
+                        Text("\(DateUtilities.getGreeting()), \(authService.currentUser?.firstName ?? "Guest")!")
+                            .font(AppTypography.title2)
+                            .fontWeight(.bold)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .leading)))
+                }
+
+                Spacer(minLength: 8)
+
+                HStack(spacing: max(8, geometry.size.width * 0.025)) {
+                    // Search button
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            viewModel.isSearchExpanded.toggle()
+                            if viewModel.isSearchExpanded {
+                                isSearchFocused = true
+                            } else {
+                                viewModel.searchText = ""
+                                isSearchFocused = false
+                            }
+                        }
+                        HapticFeedback.light()
+                    }) {
+                        Image(systemName: viewModel.isSearchExpanded ? "xmark" : "magnifyingglass")
+                            .font(.system(size: min(max(geometry.size.width * 0.05, 18), 20)))
+                            .foregroundColor(.primary)
+                            .frame(width: min(max(geometry.size.width * 0.1, 36), 40),
+                                   height: min(max(geometry.size.width * 0.1, 36), 40))
+                            .background(Color(UIColor.secondarySystemGroupedBackground))
+                            .clipShape(Circle())
+                    }
+
+                    if !viewModel.isSearchExpanded {
+                        // Favorites button
+                        Button(action: {
+                            showingFavorites = true
+                            HapticFeedback.light()
+                        }) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(RoleConfig.attendeePrimary)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                    .clipShape(Circle())
+
+                                if !favoriteManager.favoriteEventIds.isEmpty {
+                                    Text("\(favoriteManager.favoriteEventIds.count)")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(4)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                        .offset(x: 6, y: -6)
+                                }
+                            }
+                        }
+                        .transition(.scale.combined(with: .opacity))
+
+                        // Notifications button
+                        Button(action: {
+                            showingNotifications = true
+                            HapticFeedback.light()
+                        }) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "bell.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                                    .clipShape(Circle())
+
+                                if unreadNotifications > 0 {
+                                    Text("\(min(unreadNotifications, 99))")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(minWidth: 16, minHeight: 16)
+                                        .padding(4)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                        .offset(x: 8, y: -8)
+                                }
+                            }
+                        }
+                        .padding(.trailing, 4)
+                        .transition(.scale.combined(with: .opacity))
                     }
                 }
-                .sheet(isPresented: $showingNotifications) {
-                    NotificationsView(unreadCount: $unreadNotifications)
+            }
+
+            // Inline Search Bar (expands when search is tapped)
+            if viewModel.isSearchExpanded {
+                HStack(spacing: AppSpacing.sm) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+
+                    TextField("Search events, organizers, locations...", text: $viewModel.searchText)
+                        .textFieldStyle(.plain)
+                        .autocorrectionDisabled()
+                        .focused($isSearchFocused)
+
+                    if !viewModel.searchText.isEmpty {
+                        Button(action: {
+                            viewModel.searchText = ""
+                            HapticFeedback.light()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                        }
+                    }
                 }
-                .sheet(isPresented: $showingFavorites) {
-                    FavoriteEventsView()
-                        .environmentObject(services)
-                }
+                .padding(AppSpacing.md)
+                .background(Color(UIColor.secondarySystemGroupedBackground))
+                .cornerRadius(AppCornerRadius.medium)
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
+        .padding(.bottom, AppSpacing.sm)
     }
 
-    private var filteredEvents: [Event] {
-        var filtered = events
+    // MARK: - Filter Scroll View
 
-        // Filter out past events (event has ended)
-        filtered = filtered.filter { $0.endDate >= Date() }
+    @ViewBuilder
+    private var filterScrollView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: AppSpacing.sm) {
+                // Time filters
+                CategoryTile(
+                    title: "Today",
+                    icon: "calendar",
+                    isSelected: viewModel.selectedTimeCategory == .today,
+                    onTap: {
+                        viewModel.selectedTimeCategory = viewModel.selectedTimeCategory == .today ? nil : .today
+                        viewModel.selectedEventCategory = nil
+                        HapticFeedback.selection()
+                    }
+                )
 
-        // Filter by time category
-        if let timeCategory = selectedTimeCategory {
-            filtered = filtered.filter { $0.timeCategory == timeCategory }
-        }
+                CategoryTile(
+                    title: "This week",
+                    icon: "calendar.badge.clock",
+                    isSelected: viewModel.selectedTimeCategory == .thisWeek,
+                    onTap: {
+                        viewModel.selectedTimeCategory = viewModel.selectedTimeCategory == .thisWeek ? nil : .thisWeek
+                        viewModel.selectedEventCategory = nil
+                        HapticFeedback.selection()
+                    }
+                )
 
-        // Filter by event category
-        if let eventCategory = selectedEventCategory {
-            filtered = filtered.filter { $0.category == eventCategory }
-        }
+                CategoryTile(
+                    title: "This month",
+                    icon: "calendar.circle",
+                    isSelected: viewModel.selectedTimeCategory == .thisMonth,
+                    onTap: {
+                        viewModel.selectedTimeCategory = viewModel.selectedTimeCategory == .thisMonth ? nil : .thisMonth
+                        viewModel.selectedEventCategory = nil
+                        HapticFeedback.selection()
+                    }
+                )
 
-        // Filter by search text
-        if !searchText.isEmpty {
-            filtered = filtered.filter { event in
-                event.title.localizedCaseInsensitiveContains(searchText) ||
-                event.organizerName.localizedCaseInsensitiveContains(searchText) ||
-                event.venue.name.localizedCaseInsensitiveContains(searchText) ||
-                event.venue.city.localizedCaseInsensitiveContains(searchText) ||
-                event.description.localizedCaseInsensitiveContains(searchText)
-            }
-        }
+                // Divider
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 1, height: 30)
+                    .padding(.horizontal, 4)
 
-        return filtered
-    }
-
-    private func loadEvents() {
-        Task {
-            do {
-                let fetchedEvents = try await services.eventService.fetchEvents()
-                await MainActor.run {
-                    events = fetchedEvents
-                    isLoading = false
+                // Event category filters
+                ForEach(EventCategory.allCases, id: \.self) { category in
+                    CategoryTile(
+                        title: category.rawValue,
+                        icon: category.iconName,
+                        isSelected: viewModel.selectedEventCategory == category,
+                        onTap: {
+                            viewModel.selectedEventCategory = viewModel.selectedEventCategory == category ? nil : category
+                            viewModel.selectedTimeCategory = nil
+                            HapticFeedback.selection()
+                        }
+                    )
                 }
-            } catch {
-                print("Error loading events: \(error)")
-                await MainActor.run {
-                    isLoading = false
-                }
             }
+            .padding(.horizontal, AppSpacing.md)
         }
+        .padding(.bottom, AppSpacing.sm)
     }
 
+    // MARK: - Stable Scroll View (NO AUTO-SCROLL)
+
+    @ViewBuilder
+    private func stableScrollView(geometry: GeometryProxy) -> some View {
+        // CRITICAL FIX: Use ScrollViewReader to control scroll position
+        ScrollViewReader { proxy in
+            ScrollView(.vertical, showsIndicators: true) {
+                // Anchor point at top - prevents scroll jumping
+                Color.clear
+                    .frame(height: 0)
+                    .id("scrollTop")
+
+                // CRITICAL: Use consistent content structure
+                // Don't switch between skeleton and real content
+                LazyVStack(spacing: ResponsiveSpacing.md(geometry)) {
+                    if viewModel.isLoading {
+                        // Show skeleton cards while loading
+                        ForEach(0..<3, id: \.self) { index in
+                            SkeletonEventCard()
+                                .id("skeleton_\(index)")
+                        }
+                    } else {
+                        // Show actual event cards
+                        ForEach(viewModel.filteredEvents, id: \.id) { event in
+                            NavigationLink(destination: EventDetailsView(event: event)) {
+                                EventCard(
+                                    event: event,
+                                    isLiked: favoriteManager.isFavorite(eventId: event.id),
+                                    onLikeTap: {
+                                        favoriteManager.toggleFavorite(eventId: event.id)
+                                        HapticFeedback.light()
+                                    },
+                                    onCardTap: {}
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .id(event.id) // Stable ID
+                        }
+                    }
+                }
+                .padding(.horizontal, ResponsiveSpacing.md(geometry))
+                .padding(.bottom, ResponsiveSpacing.xl(geometry))
+            }
+            // CRITICAL: Disable animations on scroll content changes
+            .transaction { transaction in
+                transaction.disablesAnimations = true
+            }
+            // CRITICAL: Give ScrollView a stable ID
+            .id(scrollViewID)
+        }
+    }
 }
+
+// MARK: - Preview
 
 #Preview {
     AttendeeHomeView()
