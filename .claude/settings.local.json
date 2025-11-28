@@ -25,7 +25,9 @@
       "Bash([ -f \"EventPassUG/Utilities/ImageStorageManager.swift\" ])",
       "Bash([ -f \"EventPassUG/Utilities/AppStorage.swift\" ])",
       "Bash(gem install:*)",
-      "Bash(ruby add_appstorage.rb:*)"
+      "Bash(ruby add_appstorage.rb:*)",
+      "Bash(done)",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []
