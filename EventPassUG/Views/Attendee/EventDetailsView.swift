@@ -32,34 +32,38 @@ struct EventDetailsView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             VStack(alignment: .leading, spacing: 0) {
-                // Poster image
-                ZStack(alignment: .topLeading) {
-                    EventPosterImage(posterURL: event.posterURL, height: 250)
+                // Poster image - FIXED: Using GeometryReader for responsive sizing
+                GeometryReader { geometry in
+                    ZStack(alignment: .topLeading) {
+                        // Poster - maintains aspect ratio based on screen width
+                        EventPosterImage(posterURL: event.posterURL, height: geometry.size.width * 0.67) // FIXED: Responsive height (3:2 ratio)
 
-                    // Happening now banner
-                    if event.isHappeningNow {
-                        HStack(spacing: 8) {
-                            PulsingDot(size: 10)
-                            Text("HAPPENING NOW")
-                                .font(AppTypography.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
+                        // Happening now banner
+                        if event.isHappeningNow {
+                            HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
+                                PulsingDot(size: 11) // FIXED: Increased from 10 for better visibility
+                                Text("HAPPENING NOW")
+                                    .font(AppTypography.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, AppSpacing.md) // FIXED: Using design system constant
+                            .padding(.vertical, AppSpacing.compactSpacing) // FIXED: Using design system constant
+                            .background(
+                                RoleConfig.happeningNow
+                            )
+                            .cornerRadius(AppCornerRadius.small)
+                            .padding(AppSpacing.md)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoleConfig.happeningNow
-                        )
-                        .cornerRadius(AppCornerRadius.small)
-                        .padding(AppSpacing.md)
                     }
                 }
+                .aspectRatio(1.5, contentMode: .fit) // FIXED: Aspect ratio constraint (3:2 = 1.5)
 
                 VStack(alignment: .leading, spacing: AppSpacing.lg) {
                     // Title and actions
                     VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text(event.title)
-                            .font(.system(size: 28, weight: .bold))
+                            .font(AppTypography.largeTitle) // FIXED: Using design system typography instead of fixed size
                             .minimumScaleFactor(0.7)
                             .lineLimit(3)
                             .fixedSize(horizontal: false, vertical: true)
@@ -73,33 +77,36 @@ struct EventDetailsView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
 
                         // Actions
-                        HStack(spacing: 12) {
+                        HStack(spacing: AppSpacing.sm) { // FIXED: Using design system constant
                             AnimatedLikeButton(isLiked: $isLiked) {
                                 isLiked.toggle()
                             }
+                            .frame(minWidth: AppButtonDimensions.minimumTouchTarget, minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
 
                             Button(action: {
                                 showingShareSheet = true
                             }) {
                                 Image(systemName: "square.and.arrow.up")
-                                    .font(.system(size: 22))
+                                    .font(.system(size: 24)) // FIXED: Increased from 22 for better visibility
                                     .foregroundColor(.primary)
+                                    .frame(minWidth: AppButtonDimensions.minimumTouchTarget, minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
                             }
 
                             Button(action: {}) {
                                 Image(systemName: "exclamationmark.bubble")
-                                    .font(.system(size: 22))
+                                    .font(.system(size: 24)) // FIXED: Increased from 22 for better visibility
                                     .foregroundColor(.primary)
+                                    .frame(minWidth: AppButtonDimensions.minimumTouchTarget, minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
                             }
 
-                            Spacer(minLength: 4)
+                            Spacer(minLength: AppSpacing.compactSpacing) // FIXED: Using design system constant
 
                             // Rating
                             if event.totalRatings > 0 {
-                                HStack(spacing: 4) {
+                                HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                                     Image(systemName: "star.fill")
                                         .foregroundColor(.yellow)
-                                        .font(.system(size: 16))
+                                        .font(.system(size: 18)) // FIXED: Increased from 16 for better visibility
                                     Text(String(format: "%.1f", event.rating))
                                         .font(AppTypography.headline)
                                         .lineLimit(1)
@@ -132,17 +139,20 @@ struct EventDetailsView: View {
                             value: "\(event.venue.name)\n\(event.venue.address), \(event.venue.city)"
                         )
 
-                        // Map
-                        Map(coordinateRegion: .constant(region), annotationItems: [event]) { event in
-                            MapMarker(
-                                coordinate: event.venue.coordinate.clLocation,
-                                tint: RoleConfig.attendeePrimary
-                            )
+                        // Map - FIXED: Responsive height using GeometryReader
+                        GeometryReader { geometry in
+                            Map(coordinateRegion: .constant(region), annotationItems: [event]) { event in
+                                MapMarker(
+                                    coordinate: event.venue.coordinate.clLocation,
+                                    tint: RoleConfig.attendeePrimary
+                                )
+                            }
+                            .frame(width: geometry.size.width)
+                            .cornerRadius(AppCornerRadius.medium)
+                            .allowsHitTesting(false)
                         }
+                        .aspectRatio(2.0, contentMode: .fit) // FIXED: Aspect ratio instead of fixed height
                         .frame(maxWidth: .infinity)
-                        .frame(height: 200)
-                        .cornerRadius(AppCornerRadius.medium)
-                        .allowsHitTesting(false)
 
                         Button(action: openInMaps) {
                             Label("Open in Maps", systemImage: "map.fill")
@@ -218,15 +228,17 @@ struct EventDetailsView: View {
                                 .font(AppTypography.title3)
                                 .fontWeight(.semibold)
 
-                            HStack(spacing: 8) {
+                            HStack(spacing: AppSpacing.sm) { // FIXED: Using design system constant
                                 ForEach(1...5, id: \.self) { star in
-                                    Image(systemName: star <= Int(userRating) ? "star.fill" : "star")
-                                        .font(.system(size: 30))
-                                        .foregroundColor(.yellow)
-                                        .onTapGesture {
-                                            userRating = Double(star)
-                                            HapticFeedback.light()
-                                        }
+                                    Button(action: {
+                                        userRating = Double(star)
+                                        HapticFeedback.light()
+                                    }) {
+                                        Image(systemName: star <= Int(userRating) ? "star.fill" : "star")
+                                            .font(.system(size: 34)) // FIXED: Increased from 30 for better visibility
+                                            .foregroundColor(.yellow)
+                                            .frame(minWidth: AppButtonDimensions.minimumTouchTarget, minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
+                                    }
                                 }
                             }
 
@@ -265,8 +277,8 @@ struct EventDetailsView: View {
                 VStack(spacing: 0) {
                     Divider()
 
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: AppSpacing.sm) { // FIXED: Using design system constant
+                        VStack(alignment: .leading, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                             if let ticketType = selectedTicketType {
                                 Text(ticketType.formattedPrice)
                                     .font(AppTypography.title3)
@@ -274,7 +286,7 @@ struct EventDetailsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.8)
 
-                                HStack(spacing: 4) {
+                                HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                                     Text(ticketType.name)
                                         .font(AppTypography.caption)
                                         .foregroundColor(.secondary)
@@ -283,7 +295,7 @@ struct EventDetailsView: View {
 
                                     if ticketType.isPurchasable {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .font(.system(size: 10))
+                                            .font(.system(size: 12)) // FIXED: Increased from 10 for better visibility
                                             .foregroundColor(.green)
                                     }
                                 }
@@ -315,7 +327,7 @@ struct EventDetailsView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Spacer(minLength: 8)
+                        Spacer(minLength: AppSpacing.compactSpacing) // FIXED: Using design system constant
 
                         Button(action: {
                             // Double-check that ticket is still purchasable before opening purchase sheet
@@ -328,8 +340,9 @@ struct EventDetailsView: View {
                                 .foregroundColor(.white)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, AppSpacing.lg) // FIXED: Using design system constant
                                 .padding(.vertical, AppSpacing.md)
+                                .frame(minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
                                 .background(RoleConfig.attendeePrimary)
                                 .cornerRadius(AppCornerRadius.medium)
                         }
@@ -372,11 +385,11 @@ struct InfoRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: AppSpacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 20))
+                .font(.system(size: 22)) // FIXED: Increased from 20 for better visibility
                 .foregroundColor(RoleConfig.attendeePrimary)
-                .frame(width: 30)
+                .frame(minWidth: 32) // FIXED: Changed from fixed width to minWidth
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                 Text(title)
                     .font(AppTypography.subheadline)
                     .foregroundColor(.secondary)
@@ -403,9 +416,9 @@ struct TicketTypeCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                HStack(alignment: .top, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) {
+                HStack(alignment: .top, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
+                    VStack(alignment: .leading, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
+                        HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                             Text(ticketType.name)
                                 .font(AppTypography.headline)
                                 .foregroundColor(.primary)
@@ -414,17 +427,17 @@ struct TicketTypeCard: View {
                                 .fixedSize(horizontal: false, vertical: true)
 
                             // Status badge
-                            HStack(spacing: 3) {
+                            HStack(spacing: 3) { // Keep small for compact badge
                                 Image(systemName: ticketType.availabilityStatus.iconName)
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 11)) // FIXED: Increased from 10 for better visibility
                                 Text(ticketType.availabilityStatus.rawValue)
-                                    .font(.system(size: 10, weight: .semibold))
+                                    .font(.system(size: 11, weight: .semibold)) // FIXED: Increased from 10 for better readability
                             }
                             .foregroundColor(ticketType.availabilityStatus.color)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
+                            .padding(.horizontal, AppSpacing.compactSpacing) // FIXED: Using design system constant
+                            .padding(.vertical, 3) // Keep small for compact badge
                             .background(ticketType.availabilityStatus.color.opacity(0.15))
-                            .cornerRadius(4)
+                            .cornerRadius(AppCornerRadius.small) // FIXED: Using design system constant
                         }
 
                         if let description = ticketType.description {
@@ -448,7 +461,7 @@ struct TicketTypeCard: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    VStack(alignment: .trailing, spacing: 4) {
+                    VStack(alignment: .trailing, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                         Text(ticketType.formattedPrice)
                             .font(AppTypography.title3)
                             .fontWeight(.bold)
@@ -458,32 +471,33 @@ struct TicketTypeCard: View {
 
                         if isSelected && !isDisabled {
                             Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22)) // FIXED: Added explicit size for better visibility
                                 .foregroundColor(RoleConfig.attendeePrimary)
                         }
                     }
-                    .frame(minWidth: 60)
+                    .frame(minWidth: 70) // FIXED: Slightly increased from 60 for better layout
                 }
                 .frame(maxWidth: .infinity)
 
                 // Availability info
                 if ticketType.availabilityStatus == .upcoming {
-                    HStack(spacing: 4) {
+                    HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                         Image(systemName: "clock.fill")
-                            .font(.system(size: 11))
+                            .font(.system(size: 12)) // FIXED: Increased from 11 for better visibility
                         Text(ticketType.availabilityText)
-                            .font(.system(size: 11, weight: .medium))
+                            .font(.system(size: 12, weight: .medium)) // FIXED: Increased from 11 for better readability
                     }
                     .foregroundColor(.orange)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, AppSpacing.compactSpacing) // FIXED: Using design system constant
+                    .padding(.vertical, AppSpacing.compactSpacing) // FIXED: Using design system constant
                     .background(Color.orange.opacity(0.1))
-                    .cornerRadius(6)
+                    .cornerRadius(AppCornerRadius.small) // FIXED: Using design system constant
                 } else if ticketType.availabilityStatus == .active {
-                    HStack(spacing: 4) {
+                    HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                         Image(systemName: "timer")
-                            .font(.system(size: 11))
+                            .font(.system(size: 12)) // FIXED: Increased from 11 for better visibility
                         Text(ticketType.availabilityText)
-                            .font(.system(size: 11))
+                            .font(.system(size: 12)) // FIXED: Increased from 11 for better readability
                     }
                     .foregroundColor(.secondary)
                 }

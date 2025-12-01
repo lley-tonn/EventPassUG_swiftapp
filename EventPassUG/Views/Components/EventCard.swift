@@ -15,33 +15,36 @@ struct EventCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Poster image
-            ZStack(alignment: .topLeading) {
-                // Poster
-                EventPosterImage(posterURL: event.posterURL, height: 200)
+            // Poster image - FIXED: Using aspect ratio instead of fixed height
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    // Poster - maintains 4:5 aspect ratio
+                    EventPosterImage(posterURL: event.posterURL, height: geometry.size.width * 1.25)
 
-                // Happening now indicator
-                if event.isHappeningNow {
-                    HStack(spacing: 6) {
-                        PulsingDot(size: 8)
-                        Text("Happening now")
-                            .font(.system(size: 12))
-                            .fontWeight(.semibold)
+                    // Happening now indicator
+                    if event.isHappeningNow {
+                        HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
+                            PulsingDot(size: 10) // FIXED: Increased from 8 for better visibility
+                            Text("Happening now")
+                                .font(.system(size: 13)) // FIXED: Increased from 12 for better readability
+                                .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal, AppSpacing.sm) // FIXED: Using design system constant
+                        .padding(.vertical, AppSpacing.compactSpacing) // FIXED: Using design system constant
+                        .background(
+                            Capsule()
+                                .fill(.ultraThinMaterial)
+                        )
+                        .padding(AppSpacing.sm)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(.ultraThinMaterial)
-                    )
-                    .padding(AppSpacing.sm)
                 }
             }
+            .aspectRatio(0.65, contentMode: .fit) // Reduced poster size for compact display
 
             // Event details
             VStack(alignment: .leading, spacing: AppSpacing.sm) {
                 // Title and like button
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .top, spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
                     Text(event.title)
                         .font(AppTypography.headline)
                         .foregroundColor(.primary)
@@ -52,7 +55,7 @@ struct EventCard: View {
                     AnimatedLikeButton(isLiked: .constant(isLiked)) {
                         onLikeTap()
                     }
-                    .frame(width: 30, height: 30)
+                    .frame(width: AppButtonDimensions.minimumTouchTarget, height: AppButtonDimensions.minimumTouchTarget) // FIXED: Minimum 44pt touch target
                 }
 
                 // Date and time
@@ -105,12 +108,12 @@ struct EventCard: View {
                     }
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, AppSpacing.sm) // FIXED: Using design system constant
             .padding(.vertical, AppSpacing.sm)
         }
         .background(Color(UIColor.systemBackground))
         .cornerRadius(AppCornerRadius.medium)
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.1), radius: AppShadow.card.radius, x: AppShadow.card.x, y: AppShadow.card.y) // FIXED: Using design system shadow values
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(event.title), \(DateUtilities.formatEventDateTime(event.startDate)), \(event.venue.name)")

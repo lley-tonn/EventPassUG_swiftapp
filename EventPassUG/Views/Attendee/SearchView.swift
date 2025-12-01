@@ -3,6 +3,7 @@
 //  EventPassUG
 //
 //  Search events by title, category, organizer, and location
+//  ✨ Fully responsive with adaptive grid layout
 //
 
 import SwiftUI
@@ -19,114 +20,115 @@ struct SearchView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Search bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+            GeometryReader { geometry in
+                VStack(spacing: 0) {
+                    // Search bar
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
 
-                    TextField("Search events, organizers, locations...", text: $searchText)
-                        .textFieldStyle(.plain)
-                        .autocorrectionDisabled()
+                        TextField("Search events, organizers, locations...", text: $searchText)
+                            .textFieldStyle(.plain)
+                            .autocorrectionDisabled()
 
-                    if !searchText.isEmpty {
-                        Button(action: {
-                            searchText = ""
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
-                        }
-                    }
-                }
-                .padding(AppSpacing.md)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(AppCornerRadius.medium)
-                .padding(AppSpacing.md)
-
-                // Category filter
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: AppSpacing.sm) {
-                        CategoryFilterChip(
-                            title: "All",
-                            isSelected: selectedCategory == nil,
-                            onTap: { selectedCategory = nil }
-                        )
-
-                        ForEach(EventCategory.allCases, id: \.self) { category in
-                            CategoryFilterChip(
-                                title: category.rawValue,
-                                isSelected: selectedCategory == category,
-                                onTap: { selectedCategory = category }
-                            )
-                        }
-                    }
-                    .padding(.horizontal, AppSpacing.md)
-                }
-                .padding(.bottom, AppSpacing.md)
-
-                Divider()
-
-                // Results
-                if isLoading {
-                    VStack(spacing: AppSpacing.md) {
-                        ForEach(0..<3, id: \.self) { _ in
-                            SkeletonEventCard()
+                        if !searchText.isEmpty {
+                            Button(action: {
+                                searchText = ""
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                     .padding(AppSpacing.md)
-                } else if filteredEvents.isEmpty {
-                    VStack(spacing: AppSpacing.lg) {
-                        Spacer()
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(AppCornerRadius.medium)
+                    .padding(AppSpacing.md)
 
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 60))
-                            .foregroundColor(.gray)
+                    // Category filter
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: AppSpacing.sm) {
+                            CategoryFilterChip(
+                                title: "All",
+                                isSelected: selectedCategory == nil,
+                                onTap: { selectedCategory = nil }
+                            )
 
-                        Text(searchText.isEmpty ? "Start searching" : "No results found")
-                            .font(AppTypography.title3)
-                            .fontWeight(.semibold)
-
-                        if !searchText.isEmpty {
-                            Text("Try adjusting your search or filters")
-                                .font(AppTypography.body)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
-                    }
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: AppSpacing.md) {
-                            ForEach(filteredEvents) { event in
-                                NavigationLink(destination: EventDetailsView(event: event)) {
-                                    EventCard(
-                                        event: event,
-                                        isLiked: favoriteManager.isFavorite(eventId: event.id),
-                                        onLikeTap: {
-                                            favoriteManager.toggleFavorite(eventId: event.id)
-                                            HapticFeedback.light()
-                                        },
-                                        onCardTap: {}
-                                    )
-                                }
+                            ForEach(EventCategory.allCases, id: \.self) { category in
+                                CategoryFilterChip(
+                                    title: category.rawValue,
+                                    isSelected: selectedCategory == category,
+                                    onTap: { selectedCategory = category }
+                                )
                             }
                         }
-                        .padding(AppSpacing.md)
+                        .padding(.horizontal, AppSpacing.md)
+                    }
+                    .padding(.bottom, AppSpacing.md)
+
+                    Divider()
+
+                    // Results
+                    if isLoading {
+                        ScrollView {
+                            VStack(spacing: AppSpacing.md) {
+                                ForEach(0..<3, id: \.self) { _ in
+                                    SkeletonEventCard()
+                                }
+                            }
+                            .padding(AppSpacing.md)
+                        }
+                    } else if filteredEvents.isEmpty {
+                        VStack(spacing: AppSpacing.lg) {
+                            Spacer()
+
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray)
+
+                            Text(searchText.isEmpty ? "Start searching" : "No results found")
+                                .font(AppTypography.title3)
+                                .fontWeight(.semibold)
+
+                            if !searchText.isEmpty {
+                                Text("Try adjusting your search or filters")
+                                    .font(AppTypography.body)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        ScrollView {
+                            ResponsiveEventGrid(
+                                events: filteredEvents,
+                                geometry: geometry,
+                                isLoading: false,
+                                onEventTap: { _ in },
+                                onLikeTap: { eventId in
+                                    favoriteManager.toggleFavorite(eventId: eventId)
+                                    HapticFeedback.light()
+                                }
+                            )
+                        }
                     }
                 }
-            }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationTitle("Search Events")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationTitle("Search Events")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.primary)
+                        }
                     }
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             loadEvents()
         }
@@ -172,6 +174,53 @@ struct SearchView: View {
     }
 }
 
+// MARK: - Responsive Event Grid
+
+struct ResponsiveEventGrid: View {
+    let events: [Event]
+    let geometry: GeometryProxy
+    let isLoading: Bool
+    let onEventTap: (Event) -> Void
+    let onLikeTap: (UUID) -> Void
+
+    @StateObject private var favoriteManager = FavoriteManager.shared
+
+    // Calculate adaptive columns based on screen width
+    private var columns: [GridItem] {
+        let width = geometry.size.width
+        let minCardWidth: CGFloat = 320 // Minimum card width
+        let spacing: CGFloat = AppSpacing.md
+        let padding: CGFloat = AppSpacing.md * 2
+
+        // Calculate how many columns can fit
+        let availableWidth = width - padding
+        let columnCount = max(1, Int(availableWidth / (minCardWidth + spacing)))
+
+        return Array(repeating: GridItem(.flexible(), spacing: spacing), count: columnCount)
+    }
+
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: AppSpacing.md) {
+            ForEach(events) { event in
+                NavigationLink(destination: EventDetailsView(event: event)) {
+                    EventCard(
+                        event: event,
+                        isLiked: favoriteManager.isFavorite(eventId: event.id),
+                        onLikeTap: {
+                            onLikeTap(event.id)
+                        },
+                        onCardTap: {}
+                    )
+                }
+            }
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity) // Fill entire width
+    }
+}
+
+// MARK: - Category Filter Chip
+
 struct CategoryFilterChip: View {
     let title: String
     let isSelected: Bool
@@ -195,6 +244,8 @@ struct CategoryFilterChip: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     SearchView()

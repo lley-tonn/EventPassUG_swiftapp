@@ -22,11 +22,12 @@ enum AppButtonSize {
     case medium
     case small
 
+    // FIXED: Responsive button heights with minimum touch targets
     var height: CGFloat {
         switch self {
-        case .large: return 56
-        case .medium: return 48
-        case .small: return 36
+        case .large: return max(56, AppButtonDimensions.minimumTouchTarget)
+        case .medium: return max(48, AppButtonDimensions.minimumTouchTarget)
+        case .small: return max(44, AppButtonDimensions.minimumTouchTarget) // Increased from 36 to meet accessibility
         }
     }
 
@@ -38,11 +39,12 @@ enum AppButtonSize {
         }
     }
 
+    // FIXED: Responsive icon sizes
     var iconSize: CGFloat {
         switch self {
         case .large: return 20
         case .medium: return 18
-        case .small: return 14
+        case .small: return 16 // Increased from 14 for better visibility
         }
     }
 }
@@ -186,18 +188,18 @@ struct SocialAuthButton: View {
                         .scaleEffect(0.9)
                 } else {
                     if provider == .google {
-                        // Custom Google logo
+                        // Custom Google logo - FIXED: Using design system values
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 20, height: 20)
+                            .frame(width: 22, height: 22) // Slightly larger for better visibility
                             .overlay(
                                 Text("G")
-                                    .font(.system(size: 14, weight: .bold))
+                                    .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.blue)
                             )
                     } else {
                         Image(systemName: provider.iconName)
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 20, weight: .medium)) // Increased from 18 for consistency
                     }
 
                     Text(provider.title)
@@ -265,7 +267,7 @@ struct AppSectionHeader: View {
                 HStack(spacing: AppSpacing.sm) {
                     if let icon = icon {
                         Image(systemName: icon)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.system(size: 20, weight: .semibold)) // FIXED: Increased from 18 for better visibility
                             .foregroundColor(iconColor ?? .primary)
                     }
 
@@ -319,9 +321,9 @@ struct AppInputField: View {
             HStack(spacing: AppSpacing.sm) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16))
+                        .font(.system(size: 18)) // FIXED: Increased from 16 for better visibility
                         .foregroundColor(.secondary)
-                        .frame(width: 20)
+                        .frame(minWidth: 22) // FIXED: Changed from fixed width to minWidth
                 }
 
                 if isSecure && !showPassword {
@@ -335,10 +337,13 @@ struct AppInputField: View {
                 }
 
                 if isSecure {
-                    Button(action: { showPassword.toggle() }) {
+                    Button {
+                        showPassword.toggle()
+                    } label: {
                         Image(systemName: showPassword ? "eye.slash" : "eye")
-                            .font(.system(size: 16))
+                            .font(.system(size: 18)) // FIXED: Increased from 16 for better visibility
                             .foregroundColor(.secondary)
+                            .frame(minWidth: AppButtonDimensions.minimumTouchTarget, minHeight: AppButtonDimensions.minimumTouchTarget) // FIXED: Ensure touch target
                     }
                 }
             }
@@ -371,33 +376,46 @@ struct AppInputField: View {
 struct AppIconButton: View {
     let icon: String
     var size: CGFloat = AppButtonDimensions.iconButtonSize
-    var iconSize: CGFloat = 18
+    var iconSize: CGFloat = 20 // FIXED: Increased from 18 for better visibility
     var backgroundColor: Color = Color(UIColor.tertiarySystemFill)
     var foregroundColor: Color = .primary
     var badge: Int? = nil
     let action: () -> Void
 
+    // FIXED: Responsive badge sizing
+    private var badgeSize: CGFloat {
+        max(18, size * 0.4) // Badge scales with button size, minimum 18pt
+    }
+
+    private var badgeFontSize: CGFloat {
+        max(11, badgeSize * 0.6) // Font scales with badge, minimum 11pt
+    }
+
+    private var badgeOffset: CGFloat {
+        size * 0.1 // Offset is 10% of button size
+    }
+
     var body: some View {
-        Button(action: {
+        Button {
             HapticFeedback.light()
             action()
-        }) {
+        } label: {
             ZStack(alignment: .topTrailing) {
                 Image(systemName: icon)
                     .font(.system(size: iconSize, weight: .semibold))
                     .foregroundColor(foregroundColor)
-                    .frame(width: size, height: size)
+                    .frame(width: max(size, AppButtonDimensions.minimumTouchTarget), height: max(size, AppButtonDimensions.minimumTouchTarget)) // FIXED: Ensure minimum touch target
                     .background(backgroundColor)
                     .clipShape(Circle())
 
                 if let badge = badge, badge > 0 {
                     Text("\(badge)")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: badgeFontSize, weight: .bold)) // FIXED: Responsive font size
                         .foregroundColor(.white)
-                        .frame(minWidth: 16, minHeight: 16)
+                        .frame(minWidth: badgeSize, minHeight: badgeSize) // FIXED: Responsive badge size
                         .background(RoleConfig.error)
                         .clipShape(Circle())
-                        .offset(x: 4, y: -4)
+                        .offset(x: badgeOffset, y: -badgeOffset) // FIXED: Responsive offset
                 }
             }
         }
@@ -422,7 +440,7 @@ struct AppChip: View {
             HStack(spacing: AppSpacing.xs) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 12))
+                        .font(.system(size: 13)) // FIXED: Increased from 12 for better visibility
                 }
 
                 Text(title)
@@ -435,7 +453,7 @@ struct AppChip: View {
                         onRemove()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 15)) // FIXED: Increased from 14 for better visibility
                             .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
                     }
                 }
@@ -477,15 +495,19 @@ struct AppEmptyState: View {
     var buttonAction: (() -> Void)? = nil
     var role: UserRole = .attendee
 
+    // FIXED: Responsive sizing for empty state
+    private let circleSize: CGFloat = 130 // Increased from 120 for better visibility
+    private let iconSize: CGFloat = 55 // Increased from 50 for better visibility
+
     var body: some View {
         VStack(spacing: AppSpacing.lg) {
             ZStack {
                 Circle()
                     .fill(iconColor.opacity(0.1))
-                    .frame(width: 120, height: 120)
+                    .frame(width: circleSize, height: circleSize) // FIXED: Using constant
 
                 Image(systemName: icon)
-                    .font(.system(size: 50))
+                    .font(.system(size: iconSize)) // FIXED: Using constant
                     .foregroundColor(iconColor.opacity(0.6))
             }
 
@@ -555,11 +577,11 @@ struct AppStatusBadge: View {
         HStack(spacing: AppSpacing.xs) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(.system(size: 10))
+                    .font(.system(size: 11)) // FIXED: Increased from 10 for better visibility
             }
 
             Text(status)
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold)) // FIXED: Increased from 11 for better readability
         }
         .foregroundColor(color)
         .padding(.horizontal, AppSpacing.sm)

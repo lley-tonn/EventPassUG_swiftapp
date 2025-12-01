@@ -3,6 +3,7 @@
 //  EventPassUG
 //
 //  User's purchased tickets with QR codes
+//  ✨ Fully responsive with adaptive grid layout
 //
 
 import SwiftUI
@@ -48,84 +49,88 @@ struct TicketsView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                if isLoading {
-                    LoadingView()
-                } else if tickets.isEmpty {
-                    EmptyTicketsView()
-                } else {
-                    // Collapsible header with filters
-                    CollapsibleHeader(title: "My Tickets", scrollOffset: scrollOffset) {
-                        VStack(spacing: AppSpacing.md) {
-                            Text("My Tickets")
-                                .font(AppTypography.largeTitle)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+            GeometryReader { geometry in
+                VStack(spacing: 0) {
+                    if isLoading {
+                        LoadingView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if tickets.isEmpty {
+                        EmptyTicketsView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        // Collapsible header with filters
+                        CollapsibleHeader(title: "My Tickets", scrollOffset: scrollOffset) {
+                            VStack(spacing: AppSpacing.md) {
+                                Text("My Tickets")
+                                    .font(AppTypography.largeTitle)
+                                    .fontWeight(.bold)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                            // Filter buttons
-                            HStack(spacing: AppSpacing.md) {
-                                TicketFilterButton(
-                                    title: "All",
-                                    count: tickets.count,
-                                    isSelected: selectedFilter == .all,
-                                    color: .gray,
-                                    onTap: {
-                                        selectedFilter = .all
-                                        HapticFeedback.selection()
-                                    }
-                                )
+                                // Filter buttons - responsive
+                                HStack(spacing: AppSpacing.md) {
+                                    TicketFilterButton(
+                                        title: "All",
+                                        count: tickets.count,
+                                        isSelected: selectedFilter == .all,
+                                        color: .gray,
+                                        onTap: {
+                                            selectedFilter = .all
+                                            HapticFeedback.selection()
+                                        }
+                                    )
 
-                                TicketFilterButton(
-                                    title: "Active",
-                                    count: activeTickets.count,
-                                    isSelected: selectedFilter == .active,
-                                    color: .green,
-                                    onTap: {
-                                        selectedFilter = .active
-                                        HapticFeedback.selection()
-                                    }
-                                )
+                                    TicketFilterButton(
+                                        title: "Active",
+                                        count: activeTickets.count,
+                                        isSelected: selectedFilter == .active,
+                                        color: .green,
+                                        onTap: {
+                                            selectedFilter = .active
+                                            HapticFeedback.selection()
+                                        }
+                                    )
 
-                                TicketFilterButton(
-                                    title: "Expired",
-                                    count: expiredTickets.count,
-                                    isSelected: selectedFilter == .expired,
-                                    color: .red,
-                                    onTap: {
-                                        selectedFilter = .expired
-                                        HapticFeedback.selection()
-                                    }
-                                )
+                                    TicketFilterButton(
+                                        title: "Expired",
+                                        count: expiredTickets.count,
+                                        isSelected: selectedFilter == .expired,
+                                        color: .red,
+                                        onTap: {
+                                            selectedFilter = .expired
+                                            HapticFeedback.selection()
+                                        }
+                                    )
+
+                                    Spacer()
+                                }
                             }
                         }
+
+                        // ✨ RESPONSIVE ADAPTIVE GRID with scroll tracking
+                        ScrollOffsetReader(content: {
+                            ResponsiveTicketGrid(
+                                tickets: filteredTickets,
+                                geometry: geometry,
+                                onTicketTap: { ticket in
+                                    selectedTicket = ticket
+                                    showingTicketDetail = true
+                                    HapticFeedback.light()
+                                },
+                                onTicketShare: { ticket in
+                                    shareTicketAsPDF(ticket)
+                                }
+                            )
+                        }, onOffsetChange: { offset in
+                            scrollOffset = offset
+                        })
                     }
-
-                    // Tickets list with scroll tracking
-                    ScrollOffsetReader(content: {
-                        LazyVStack(spacing: AppSpacing.md) {
-                            ForEach(filteredTickets) { ticket in
-                                TicketCard(
-                                    ticket: ticket,
-                                    onTap: {
-                                        selectedTicket = ticket
-                                        showingTicketDetail = true
-                                        HapticFeedback.light()
-                                    },
-                                    onShare: {
-                                        shareTicketAsPDF(ticket)
-                                    }
-                                )
-                            }
-                        }
-                        .padding(AppSpacing.md)
-                    }, onOffsetChange: { offset in
-                        scrollOffset = offset
-                    })
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationBarHidden(true)
+                .background(Color(UIColor.systemGroupedBackground))
             }
-            .navigationBarHidden(true)
-            .background(Color(UIColor.systemGroupedBackground))
         }
+        .navigationViewStyle(.stack) // Prevents split view on iPad
         .onAppear {
             loadTickets()
         }
@@ -207,6 +212,49 @@ struct TicketsView: View {
     }
 }
 
+// MARK: - Responsive Ticket Grid
+
+struct ResponsiveTicketGrid: View {
+    let tickets: [Ticket]
+    let geometry: GeometryProxy
+    let onTicketTap: (Ticket) -> Void
+    let onTicketShare: (Ticket) -> Void
+
+    // Calculate adaptive columns based on screen width
+    private var columns: [GridItem] {
+        let width = geometry.size.width
+        let minCardWidth: CGFloat = 320 // Minimum card width
+        let spacing: CGFloat = AppSpacing.md
+        let padding: CGFloat = AppSpacing.md * 2
+
+        // Calculate how many columns can fit
+        let availableWidth = width - padding
+        let columnCount = max(1, Int(availableWidth / (minCardWidth + spacing)))
+
+        return Array(repeating: GridItem(.flexible(), spacing: spacing), count: columnCount)
+    }
+
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: AppSpacing.md) {
+            ForEach(tickets) { ticket in
+                TicketCard(
+                    ticket: ticket,
+                    onTap: {
+                        onTicketTap(ticket)
+                    },
+                    onShare: {
+                        onTicketShare(ticket)
+                    }
+                )
+            }
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity) // Fill entire width
+    }
+}
+
+// MARK: - Ticket Filter Button
+
 struct TicketFilterButton: View {
     let title: String
     let count: Int
@@ -252,6 +300,8 @@ struct TicketFilterButton: View {
     }
 }
 
+// MARK: - Ticket Card (Responsive)
+
 struct TicketCard: View {
     let ticket: Ticket
     let onTap: () -> Void
@@ -260,147 +310,110 @@ struct TicketCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 0) {
-                    // Status banner
-                    if ticket.scanStatus == .scanned {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 12))
-                            Text("Scanned")
+                // Status banner
+                statusBanner
+
+                VStack(alignment: .leading, spacing: 8) {
+                    // Event title
+                    Text(ticket.eventTitle)
+                        .font(AppTypography.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Ticket type and price
+                    HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Ticket Type")
                                 .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                                .minimumScaleFactor(0.85)
+
+                            Text(ticket.ticketType.name)
+                                .font(AppTypography.callout)
                                 .fontWeight(.semibold)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(Color.green)
-                    } else if ticket.isExpired {
-                        HStack {
-                            Image(systemName: "clock.fill")
-                                .font(.system(size: 12))
-                            Text("Event Ended")
-                                .font(AppTypography.caption)
-                                .fontWeight(.semibold)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(Color.gray)
-                    } else {
-                        HStack {
-                            Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 12))
-                            Text("Active")
-                                .font(AppTypography.caption)
-                                .fontWeight(.semibold)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
-                        .background(RoleConfig.attendeePrimary)
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        // Event title
-                        Text(ticket.eventTitle)
-                            .font(AppTypography.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.85)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        // Ticket type and price
-                        HStack(spacing: 8) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Ticket Type")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(.secondary)
-                                    .minimumScaleFactor(0.85)
-
-                                Text(ticket.ticketType.name)
-                                    .font(AppTypography.callout)
-                                    .fontWeight(.semibold)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.85)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                            VStack(alignment: .trailing, spacing: 4) {
-                                Text("Price")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(.secondary)
-                                    .minimumScaleFactor(0.85)
-
-                                Text(ticket.ticketType.formattedPrice)
-                                    .font(AppTypography.callout)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(RoleConfig.attendeePrimary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.85)
-                            }
-                        }
-                    }
-                    .padding(12)
-
-                    Divider()
-
-                    // Event details
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "calendar")
-                                .font(.caption)
-                            Text(DateUtilities.formatEventDateTime(ticket.eventDate))
-                                .font(AppTypography.subheadline)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.85)
                         }
-                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                        HStack(spacing: 4) {
-                            Image(systemName: "location.fill")
-                                .font(.caption)
-                            Text(ticket.eventVenue)
-                                .font(AppTypography.subheadline)
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text("Price")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                                .minimumScaleFactor(0.85)
+
+                            Text(ticket.ticketType.formattedPrice)
+                                .font(AppTypography.callout)
+                                .fontWeight(.semibold)
+                                .foregroundColor(RoleConfig.attendeePrimary)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.85)
                         }
-                        .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, AppSpacing.sm)
-
-                    // Bottom actions
-                    HStack {
-                        Button(action: onShare) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.caption)
-                                Text("Share")
-                                    .font(AppTypography.caption)
-                                    .minimumScaleFactor(0.85)
-                            }
-                            .foregroundColor(RoleConfig.attendeePrimary)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(RoleConfig.attendeePrimary.opacity(0.1))
-                            )
-                        }
-                        .buttonStyle(.plain)
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 12)
                 }
+                .padding(12)
+
+                Divider()
+
+                // Event details
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar")
+                            .font(.caption)
+                        Text(DateUtilities.formatEventDateTime(ticket.eventDate))
+                            .font(AppTypography.subheadline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                    }
+                    .foregroundColor(.secondary)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "location.fill")
+                            .font(.caption)
+                        Text(ticket.eventVenue)
+                            .font(AppTypography.subheadline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                    }
+                    .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, AppSpacing.sm)
+
+                // Bottom actions
+                HStack {
+                    Button(action: onShare) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.caption)
+                            Text("Share")
+                                .font(AppTypography.caption)
+                                .minimumScaleFactor(0.85)
+                        }
+                        .foregroundColor(RoleConfig.attendeePrimary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(RoleConfig.attendeePrimary.opacity(0.1))
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+            }
+            .frame(maxWidth: .infinity) // Card fills available width
         }
         .background(Color(UIColor.systemBackground))
         .cornerRadius(AppCornerRadius.medium)
@@ -408,7 +421,53 @@ struct TicketCard: View {
         .opacity(ticket.isExpired ? 0.85 : 1.0)
         .buttonStyle(.plain)
     }
+
+    @ViewBuilder
+    private var statusBanner: some View {
+        if ticket.scanStatus == .scanned {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 12))
+                Text("Scanned")
+                    .font(AppTypography.caption)
+                    .fontWeight(.semibold)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(Color.green)
+        } else if ticket.isExpired {
+            HStack {
+                Image(systemName: "clock.fill")
+                    .font(.system(size: 12))
+                Text("Event Ended")
+                    .font(AppTypography.caption)
+                    .fontWeight(.semibold)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(Color.gray)
+        } else {
+            HStack {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 12))
+                Text("Active")
+                    .font(AppTypography.caption)
+                    .fontWeight(.semibold)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(RoleConfig.attendeePrimary)
+        }
+    }
 }
+
+// MARK: - Empty State
 
 struct EmptyTicketsView: View {
     var body: some View {
@@ -427,9 +486,11 @@ struct EmptyTicketsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.xl)
         }
-        .frame(maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+
+// MARK: - Ticket QR View
 
 struct TicketQRView: View {
     let ticket: Ticket
@@ -524,6 +585,8 @@ struct TicketQRView: View {
         HapticFeedback.light()
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     TicketsView()

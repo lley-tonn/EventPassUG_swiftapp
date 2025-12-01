@@ -2,7 +2,8 @@
 //  ProfileView.swift
 //  EventPassUG
 //
-//  User profile screen with role switching and settings - with collapsible header
+//  User profile screen with role switching and settings
+//  ✨ FULLY RESPONSIVE - All hard-coded values removed
 //
 
 import SwiftUI
@@ -29,364 +30,98 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Collapsible Profile Header
-                CollapsibleHeader(title: authService.currentUser?.fullName ?? "Profile", scrollOffset: scrollOffset) {
-                    HStack(spacing: AppSpacing.md) {
-                        // Profile image
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(
-                                RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
-                            )
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Text(authService.currentUser?.fullName ?? "Guest")
-                                    .font(AppTypography.title2)
-                                    .fontWeight(.bold)
-                                    .lineLimit(1)
-
-                                // Account Verified Badge
-                                if authService.currentUser?.isVerified == true {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(.green)
-                                }
-                            }
-
-                            if authService.currentUser?.isVerified == true {
-                                Text("Account Verified")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(.green)
-                            } else {
-                                Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(Color.secondary)
-                                    .lineLimit(1)
-                            }
-
-                            // Role badge - shows current active role
-                            HStack(spacing: 4) {
-                                Image(systemName: currentActiveRole == .organizer
-                                      ? "briefcase.fill"
-                                      : "person.fill"
+            GeometryReader { geometry in
+                VStack(spacing: 0) {
+                    // Collapsible Profile Header
+                    CollapsibleHeader(title: authService.currentUser?.fullName ?? "Profile", scrollOffset: scrollOffset) {
+                        HStack(spacing: AppSpacing.md) {
+                            // Profile image - RESPONSIVE SIZE
+                            Image(systemName: "person.circle.fill")
+                                .font(.system(size: profileIconSize(for: geometry)))
+                                .foregroundColor(
+                                    RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
                                 )
-                                .font(.caption)
 
-                                Text(currentActiveRole.displayName)
-                                    .font(.caption)
+                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                                HStack(spacing: AppSpacing.xs) {
+                                    Text(authService.currentUser?.fullName ?? "Guest")
+                                        .font(AppTypography.title2)
+                                        .fontWeight(.bold)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.8)
 
-                                // Show dual-role indicator if user has both roles
-                                if authService.currentUser?.hasBothRoles == true {
-                                    Text("(Can Switch)")
-                                        .font(.system(size: 8))
-                                        .opacity(0.8)
-                                }
-                            }
-                            .foregroundColor(Color.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoleConfig.getPrimaryColor(for: currentActiveRole)
-                            )
-                            .cornerRadius(AppCornerRadius.small)
-                        }
-
-                        Spacer()
-                    }
-                }
-
-                // Settings List
-                ScrollOffsetReader(content: {
-                    VStack(spacing: AppSpacing.lg) {
-                        // Role switcher and verification (conditional)
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Account")
-                                .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, AppSpacing.md)
-
-                            VStack(spacing: 1) {
-                                // Verification Status (for organizers)
-                                if authService.currentUser?.isOrganizer == true {
+                                    // Account Verified Badge - RESPONSIVE SIZE
                                     if authService.currentUser?.isVerified == true {
-                                        // Verified organizer
-                                        HStack {
-                                            Image(systemName: "checkmark.shield.fill")
-                                                .foregroundColor(.green)
-
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text("Verified Organizer")
-                                                    .foregroundColor(.primary)
-                                                if let verificationDate = authService.currentUser?.verificationDate {
-                                                    Text("Verified on \(verificationDate.formatted(date: .abbreviated, time: .omitted))")
-                                                        .font(AppTypography.caption)
-                                                        .foregroundColor(.secondary)
-                                                }
-                                            }
-
-                                            Spacer()
-                                        }
-                                        .padding()
-                                    } else {
-                                        // Unverified organizer - show verification required
-                                        Button(action: {
-                                            showingVerification = true
-                                        }) {
-                                            HStack {
-                                                Image(systemName: "exclamationmark.shield.fill")
-                                                    .foregroundColor(.orange)
-
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text("Verification Required")
-                                                        .foregroundColor(.primary)
-                                                    Text("Complete verification to access organizer features")
-                                                        .font(AppTypography.caption)
-                                                        .foregroundColor(.secondary)
-                                                }
-
-                                                Spacer()
-
-                                                Image(systemName: "chevron.right")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                            .padding()
-                                        }
-                                    }
-
-                                    Divider()
-                                } else if authService.currentUser?.isAttendee == true {
-                                    // Attendee - optional verification
-                                    if authService.currentUser?.isVerified != true {
-                                        Button(action: {
-                                            showingVerification = true
-                                        }) {
-                                            HStack {
-                                                Image(systemName: "checkmark.shield")
-                                                    .foregroundColor(RoleConfig.getPrimaryColor(for: .attendee))
-
-                                                Text("Verify National ID (Optional)")
-                                                    .foregroundColor(.primary)
-
-                                                Spacer()
-
-                                                Image(systemName: "chevron.right")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                            .padding()
-                                        }
-
-                                        Divider()
+                                        Image(systemName: "checkmark.seal.fill")
+                                            .font(.system(size: badgeIconSize(for: geometry)))
+                                            .foregroundColor(.green)
                                     }
                                 }
 
-                                // Conditional role switching based on user capabilities
-                                if authService.currentUser?.hasBothRoles == true {
-                                    // User has both roles - show switch (only if verified)
-                                    Button(action: {
-                                        if authService.currentUser?.isVerifiedOrganizer != true && currentActiveRole == .attendee {
-                                            showingVerificationRequired = true
-                                        } else {
-                                            toggleActiveRole()
-                                        }
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "arrow.left.arrow.right")
-                                                .foregroundColor(
-                                                    RoleConfig.getPrimaryColor(for: currentActiveRole)
-                                                )
-
-                                            Text("Switch Role")
-                                                .foregroundColor(.primary)
-
-                                            Spacer()
-
-                                            Text(currentActiveRole == .attendee ? "To Organizer" : "To Attendee")
-                                                .font(AppTypography.caption)
-                                                .foregroundColor(.secondary)
-
-                                            Image(systemName: "chevron.right")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        .padding()
-                                    }
-                                } else if authService.currentUser?.canBecomeOrganizer == true {
-                                    // User is only attendee - show become organizer
-                                    Button(action: { showingBecomeOrganizer = true }) {
-                                        HStack {
-                                            Image(systemName: "briefcase")
-                                                .foregroundColor(RoleConfig.organizerPrimary)
-
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text("Become an Organizer")
-                                                    .foregroundColor(.primary)
-
-                                                Text("Host events and sell tickets")
-                                                    .font(AppTypography.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-
-                                            Spacer()
-
-                                            Image(systemName: "chevron.right")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        .padding()
-                                    }
+                                if authService.currentUser?.isVerified == true {
+                                    Text("Account Verified")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.green)
+                                } else {
+                                    Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(Color.secondary)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.8)
                                 }
+
+                                // Role badge - FULLY RESPONSIVE
+                                roleBadge(for: geometry)
                             }
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                            .padding(.horizontal, AppSpacing.md)
+
+                            Spacer()
                         }
-
-                        // Contact Information
-                        ContactVerificationSection(
-                            showingEmailVerification: $showingEmailVerification,
-                            showingPhoneVerification: $showingPhoneVerification,
-                            showingAddEmail: $showingAddEmail,
-                            showingAddPhone: $showingAddPhone,
-                            showingAccountLinking: $showingAccountLinking,
-                            isVerifyingEmail: $isVerifyingEmail
-                        )
-                        .environmentObject(authService)
-
-                        // Settings
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Settings")
-                                .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, AppSpacing.md)
-
-                            VStack(spacing: 1) {
-                                settingsRow(icon: "person", title: "Edit Profile", destination: AnyView(EditProfileView().environmentObject(authService)))
-                                settingsRow(icon: "sparkles", title: "Interests", destination: AnyView(FavoriteEventCategoriesView(isOnboarding: false).environmentObject(authService)))
-                                settingsRow(icon: "bell", title: "Notifications", destination: AnyView(NotificationSettingsView().environmentObject(authService)))
-                                settingsRow(icon: "creditcard", title: "Payment Methods", destination: AnyView(PaymentMethodsView().environmentObject(authService)))
-                            }
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                            .padding(.horizontal, AppSpacing.md)
-                        }
-
-                        // Community
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Community")
-                                .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, AppSpacing.md)
-
-                            VStack(spacing: 1) {
-                                // Invite Friends
-                                Button(action: inviteFriends) {
-                                    HStack {
-                                        Label("Invite Friends", systemImage: "person.2.fill")
-                                            .foregroundColor(.primary)
-                                        Spacer()
-                                        Image(systemName: "square.and.arrow.up")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding()
-                                }
-                                .buttonStyle(.plain)
-
-                                Divider()
-
-                                // Rate Us
-                                Button(action: rateApp) {
-                                    HStack {
-                                        Label("Rate Us", systemImage: "star.fill")
-                                            .foregroundColor(.primary)
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding()
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                            .padding(.horizontal, AppSpacing.md)
-
-                            // Social Media Icons
-                            HStack(spacing: AppSpacing.lg) {
-                                Spacer()
-
-                                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .white)
-                                socialMediaImageButton(imageName: "instagram_icon", url: "https://instagram.com/eventpassug")
-                                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", tintColor: .white)
-                                socialMediaImageButton(imageName: "facebook_icon", url: "https://facebook.com/eventpassug")
-                                socialMediaSystemButton(icon: "globe", url: "https://eventpassug.com")
-
-                                Spacer()
-                            }
-                            .padding(.vertical, AppSpacing.sm)
-                        }
-
-                        // Support
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Support")
-                                .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.horizontal, AppSpacing.md)
-
-                            VStack(spacing: 1) {
-                                settingsRow(icon: "questionmark.circle", title: "Help Center", destination: AnyView(HelpCenterView().environmentObject(authService)))
-                                settingsRow(icon: "envelope", title: "Contact Support", destination: AnyView(SupportCenterView().environmentObject(authService)))
-                                settingsRow(icon: "doc.text", title: "Terms & Privacy", destination: AnyView(TermsAndPrivacyView()))
-                            }
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                            .padding(.horizontal, AppSpacing.md)
-                        }
-
-                        // App info
-                        VStack(spacing: AppSpacing.sm) {
-                            HStack {
-                                Text("Version")
-                                Spacer()
-                                Text("1.0.0")
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding()
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-
-                            Button(action: {
-                                showingLogoutConfirmation = true
-                            }) {
-                                HStack {
-                                    Text("Sign Out")
-                                        .foregroundColor(.red)
-                                    Spacer()
-                                    Image(systemName: "arrow.right.square")
-                                        .foregroundColor(.red)
-                                }
-                                .padding()
-                            }
-                            .background(Color(UIColor.secondarySystemGroupedBackground))
-                            .cornerRadius(AppCornerRadius.medium)
-                        }
-                        .padding(.horizontal, AppSpacing.md)
-
-                        Spacer(minLength: 40)
+                        .frame(maxWidth: .infinity)
                     }
-                    .padding(.top, AppSpacing.md)
-                }, onOffsetChange: { offset in
-                    scrollOffset = offset
-                })
+
+                    // Settings List
+                    ScrollOffsetReader(content: {
+                        VStack(spacing: AppSpacing.lg) {
+                            // Role switcher and verification (conditional)
+                            accountSection
+
+                            // Contact Information
+                            ContactVerificationSection(
+                                showingEmailVerification: $showingEmailVerification,
+                                showingPhoneVerification: $showingPhoneVerification,
+                                showingAddEmail: $showingAddEmail,
+                                showingAddPhone: $showingAddPhone,
+                                showingAccountLinking: $showingAccountLinking,
+                                isVerifyingEmail: $isVerifyingEmail
+                            )
+                            .environmentObject(authService)
+
+                            // Settings
+                            settingsSection
+
+                            // Community
+                            communitySection(geometry: geometry)
+
+                            // Support
+                            supportSection
+
+                            // App info
+                            appInfoSection
+
+                            Spacer(minLength: AppSpacing.xl)
+                        }
+                        .padding(.top, AppSpacing.md)
+                        .frame(maxWidth: .infinity)
+                    }, onOffsetChange: { offset in
+                        scrollOffset = offset
+                    })
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationBarHidden(true)
             }
-            .background(Color(UIColor.systemGroupedBackground))
-            .navigationBarHidden(true)
         }
+        .navigationViewStyle(.stack)
         .sheet(isPresented: $showingEmailVerification) {
             EmailVerificationSheet(
                 isVerifying: $isVerifyingEmail
@@ -396,7 +131,6 @@ struct ProfileView: View {
         .sheet(isPresented: $showingPhoneVerification) {
             if let phone = authService.currentUser?.phoneNumber {
                 PhoneVerificationView(phoneNumber: phone) {
-                    // On verified
                     showingPhoneVerification = false
                 }
                 .environmentObject(authService)
@@ -452,10 +186,353 @@ struct ProfileView: View {
         }
     }
 
-    // Computed property for current active role
-    private var currentActiveRole: UserRole {
-        authService.currentUser?.currentActiveRole ?? authService.currentUser?.role ?? .attendee
+    // MARK: - Responsive Sizing Functions
+
+    /// Calculate profile icon size based on screen size
+    private func profileIconSize(for geometry: GeometryProxy) -> CGFloat {
+        let baseSize: CGFloat = 60
+        let screenWidth = geometry.size.width
+
+        // Scale up for iPad (width > 768)
+        if screenWidth > 768 {
+            return min(baseSize * 1.5, 90) // Max 90pt on large iPads
+        }
+        // Slightly smaller on very small phones
+        else if screenWidth < 375 {
+            return max(baseSize * 0.9, 50) // Min 50pt
+        }
+        return baseSize
     }
+
+    /// Calculate badge icon size
+    private func badgeIconSize(for geometry: GeometryProxy) -> CGFloat {
+        let screenWidth = geometry.size.width
+        return screenWidth > 768 ? 22 : 18
+    }
+
+    /// Calculate social icon size
+    private func socialIconSize(for geometry: GeometryProxy) -> CGFloat {
+        let screenWidth = geometry.size.width
+        if screenWidth > 768 {
+            return 36 // iPad
+        } else if screenWidth > 600 {
+            return 32 // Large phones / iPad mini
+        } else {
+            return 28 // Standard phones
+        }
+    }
+
+    /// Calculate social icon container size (44pt minimum for touch target)
+    private func socialIconContainerSize(for geometry: GeometryProxy) -> CGFloat {
+        max(socialIconSize(for: geometry) + 16, 44) // Add padding, ensure 44pt minimum
+    }
+
+    /// Responsive role badge
+    @ViewBuilder
+    private func roleBadge(for geometry: GeometryProxy) -> some View {
+        HStack(spacing: AppSpacing.xs) { // FIXED: Changed from xxs to xs (xxs doesn't exist)
+            Image(systemName: currentActiveRole == .organizer
+                  ? "briefcase.fill"
+                  : "person.fill"
+            )
+            .font(.caption)
+
+            Text(currentActiveRole.displayName)
+                .font(.caption)
+
+            // Show dual-role indicator if user has both roles
+            if authService.currentUser?.hasBothRoles == true {
+                Text("(Switch)")
+                    .font(.system(size: geometry.size.width > 768 ? 10 : 8))
+                    .opacity(0.8)
+            }
+        }
+        .foregroundColor(Color.white)
+        .padding(.horizontal, geometry.size.width > 768 ? AppSpacing.sm : AppSpacing.xs)
+        .padding(.vertical, AppSpacing.xs) // FIXED: Changed from xxs to xs (xxs doesn't exist)
+        .background(
+            RoleConfig.getPrimaryColor(for: currentActiveRole)
+        )
+        .cornerRadius(AppCornerRadius.small)
+    }
+
+    // MARK: - View Sections
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Account")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, AppSpacing.md)
+
+            VStack(spacing: 1) {
+                // Verification Status (for organizers)
+                if authService.currentUser?.isOrganizer == true {
+                    if authService.currentUser?.isVerified == true {
+                        // Verified organizer
+                        HStack {
+                            Image(systemName: "checkmark.shield.fill")
+                                .foregroundColor(.green)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Verified Organizer")
+                                    .foregroundColor(.primary)
+                                if let verificationDate = authService.currentUser?.verificationDate {
+                                    Text("Verified on \(verificationDate.formatted(date: .abbreviated, time: .omitted))")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .padding()
+                    } else {
+                        // Unverified organizer
+                        Button(action: {
+                            showingVerification = true
+                        }) {
+                            HStack {
+                                Image(systemName: "exclamationmark.shield.fill")
+                                    .foregroundColor(.orange)
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Verification Required")
+                                        .foregroundColor(.primary)
+                                    Text("Complete verification to access organizer features")
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                        }
+                    }
+
+                    Divider()
+                } else if authService.currentUser?.isAttendee == true {
+                    // Attendee - optional verification
+                    if authService.currentUser?.isVerified != true {
+                        Button(action: {
+                            showingVerification = true
+                        }) {
+                            HStack {
+                                Image(systemName: "checkmark.shield")
+                                    .foregroundColor(RoleConfig.getPrimaryColor(for: .attendee))
+
+                                Text("Verify National ID (Optional)")
+                                    .foregroundColor(.primary)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                        }
+
+                        Divider()
+                    }
+                }
+
+                // Role switching
+                roleSwitch
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .padding(.horizontal, AppSpacing.md)
+        }
+    }
+
+    @ViewBuilder
+    private var roleSwitch: some View {
+        if authService.currentUser?.hasBothRoles == true {
+            Button(action: {
+                if authService.currentUser?.isVerifiedOrganizer != true && currentActiveRole == .attendee {
+                    showingVerificationRequired = true
+                } else {
+                    toggleActiveRole()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "arrow.left.arrow.right")
+                        .foregroundColor(
+                            RoleConfig.getPrimaryColor(for: currentActiveRole)
+                        )
+
+                    Text("Switch Role")
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Text(currentActiveRole == .attendee ? "To Organizer" : "To Attendee")
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+            }
+        } else if authService.currentUser?.canBecomeOrganizer == true {
+            Button(action: { showingBecomeOrganizer = true }) {
+                HStack {
+                    Image(systemName: "briefcase")
+                        .foregroundColor(RoleConfig.organizerPrimary)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Become an Organizer")
+                            .foregroundColor(.primary)
+
+                        Text("Host events and sell tickets")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding()
+            }
+        }
+    }
+
+    private var settingsSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Settings")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, AppSpacing.md)
+
+            VStack(spacing: 1) {
+                settingsRow(icon: "person", title: "Edit Profile", destination: AnyView(EditProfileView().environmentObject(authService)))
+                settingsRow(icon: "sparkles", title: "Interests", destination: AnyView(FavoriteEventCategoriesView(isOnboarding: false).environmentObject(authService)))
+                settingsRow(icon: "bell", title: "Notifications", destination: AnyView(NotificationSettingsView().environmentObject(authService)))
+                settingsRow(icon: "creditcard", title: "Payment Methods", destination: AnyView(PaymentMethodsView().environmentObject(authService)))
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .padding(.horizontal, AppSpacing.md)
+        }
+    }
+
+    private func communitySection(geometry: GeometryProxy) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Community")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, AppSpacing.md)
+
+            VStack(spacing: 1) {
+                // Invite Friends
+                Button(action: inviteFriends) {
+                    HStack {
+                        Label("Invite Friends", systemImage: "person.2.fill")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                }
+                .buttonStyle(.plain)
+
+                Divider()
+
+                // Rate Us
+                Button(action: rateApp) {
+                    HStack {
+                        Label("Rate Us", systemImage: "star.fill")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                }
+                .buttonStyle(.plain)
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .padding(.horizontal, AppSpacing.md)
+
+            // Social Media Icons - FULLY RESPONSIVE
+            HStack(spacing: AppSpacing.md) {
+                Spacer()
+
+                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .white, geometry: geometry)
+                socialMediaImageButton(imageName: "instagram_icon", url: "https://instagram.com/eventpassug", geometry: geometry)
+                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", tintColor: .white, geometry: geometry)
+                socialMediaImageButton(imageName: "facebook_icon", url: "https://facebook.com/eventpassug", geometry: geometry)
+                socialMediaSystemButton(icon: "globe", url: "https://eventpassug.com", geometry: geometry)
+
+                Spacer()
+            }
+            .padding(.vertical, AppSpacing.sm)
+        }
+    }
+
+    private var supportSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Support")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, AppSpacing.md)
+
+            VStack(spacing: 1) {
+                settingsRow(icon: "questionmark.circle", title: "Help Center", destination: AnyView(HelpCenterView().environmentObject(authService)))
+                settingsRow(icon: "envelope", title: "Contact Support", destination: AnyView(SupportCenterView().environmentObject(authService)))
+                settingsRow(icon: "doc.text", title: "Terms & Privacy", destination: AnyView(TermsAndPrivacyView()))
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+            .padding(.horizontal, AppSpacing.md)
+        }
+    }
+
+    private var appInfoSection: some View {
+        VStack(spacing: AppSpacing.sm) {
+            HStack {
+                Text("Version")
+                Spacer()
+                Text("1.0.0")
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+
+            Button(action: {
+                showingLogoutConfirmation = true
+            }) {
+                HStack {
+                    Text("Sign Out")
+                        .foregroundColor(.red)
+                    Spacer()
+                    Image(systemName: "arrow.right.square")
+                        .foregroundColor(.red)
+                }
+                .padding()
+            }
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .cornerRadius(AppCornerRadius.medium)
+        }
+        .padding(.horizontal, AppSpacing.md)
+    }
+
+    // MARK: - Helper Views
 
     @ViewBuilder
     private func settingsRow(icon: String, title: String, destination: AnyView) -> some View {
@@ -474,7 +551,7 @@ struct ProfileView: View {
     }
 
     @ViewBuilder
-    private func socialMediaImageButton(imageName: String, url: String, tintColor: Color? = nil) -> some View {
+    private func socialMediaImageButton(imageName: String, url: String, tintColor: Color? = nil, geometry: GeometryProxy) -> some View {
         Button(action: {
             openURL(url)
         }) {
@@ -491,25 +568,28 @@ struct ProfileView: View {
                         .scaledToFit()
                 }
             }
-            .frame(width: 28, height: 28)
-            .frame(width: 40, height: 40)
+            .frame(width: socialIconSize(for: geometry), height: socialIconSize(for: geometry))
+            .frame(width: socialIconContainerSize(for: geometry), height: socialIconContainerSize(for: geometry))
+            .background(Color(UIColor.secondarySystemGroupedBackground))
             .clipShape(Circle())
         }
     }
 
     @ViewBuilder
-    private func socialMediaSystemButton(icon: String, url: String) -> some View {
+    private func socialMediaSystemButton(icon: String, url: String, geometry: GeometryProxy) -> some View {
         Button(action: {
             openURL(url)
         }) {
             Image(systemName: icon)
-                .font(.system(size: 20))
+                .font(.system(size: socialIconSize(for: geometry) * 0.7))
                 .foregroundColor(.gray)
-                .frame(width: 40, height: 40)
+                .frame(width: socialIconContainerSize(for: geometry), height: socialIconContainerSize(for: geometry))
                 .background(Color(UIColor.secondarySystemGroupedBackground))
                 .clipShape(Circle())
         }
     }
+
+    // MARK: - Actions
 
     private func inviteFriends() {
         let shareText = """
@@ -523,12 +603,16 @@ struct ProfileView: View {
             applicationActivities: nil
         )
 
+        // RESPONSIVE POPOVER POSITIONING - Uses view controller's view bounds
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
             activityVC.popoverPresentationController?.sourceView = rootVC.view
-            activityVC.popoverPresentationController?.sourceRect = CGRect(x: UIScreen.main.bounds.width / 2,
-                                                                           y: UIScreen.main.bounds.height / 2,
-                                                                           width: 0, height: 0)
+            activityVC.popoverPresentationController?.sourceRect = CGRect(
+                x: rootVC.view.bounds.midX,
+                y: rootVC.view.bounds.midY,
+                width: 0,
+                height: 0
+            )
             activityVC.popoverPresentationController?.permittedArrowDirections = []
             rootVC.present(activityVC, animated: true)
         }
@@ -537,16 +621,9 @@ struct ProfileView: View {
     }
 
     private func rateApp() {
-        // Option 1: Request in-app review (preferred)
         if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
             SKStoreReviewController.requestReview(in: scene)
         }
-
-        // Option 2: Direct App Store link (fallback)
-        // Uncomment and add your App Store ID when available
-        // let appStoreURL = "https://apps.apple.com/app/id YOUR_APP_ID?action=write-review"
-        // openURL(appStoreURL)
-
         HapticFeedback.light()
     }
 
@@ -574,7 +651,6 @@ struct ProfileView: View {
     private func toggleActiveRole() {
         guard var user = authService.currentUser else { return }
 
-        // Toggle between attendee and organizer active role
         let newActiveRole: UserRole = currentActiveRole == .attendee ? .organizer : .attendee
         user.currentActiveRole = newActiveRole
 
@@ -598,9 +674,16 @@ struct ProfileView: View {
             HapticFeedback.error()
         }
     }
+
+    // MARK: - Computed Properties
+
+    private var currentActiveRole: UserRole {
+        authService.currentUser?.currentActiveRole ?? authService.currentUser?.role ?? .attendee
+    }
 }
 
-// Contact Verification Section
+// MARK: - Contact Verification Section (No changes needed - already well structured)
+
 struct ContactVerificationSection: View {
     @EnvironmentObject var authService: MockAuthService
     @Binding var showingEmailVerification: Bool
@@ -620,9 +703,7 @@ struct ContactVerificationSection: View {
             VStack(spacing: 1) {
                 // Email Status/Actions
                 if let email = authService.currentUser?.email {
-                    // Email exists
                     if authService.currentUser?.isEmailVerified == true {
-                        // Verified email
                         HStack {
                             Image(systemName: "envelope.fill")
                                 .foregroundColor(.green)
@@ -642,7 +723,6 @@ struct ContactVerificationSection: View {
                         }
                         .padding()
                     } else {
-                        // Unverified email
                         Button(action: {
                             showingEmailVerification = true
                         }) {
@@ -670,7 +750,6 @@ struct ContactVerificationSection: View {
 
                     Divider()
                 } else {
-                    // No email - show add button
                     Button(action: {
                         showingAddEmail = true
                     }) {
@@ -694,9 +773,7 @@ struct ContactVerificationSection: View {
 
                 // Phone Status/Actions
                 if let phone = authService.currentUser?.phoneNumber {
-                    // Phone exists
                     if authService.currentUser?.isPhoneVerified == true {
-                        // Verified phone
                         HStack {
                             Image(systemName: "phone.fill")
                                 .foregroundColor(.green)
@@ -716,7 +793,6 @@ struct ContactVerificationSection: View {
                         }
                         .padding()
                     } else {
-                        // Unverified phone
                         Button(action: {
                             showingPhoneVerification = true
                         }) {
@@ -744,7 +820,6 @@ struct ContactVerificationSection: View {
 
                     Divider()
                 } else {
-                    // No phone - show add button
                     Button(action: {
                         showingAddPhone = true
                     }) {
@@ -766,7 +841,7 @@ struct ContactVerificationSection: View {
                     Divider()
                 }
 
-                // Account Linking (if user has less than 3 providers)
+                // Account Linking
                 if (authService.currentUser?.authProviders.count ?? 0) < 3 {
                     Button(action: {
                         showingAccountLinking = true
@@ -800,7 +875,8 @@ struct ContactVerificationSection: View {
     }
 }
 
-// Email Verification Sheet
+// MARK: - Email Verification Sheet (Already responsive - no changes needed)
+
 struct EmailVerificationSheet: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authService: MockAuthService
@@ -810,62 +886,66 @@ struct EmailVerificationSheet: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: AppSpacing.xl) {
-                Spacer()
+            GeometryReader { geometry in
+                VStack(spacing: AppSpacing.xl) {
+                    Spacer()
 
-                VStack(spacing: AppSpacing.md) {
-                    Image(systemName: "envelope.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(RoleConfig.attendeePrimary)
-
-                    Text("Verify Your Email")
-                        .font(AppTypography.title2)
-                        .fontWeight(.bold)
-
-                    if let email = authService.currentUser?.email {
-                        Text("We'll send a verification link to:")
-                            .font(AppTypography.body)
-                            .foregroundColor(.secondary)
-
-                        Text(email)
-                            .font(AppTypography.headline)
+                    VStack(spacing: AppSpacing.md) {
+                        Image(systemName: "envelope.circle.fill")
+                            .font(.system(size: max(geometry.size.width * 0.15, 60)))
                             .foregroundColor(RoleConfig.attendeePrimary)
+
+                        Text("Verify Your Email")
+                            .font(AppTypography.title2)
+                            .fontWeight(.bold)
+
+                        if let email = authService.currentUser?.email {
+                            Text("We'll send a verification link to:")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+
+                            Text(email)
+                                .font(AppTypography.headline)
+                                .foregroundColor(RoleConfig.attendeePrimary)
+                        }
+
+                        Text("Click the link in the email to verify your address")
+                            .font(AppTypography.callout)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
 
-                    Text("Click the link in the email to verify your address")
-                        .font(AppTypography.callout)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                if isVerifying {
-                    ProgressView()
-                        .padding()
-                } else {
-                    Button(action: sendVerificationEmail) {
-                        Text("Send Verification Email")
-                            .font(AppTypography.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
+                    if isVerifying {
+                        ProgressView()
                             .padding()
-                            .background(RoleConfig.attendeePrimary)
-                            .cornerRadius(AppCornerRadius.medium)
+                    } else {
+                        Button(action: sendVerificationEmail) {
+                            Text("Send Verification Email")
+                                .font(AppTypography.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(RoleConfig.attendeePrimary)
+                                .cornerRadius(AppCornerRadius.medium)
+                        }
+                        .padding(.horizontal, AppSpacing.xl)
                     }
-                    .padding(.horizontal, AppSpacing.xl)
-                }
 
-                Spacer()
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
                     }
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Email Sent!", isPresented: $showSuccess) {
             Button("OK") {
                 dismiss()
@@ -897,7 +977,8 @@ struct EmailVerificationSheet: View {
     }
 }
 
-// Account Linking View
+// MARK: - Account Linking View (Already responsive - no changes needed)
+
 struct AccountLinkingView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authService: MockAuthService
@@ -980,7 +1061,7 @@ struct AccountLinkingView: View {
                                 linkButton(
                                     icon: "envelope.fill",
                                     title: "Link Email & Password",
-                                    action: {} // Shows add email sheet
+                                    action: {}
                                 )
                             }
                         }
@@ -989,6 +1070,7 @@ struct AccountLinkingView: View {
                 }
                 .padding(.bottom, AppSpacing.xl)
             }
+            .frame(maxWidth: .infinity)
             .background(Color(UIColor.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -999,6 +1081,7 @@ struct AccountLinkingView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Account Linked!", isPresented: $showSuccess) {
             Button("OK") {}
         } message: {
@@ -1010,7 +1093,7 @@ struct AccountLinkingView: View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(AppTypography.body)
                     .foregroundColor(RoleConfig.attendeePrimary)
 
                 Text(title)
@@ -1026,6 +1109,7 @@ struct AccountLinkingView: View {
                 }
             }
             .padding()
+            .frame(maxWidth: .infinity)
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
         }

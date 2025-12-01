@@ -3,6 +3,7 @@
 //  EventPassUG
 //
 //  Displays user's favorited/saved events with modern UI
+//  ✨ Fully responsive with adaptive grid layout
 //
 
 import SwiftUI
@@ -32,187 +33,184 @@ struct FavoriteEventsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Modern header with gradient accent
+        GeometryReader { geometry in
             VStack(spacing: 0) {
-                // Top bar with close and actions
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .frame(width: 32, height: 32)
-                            .background(Color(UIColor.tertiarySystemFill))
-                            .clipShape(Circle())
-                    }
-
-                    Spacer()
-
-                    // Sort button
-                    if !favoriteEvents.isEmpty {
-                        Menu {
-                            ForEach(SortOption.allCases, id: \.self) { option in
-                                Button(action: {
-                                    sortOption = option
-                                    HapticFeedback.selection()
-                                }) {
-                                    Label(option.rawValue, systemImage: option.icon)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.primary)
-                                .frame(width: 32, height: 32)
-                                .background(Color(UIColor.tertiarySystemFill))
-                                .clipShape(Circle())
-                        }
-                    }
-
-                    if !favoriteEvents.isEmpty {
-                        Menu {
-                            Button(role: .destructive, action: {
-                                withAnimation {
-                                    favoriteManager.clearAll()
-                                }
-                                HapticFeedback.success()
-                            }) {
-                                Label("Clear All", systemImage: "trash")
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.primary)
-                                .frame(width: 32, height: 32)
-                                .background(Color(UIColor.tertiarySystemFill))
-                                .clipShape(Circle())
-                        }
-                    }
-                }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.sm)
-
-                // Title section with heart icon
-                HStack(spacing: AppSpacing.sm) {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.pink)
-
-                    Text("My Favorites")
-                        .font(.system(size: 28, weight: .bold))
-
-                    Spacer()
-
-                    if !favoriteEvents.isEmpty {
-                        Text("\(favoriteEvents.count)")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(minWidth: 28)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.pink)
-                            .clipShape(Capsule())
-                    }
-                }
-                .padding(.horizontal, AppSpacing.md)
-                .padding(.top, AppSpacing.md)
-                .padding(.bottom, AppSpacing.sm)
-
-                // Sort indicator
-                if !favoriteEvents.isEmpty {
+                // Modern header with gradient accent
+                VStack(spacing: 0) {
+                    // Top bar with close and actions
                     HStack {
-                        Image(systemName: sortOption.icon)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                                .frame(width: 32, height: 32)
+                                .background(Color(UIColor.tertiarySystemFill))
+                                .clipShape(Circle())
+                        }
 
-                        Text("Sorted by \(sortOption.rawValue)")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
+                        Spacer()
+
+                        // Sort button
+                        if !favoriteEvents.isEmpty {
+                            Menu {
+                                ForEach(SortOption.allCases, id: \.self) { option in
+                                    Button(action: {
+                                        sortOption = option
+                                        HapticFeedback.selection()
+                                    }) {
+                                        Label(option.rawValue, systemImage: option.icon)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "arrow.up.arrow.down")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color(UIColor.tertiarySystemFill))
+                                    .clipShape(Circle())
+                            }
+                        }
+
+                        if !favoriteEvents.isEmpty {
+                            Menu {
+                                Button(role: .destructive, action: {
+                                    withAnimation {
+                                        favoriteManager.clearAll()
+                                    }
+                                    HapticFeedback.success()
+                                }) {
+                                    Label("Clear All", systemImage: "trash")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color(UIColor.tertiarySystemFill))
+                                    .clipShape(Circle())
+                            }
+                        }
+                    }
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.top, AppSpacing.sm)
+
+                    // Title section with heart icon
+                    HStack(spacing: AppSpacing.sm) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.pink)
+
+                        Text("My Favorites")
+                            .font(.system(size: 28, weight: .bold))
+
+                        Spacer()
+
+                        if !favoriteEvents.isEmpty {
+                            Text("\(favoriteEvents.count)")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(minWidth: 28)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.pink)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.top, AppSpacing.md)
+                    .padding(.bottom, AppSpacing.sm)
+
+                    // Sort indicator
+                    if !favoriteEvents.isEmpty {
+                        HStack {
+                            Image(systemName: sortOption.icon)
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+
+                            Text("Sorted by \(sortOption.rawValue)")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.bottom, AppSpacing.sm)
+                    }
+                }
+                .background(Color(UIColor.systemBackground))
+
+                // Content
+                if isLoading {
+                    ScrollView {
+                        VStack(spacing: AppSpacing.md) {
+                            ForEach(0..<3, id: \.self) { _ in
+                                SkeletonFavoriteCard()
+                            }
+                        }
+                        .padding(AppSpacing.md)
+                    }
+                } else if favoriteEvents.isEmpty {
+                    // Modern empty state
+                    VStack(spacing: AppSpacing.lg) {
+                        Spacer()
+
+                        ZStack {
+                            Circle()
+                                .fill(Color.pink.opacity(0.1))
+                                .frame(width: 120, height: 120)
+
+                            Image(systemName: "heart.slash")
+                                .font(.system(size: 50))
+                                .foregroundColor(.pink.opacity(0.6))
+                        }
+
+                        VStack(spacing: AppSpacing.sm) {
+                            Text("No Favorites Yet")
+                                .font(.system(size: 24, weight: .bold))
+
+                            Text("Tap the heart icon on events\nyou'd like to save for later")
+                                .font(AppTypography.body)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+
+                        Button(action: { dismiss() }) {
+                            Text("Browse Events")
+                                .font(AppTypography.body)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, AppSpacing.xl)
+                                .padding(.vertical, AppSpacing.sm)
+                                .background(Color.pink)
+                                .cornerRadius(AppCornerRadius.medium)
+                        }
+                        .padding(.top, AppSpacing.md)
 
                         Spacer()
                     }
-                    .padding(.horizontal, AppSpacing.md)
-                    .padding(.bottom, AppSpacing.sm)
-                }
-            }
-            .background(Color(UIColor.systemBackground))
-
-            // Content
-            if isLoading {
-                ScrollView {
-                    VStack(spacing: AppSpacing.md) {
-                        ForEach(0..<3, id: \.self) { _ in
-                            SkeletonEventCard()
-                        }
-                    }
-                    .padding(AppSpacing.md)
-                }
-            } else if favoriteEvents.isEmpty {
-                // Modern empty state
-                VStack(spacing: AppSpacing.lg) {
-                    Spacer()
-
-                    ZStack {
-                        Circle()
-                            .fill(Color.pink.opacity(0.1))
-                            .frame(width: 120, height: 120)
-
-                        Image(systemName: "heart.slash")
-                            .font(.system(size: 50))
-                            .foregroundColor(.pink.opacity(0.6))
-                    }
-
-                    VStack(spacing: AppSpacing.sm) {
-                        Text("No Favorites Yet")
-                            .font(.system(size: 24, weight: .bold))
-
-                        Text("Tap the heart icon on events\nyou'd like to save for later")
-                            .font(AppTypography.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-
-                    Button(action: { dismiss() }) {
-                        Text("Browse Events")
-                            .font(AppTypography.body)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, AppSpacing.xl)
-                            .padding(.vertical, AppSpacing.sm)
-                            .background(Color.pink)
-                            .cornerRadius(AppCornerRadius.medium)
-                    }
-                    .padding(.top, AppSpacing.md)
-
-                    Spacer()
-                }
-                .padding(AppSpacing.xl)
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: AppSpacing.md) {
-                        ForEach(sortedFavoriteEvents) { event in
-                            FavoriteEventCard(
-                                event: event,
-                                onRemove: {
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        favoriteManager.removeFavorite(eventId: event.id)
-                                    }
-                                    HapticFeedback.light()
+                    .padding(AppSpacing.xl)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        ResponsiveFavoriteGrid(
+                            events: sortedFavoriteEvents,
+                            geometry: geometry,
+                            isLoading: false,
+                            onRemove: { eventId in
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    favoriteManager.removeFavorite(eventId: eventId)
                                 }
-                            )
-                            .transition(.asymmetric(
-                                insertion: .opacity,
-                                removal: .move(edge: .trailing).combined(with: .opacity)
-                            ))
-                        }
+                                HapticFeedback.light()
+                            }
+                        )
                     }
-                    .padding(AppSpacing.md)
                 }
             }
-        }
-        .background(Color(UIColor.systemGroupedBackground))
-        .onAppear {
-            loadEvents()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(UIColor.systemGroupedBackground))
+            .onAppear {
+                loadEvents()
+            }
         }
     }
 
@@ -246,6 +244,48 @@ struct FavoriteEventsView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Responsive Favorite Grid
+
+struct ResponsiveFavoriteGrid: View {
+    let events: [Event]
+    let geometry: GeometryProxy
+    let isLoading: Bool
+    let onRemove: (UUID) -> Void
+
+    // Calculate adaptive columns based on screen width
+    private var columns: [GridItem] {
+        let width = geometry.size.width
+        let minCardWidth: CGFloat = 320 // Minimum card width
+        let spacing: CGFloat = AppSpacing.md
+        let padding: CGFloat = AppSpacing.md * 2
+
+        // Calculate how many columns can fit
+        let availableWidth = width - padding
+        let columnCount = max(1, Int(availableWidth / (minCardWidth + spacing)))
+
+        return Array(repeating: GridItem(.flexible(), spacing: spacing), count: columnCount)
+    }
+
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: AppSpacing.md) {
+            ForEach(events) { event in
+                FavoriteEventCard(
+                    event: event,
+                    onRemove: {
+                        onRemove(event.id)
+                    }
+                )
+                .transition(.asymmetric(
+                    insertion: .opacity,
+                    removal: .move(edge: .trailing).combined(with: .opacity)
+                ))
+            }
+        }
+        .padding(AppSpacing.md)
+        .frame(maxWidth: .infinity) // Fill entire width
     }
 }
 
@@ -333,8 +373,7 @@ struct FavoriteEventCard: View {
                     }
                 }
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             // Remove button
             Button(action: onRemove) {
@@ -349,8 +388,59 @@ struct FavoriteEventCard: View {
         .padding(AppSpacing.sm)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(AppCornerRadius.medium)
+        .frame(maxWidth: .infinity) // Card fills available width
     }
 }
+
+// MARK: - Skeleton Favorite Card
+
+struct SkeletonFavoriteCard: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        HStack(spacing: AppSpacing.md) {
+            // Thumbnail skeleton
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 80, height: 80)
+                .cornerRadius(AppCornerRadius.medium)
+
+            // Details skeleton
+            VStack(alignment: .leading, spacing: 8) {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 16)
+                    .cornerRadius(4)
+
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 120, height: 12)
+                    .cornerRadius(4)
+
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 12)
+                    .cornerRadius(4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Button skeleton
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 44, height: 44)
+        }
+        .padding(AppSpacing.sm)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.medium)
+        .opacity(isAnimating ? 0.6 : 1.0)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: isAnimating)
+        .onAppear {
+            isAnimating = true
+        }
+    }
+}
+
+// MARK: - Preview
 
 #Preview {
     FavoriteEventsView()

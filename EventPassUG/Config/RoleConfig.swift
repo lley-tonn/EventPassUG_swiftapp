@@ -155,6 +155,7 @@ struct AppButtonDimensions {
     static let smallHeight: CGFloat = 36
     static let iconButtonSize: CGFloat = 44
     static let compactIconSize: CGFloat = 32
+    static let minimumTouchTarget: CGFloat = 44 // Apple's accessibility minimum
 }
 
 // MARK: - Animation
