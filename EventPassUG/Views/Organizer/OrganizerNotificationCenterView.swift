@@ -11,8 +11,8 @@ struct OrganizerNotificationCenterView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authService: MockAuthService
     @EnvironmentObject var services: ServiceContainer
+    @StateObject private var notificationManager = InAppNotificationManager.shared
 
-    @State private var notifications: [OrganizerNotification] = []
     @State private var isLoading = true
 
     var body: some View {
@@ -51,13 +51,16 @@ struct OrganizerNotificationCenterView: View {
                     Spacer()
                     ProgressView()
                     Spacer()
-                } else if notifications.isEmpty {
+                } else if notificationManager.notifications.isEmpty {
                     emptyState
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 0) {
-                            ForEach(notifications) { notification in
-                                OrganizerNotificationRow(notification: notification)
+                            ForEach(notificationManager.notifications) { notification in
+                                NotificationRow(notification: notification)
+                                    .onTapGesture {
+                                        notificationManager.markAsRead(notificationId: notification.id)
+                                    }
                                 Divider()
                                     .padding(.leading, 60)
                             }
@@ -95,102 +98,24 @@ struct OrganizerNotificationCenterView: View {
     }
 
     private func loadNotifications() {
-        // Load organizer-specific notifications
         Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-
+            try? await Task.sleep(nanoseconds: 300_000_000)
             await MainActor.run {
-                // Mock organizer notifications
-                notifications = [
-                    OrganizerNotification(
-                        id: UUID(),
-                        type: .ticketSale,
-                        title: "New Ticket Sale",
-                        message: "Someone purchased 2 VIP tickets for your event 'Tech Innovators Summit'",
-                        timestamp: Date().addingTimeInterval(-3600),
-                        isRead: false,
-                        eventId: UUID()
-                    ),
-                    OrganizerNotification(
-                        id: UUID(),
-                        type: .eventMilestone,
-                        title: "Event Milestone",
-                        message: "Your event 'Summer Music Festival' reached 100 ticket sales!",
-                        timestamp: Date().addingTimeInterval(-7200),
-                        isRead: false,
-                        eventId: UUID()
-                    ),
-                    OrganizerNotification(
-                        id: UUID(),
-                        type: .eventReminder,
-                        title: "Event Starting Soon",
-                        message: "Your event 'Charity Run' starts in 24 hours",
-                        timestamp: Date().addingTimeInterval(-86400),
-                        isRead: true,
-                        eventId: UUID()
-                    )
-                ]
                 isLoading = false
             }
         }
     }
 
     private func markAllAsRead() {
-        withAnimation {
-            notifications = notifications.map { notification in
-                var updated = notification
-                updated.isRead = true
-                return updated
-            }
-        }
+        notificationManager.markAllAsRead()
         HapticFeedback.success()
-    }
-}
-
-// MARK: - Organizer Notification Model
-
-struct OrganizerNotification: Identifiable {
-    let id: UUID
-    let type: NotificationType
-    let title: String
-    let message: String
-    let timestamp: Date
-    var isRead: Bool
-    let eventId: UUID?
-
-    enum NotificationType {
-        case ticketSale
-        case eventMilestone
-        case eventReminder
-        case payoutReady
-        case eventUpdate
-
-        var iconName: String {
-            switch self {
-            case .ticketSale: return "ticket.fill"
-            case .eventMilestone: return "star.fill"
-            case .eventReminder: return "bell.fill"
-            case .payoutReady: return "banknote.fill"
-            case .eventUpdate: return "info.circle.fill"
-            }
-        }
-
-        var iconColor: Color {
-            switch self {
-            case .ticketSale: return .green
-            case .eventMilestone: return .yellow
-            case .eventReminder: return .orange
-            case .payoutReady: return .blue
-            case .eventUpdate: return .purple
-            }
-        }
     }
 }
 
 // MARK: - Notification Row
 
-struct OrganizerNotificationRow: View {
-    let notification: OrganizerNotification
+struct NotificationRow: View {
+    let notification: NotificationModel
 
     var body: some View {
         HStack(alignment: .top, spacing: AppSpacing.md) {
@@ -233,6 +158,34 @@ struct OrganizerNotificationRow: View {
         }
         .padding(AppSpacing.md)
         .background(notification.isRead ? Color.clear : RoleConfig.organizerPrimary.opacity(0.05))
+    }
+}
+
+// MARK: - NotificationType Extension
+
+extension NotificationType {
+    var iconName: String {
+        switch self {
+        case .ticketPurchased: return "ticket.fill"
+        case .ticketScanned: return "checkmark.circle.fill"
+        case .eventReminder: return "bell.fill"
+        case .paymentReceived: return "banknote.fill"
+        case .eventUpdate: return "info.circle.fill"
+        case .newEvent: return "star.fill"
+        case .newFollower: return "person.badge.plus.fill"
+        }
+    }
+
+    var iconColor: Color {
+        switch self {
+        case .ticketPurchased: return .green
+        case .ticketScanned: return .blue
+        case .eventReminder: return .orange
+        case .paymentReceived: return .purple
+        case .eventUpdate: return .indigo
+        case .newEvent: return .yellow
+        case .newFollower: return .pink
+        }
     }
 }
 

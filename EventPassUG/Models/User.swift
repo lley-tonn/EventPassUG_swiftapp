@@ -53,6 +53,7 @@ struct User: Identifiable, Codable, Equatable {
     var phoneNumber: String?
     var dateJoined: Date
     var favoriteEventIds: [UUID]
+    var followedOrganizerIds: [UUID]
 
     // Contact Verification
     var isEmailVerified: Bool
@@ -132,6 +133,7 @@ struct User: Identifiable, Codable, Equatable {
         phoneNumber: String? = nil,
         dateJoined: Date = Date(),
         favoriteEventIds: [UUID] = [],
+        followedOrganizerIds: [UUID] = [],
         isEmailVerified: Bool = false,
         isPhoneVerified: Bool = false,
         authProviders: [String] = [],
@@ -161,6 +163,7 @@ struct User: Identifiable, Codable, Equatable {
         self.phoneNumber = phoneNumber
         self.dateJoined = dateJoined
         self.favoriteEventIds = favoriteEventIds
+        self.followedOrganizerIds = followedOrganizerIds
         self.isEmailVerified = isEmailVerified
         self.isPhoneVerified = isPhoneVerified
         self.authProviders = authProviders

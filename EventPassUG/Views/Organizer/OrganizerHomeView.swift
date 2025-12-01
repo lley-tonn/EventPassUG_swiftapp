@@ -508,7 +508,16 @@ struct OrganizerEventDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.lg) {
                 // Event poster
-                EventPosterImage(posterURL: event.posterURL, height: 250, cornerRadius: AppCornerRadius.medium)
+                EventPosterImage(posterURL: event.posterURL, height: 240, cornerRadius: AppCornerRadius.medium)
+                    .frame(maxWidth: .infinity)
+                    .frame(maxHeight: 240)
+                    .clipped()
+                    .shadow(
+                        color: Color.black.opacity(0.12),
+                        radius: 10,
+                        x: 0,
+                        y: 5
+                    )
 
                 // Event title and status
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {

@@ -374,36 +374,59 @@ struct Step1EventDetails: View {
                         .font(AppTypography.headline)
 
                     PhotosPicker(selection: $selectedPosterItem, matching: .images) {
-                        if let uiImage = posterUIImage {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
-                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
-                                .clipped()
-                                .cornerRadius(AppCornerRadius.medium)
-                        } else if let posterName = posterImageName {
-                            EventPosterImage(
-                                posterURL: posterName,
-                                height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56,
-                                cornerRadius: AppCornerRadius.medium
-                            )
-                            .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
-                        } else {
-                            RoundedRectangle(cornerRadius: AppCornerRadius.medium)
-                                .fill(Color(UIColor.systemGray6))
-                                .frame(width: geometry.size.width - (ResponsiveSpacing.md(geometry) * 2))
-                                .frame(height: (geometry.size.width - (ResponsiveSpacing.md(geometry) * 2)) * 0.56)
-                                .overlay(
-                                    VStack(spacing: 8) {
-                                        Image(systemName: "photo.badge.plus")
-                                            .font(.system(size: 40))
-                                        Text("Tap to select poster")
-                                            .font(AppTypography.caption)
-                                    }
-                                    .foregroundColor(.secondary)
+                        ZStack {
+                            if let uiImage = posterUIImage {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: min(260, geometry.size.width * 0.65)) // Max 260px, 4:5 ratio
+                                    .clipped()
+                                    .cornerRadius(AppCornerRadius.medium)
+                                    .shadow(
+                                        color: Color.black.opacity(0.15),
+                                        radius: 12,
+                                        x: 0,
+                                        y: 6
+                                    )
+                            } else if let posterName = posterImageName {
+                                EventPosterImage(
+                                    posterURL: posterName,
+                                    height: min(260, geometry.size.width * 0.65),
+                                    cornerRadius: AppCornerRadius.medium
                                 )
+                                .frame(maxWidth: .infinity)
+                                .frame(height: min(260, geometry.size.width * 0.65))
+                                .shadow(
+                                    color: Color.black.opacity(0.15),
+                                    radius: 12,
+                                    x: 0,
+                                    y: 6
+                                )
+                            } else {
+                                RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                                    .fill(Color(UIColor.systemGray6))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: min(260, geometry.size.width * 0.65))
+                                    .overlay(
+                                        VStack(spacing: 8) {
+                                            Image(systemName: "photo.badge.plus")
+                                                .font(.system(size: 40))
+                                                .foregroundColor(.secondary)
+                                            Text("Tap to select poster")
+                                                .font(AppTypography.callout)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    )
+                                    .shadow(
+                                        color: Color.black.opacity(0.08),
+                                        radius: 8,
+                                        x: 0,
+                                        y: 4
+                                    )
+                            }
                         }
+                        .padding(.horizontal, AppSpacing.xs)
                     }
                     .onChange(of: selectedPosterItem) { newItem in
                         Task {
@@ -784,6 +807,15 @@ struct Step3Review: View {
                         EventPosterImage(
                             posterURL: posterName,
                             cornerRadius: AppCornerRadius.medium
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(maxHeight: 240)
+                        .clipped()
+                        .shadow(
+                            color: Color.black.opacity(0.12),
+                            radius: 10,
+                            x: 0,
+                            y: 5
                         )
                     }
 

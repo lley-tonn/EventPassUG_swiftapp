@@ -76,6 +76,9 @@ struct OrganizerProfile: Codable, Equatable {
     // Onboarding Progress
     var completedOnboardingSteps: Set<OrganizerOnboardingStep>
 
+    // Follower count
+    var followerCount: Int
+
     init(
         publicEmail: String = "",
         publicPhone: String = "",
@@ -87,7 +90,8 @@ struct OrganizerProfile: Codable, Equatable {
         payoutMethod: PayoutMethod? = nil,
         agreedToTermsDate: Date? = nil,
         termsVersion: String? = nil,
-        completedOnboardingSteps: Set<OrganizerOnboardingStep> = []
+        completedOnboardingSteps: Set<OrganizerOnboardingStep> = [],
+        followerCount: Int = 0
     ) {
         self.publicEmail = publicEmail
         self.publicPhone = publicPhone
@@ -100,6 +104,7 @@ struct OrganizerProfile: Codable, Equatable {
         self.agreedToTermsDate = agreedToTermsDate
         self.termsVersion = termsVersion
         self.completedOnboardingSteps = completedOnboardingSteps
+        self.followerCount = followerCount
     }
 }
 

@@ -11,6 +11,7 @@ import Combine
 struct OrganizerDashboardView: View {
     @EnvironmentObject var authService: MockAuthService
     @EnvironmentObject var services: ServiceContainer
+    @StateObject private var followManager = FollowManager.shared
 
     @State private var totalRevenue: Double = 0
     @State private var totalTicketsSold: Int = 0
@@ -77,6 +78,13 @@ struct OrganizerDashboardView: View {
                                 value: "\(events.count)",
                                 icon: "chart.bar.fill",
                                 color: .purple
+                            )
+
+                            AnalyticsCard(
+                                title: "Followers",
+                                value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
+                                icon: "person.2.fill",
+                                color: .orange
                             )
                         }
 

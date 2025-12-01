@@ -12,7 +12,9 @@ struct EventDetailsView: View {
     let event: Event
 
     @EnvironmentObject var services: ServiceContainer
+    @EnvironmentObject var authService: MockAuthService
     @Environment(\.dismiss) var dismiss
+    @StateObject private var followManager = FollowManager.shared
 
     @State private var isLiked = false
     @State private var selectedTicketType: TicketType?
@@ -69,12 +71,41 @@ struct EventDetailsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Text("by \(event.organizerName)")
-                            .font(AppTypography.callout)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.85)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack(spacing: AppSpacing.sm) {
+                            Text("by \(event.organizerName)")
+                                .font(AppTypography.callout)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.85)
+
+                            Button(action: {
+                                followManager.toggleFollow(
+                                    organizerId: event.organizerId,
+                                    organizerName: event.organizerName,
+                                    followerId: authService.currentUser?.id,
+                                    followerName: authService.currentUser?.fullName
+                                )
+                                HapticFeedback.light()
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: followManager.isFollowing(organizerId: event.organizerId) ? "checkmark" : "plus")
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Text(followManager.isFollowing(organizerId: event.organizerId) ? "Following" : "Follow")
+                                        .font(.system(size: 12, weight: .semibold))
+                                }
+                                .foregroundColor(followManager.isFollowing(organizerId: event.organizerId) ? .white : RoleConfig.attendeePrimary)
+                                .padding(.horizontal, AppSpacing.sm)
+                                .padding(.vertical, 6)
+                                .background(
+                                    followManager.isFollowing(organizerId: event.organizerId)
+                                        ? RoleConfig.attendeePrimary
+                                        : RoleConfig.attendeePrimary.opacity(0.1)
+                                )
+                                .cornerRadius(AppCornerRadius.small)
+                            }
+
+                            Spacer()
+                        }
 
                         // Actions
                         HStack(spacing: AppSpacing.sm) { // FIXED: Using design system constant

@@ -15,31 +15,49 @@ struct EventCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Poster image - FIXED: Using aspect ratio instead of fixed height
-            GeometryReader { geometry in
-                ZStack(alignment: .topLeading) {
-                    // Poster - maintains 4:5 aspect ratio
-                    EventPosterImage(posterURL: event.posterURL, height: geometry.size.width * 1.25)
-
-                    // Happening now indicator
-                    if event.isHappeningNow {
-                        HStack(spacing: AppSpacing.compactSpacing) { // FIXED: Using design system constant
-                            PulsingDot(size: 10) // FIXED: Increased from 8 for better visibility
-                            Text("Happening now")
-                                .font(.system(size: 13)) // FIXED: Increased from 12 for better readability
-                                .fontWeight(.semibold)
-                        }
-                        .padding(.horizontal, AppSpacing.sm) // FIXED: Using design system constant
-                        .padding(.vertical, AppSpacing.compactSpacing) // FIXED: Using design system constant
-                        .background(
-                            Capsule()
-                                .fill(.ultraThinMaterial)
+            // Poster image - Optimized with max height constraint
+            ZStack(alignment: .topLeading) {
+                if let posterURL = event.posterURL {
+                    EventPosterImage(posterURL: posterURL, height: 200, cornerRadius: 0)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
+                        .clipped()
+                } else {
+                    Rectangle()
+                        .fill(Color(UIColor.systemGray5))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 200)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .font(.system(size: 40))
+                                .foregroundColor(.secondary)
                         )
-                        .padding(AppSpacing.sm)
+                }
+
+                // Happening now indicator
+                if event.isHappeningNow {
+                    HStack(spacing: AppSpacing.compactSpacing) {
+                        PulsingDot(size: 10)
+                        Text("Happening now")
+                            .font(.system(size: 13))
+                            .fontWeight(.semibold)
                     }
+                    .padding(.horizontal, AppSpacing.sm)
+                    .padding(.vertical, AppSpacing.compactSpacing)
+                    .background(
+                        Capsule()
+                            .fill(.ultraThinMaterial)
+                    )
+                    .padding(AppSpacing.sm)
                 }
             }
-            .aspectRatio(0.65, contentMode: .fit) // Reduced poster size for compact display
+            .frame(height: 200)
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: AppCornerRadius.medium,
+                    topTrailingRadius: AppCornerRadius.medium
+                )
+            )
 
             // Event details
             VStack(alignment: .leading, spacing: AppSpacing.sm) {

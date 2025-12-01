@@ -14,6 +14,7 @@ enum NotificationType: String, Codable {
     case newEvent
     case ticketScanned
     case paymentReceived
+    case newFollower
 }
 
 struct NotificationModel: Identifiable, Codable, Equatable {
@@ -25,6 +26,7 @@ struct NotificationModel: Identifiable, Codable, Equatable {
     var isRead: Bool
     let relatedEventId: UUID?
     let relatedTicketId: UUID?
+    let relatedUserId: UUID? // For follow notifications
 
     init(
         id: UUID = UUID(),
@@ -34,7 +36,8 @@ struct NotificationModel: Identifiable, Codable, Equatable {
         timestamp: Date = Date(),
         isRead: Bool = false,
         relatedEventId: UUID? = nil,
-        relatedTicketId: UUID? = nil
+        relatedTicketId: UUID? = nil,
+        relatedUserId: UUID? = nil
     ) {
         self.id = id
         self.type = type
@@ -44,6 +47,7 @@ struct NotificationModel: Identifiable, Codable, Equatable {
         self.isRead = isRead
         self.relatedEventId = relatedEventId
         self.relatedTicketId = relatedTicketId
+        self.relatedUserId = relatedUserId
     }
 }
 
