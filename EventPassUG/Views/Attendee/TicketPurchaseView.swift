@@ -41,8 +41,13 @@ struct TicketPurchaseView: View {
                     VStack(alignment: .leading, spacing: AppSpacing.lg) {
                         // Event summary
                         HStack(spacing: AppSpacing.md) {
-                            EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: AppCornerRadius.small)
-                                .frame(width: 80)
+                            EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: 0)
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                                        .stroke(Color.gray.opacity(0.1), lineWidth: 0.5)
+                                )
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(event.title)

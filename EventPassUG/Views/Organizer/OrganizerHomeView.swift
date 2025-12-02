@@ -353,8 +353,13 @@ struct OrganizerEventCard: View {
         VStack(spacing: 0) {
             HStack(spacing: AppSpacing.md) {
                 // Poster thumbnail
-                EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: AppCornerRadius.small)
-                    .frame(width: 80)
+                EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: 0)
+                    .frame(width: 80, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                            .stroke(Color.gray.opacity(0.1), lineWidth: 0.5)
+                    )
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(event.title)

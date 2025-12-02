@@ -18,6 +18,10 @@ struct SearchView: View {
     @State private var isLoading = true
     @State private var selectedCategory: EventCategory?
 
+    // Share functionality
+    @State private var showingShareSheet = false
+    @State private var shareEvent: Event?
+
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
@@ -109,6 +113,11 @@ struct SearchView: View {
                                 onLikeTap: { eventId in
                                     favoriteManager.toggleFavorite(eventId: eventId)
                                     HapticFeedback.light()
+                                },
+                                onShareTap: { event in
+                                    shareEvent = event
+                                    showingShareSheet = true
+                                    HapticFeedback.light()
                                 }
                             )
                         }
@@ -131,6 +140,15 @@ struct SearchView: View {
         .navigationViewStyle(.stack)
         .onAppear {
             loadEvents()
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let event = shareEvent {
+                ShareSheet(items: shareItems(for: event)) { completed in
+                    if completed {
+                        HapticFeedback.success()
+                    }
+                }
+            }
         }
     }
 
@@ -172,6 +190,28 @@ struct SearchView: View {
             }
         }
     }
+
+    private func shareItems(for event: Event) -> [Any] {
+        var items: [Any] = []
+
+        let eventText = """
+        🎉 Check out this event: \(event.title)
+
+        📅 \(DateUtilities.formatEventDateTime(event.startDate))
+        📍 \(event.venue.name), \(event.venue.city)
+
+        🎫 Get tickets now!
+        """
+
+        items.append(eventText)
+
+        // Deep link URL for the event
+        if let url = URL(string: "https://eventpassug.com/events/\(event.id)") {
+            items.append(url)
+        }
+
+        return items
+    }
 }
 
 // MARK: - Responsive Event Grid
@@ -182,6 +222,7 @@ struct ResponsiveEventGrid: View {
     let isLoading: Bool
     let onEventTap: (Event) -> Void
     let onLikeTap: (UUID) -> Void
+    let onShareTap: ((Event) -> Void)?
 
     @StateObject private var favoriteManager = FavoriteManager.shared
 
@@ -209,7 +250,10 @@ struct ResponsiveEventGrid: View {
                         onLikeTap: {
                             onLikeTap(event.id)
                         },
-                        onCardTap: {}
+                        onCardTap: {},
+                        onShareTap: onShareTap != nil ? {
+                            onShareTap?(event)
+                        } : nil
                     )
                 }
             }

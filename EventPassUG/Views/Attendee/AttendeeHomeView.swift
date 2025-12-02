@@ -28,6 +28,10 @@ struct AttendeeHomeView: View {
     // Scroll position anchor - critical for preventing auto-scroll
     @State private var scrollViewID = UUID()
 
+    // Share functionality
+    @State private var showingShareSheet = false
+    @State private var shareEvent: Event?
+
     // MARK: - Body
 
     var body: some View {
@@ -65,6 +69,15 @@ struct AttendeeHomeView: View {
         .sheet(isPresented: $showingFavorites) {
             FavoriteEventsView()
                 .environmentObject(services)
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let event = shareEvent {
+                ShareSheet(items: shareItems(for: event)) { completed in
+                    if completed {
+                        HapticFeedback.success()
+                    }
+                }
+            }
         }
     }
 
@@ -304,7 +317,12 @@ struct AttendeeHomeView: View {
                                         favoriteManager.toggleFavorite(eventId: event.id)
                                         HapticFeedback.light()
                                     },
-                                    onCardTap: {}
+                                    onCardTap: {},
+                                    onShareTap: {
+                                        shareEvent = event
+                                        showingShareSheet = true
+                                        HapticFeedback.light()
+                                    }
                                 )
                             }
                             .buttonStyle(.plain)
@@ -322,6 +340,30 @@ struct AttendeeHomeView: View {
             // CRITICAL: Give ScrollView a stable ID
             .id(scrollViewID)
         }
+    }
+
+    // MARK: - Share Functionality
+
+    private func shareItems(for event: Event) -> [Any] {
+        var items: [Any] = []
+
+        let eventText = """
+        🎉 Check out this event: \(event.title)
+
+        📅 \(DateUtilities.formatEventDateTime(event.startDate))
+        📍 \(event.venue.name), \(event.venue.city)
+
+        🎫 Get tickets now!
+        """
+
+        items.append(eventText)
+
+        // Deep link URL for the event
+        if let url = URL(string: "https://eventpassug.com/events/\(event.id)") {
+            items.append(url)
+        }
+
+        return items
     }
 }
 

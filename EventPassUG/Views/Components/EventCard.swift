@@ -12,6 +12,7 @@ struct EventCard: View {
     let isLiked: Bool
     let onLikeTap: () -> Void
     let onCardTap: () -> Void
+    let onShareTap: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -48,6 +49,28 @@ struct EventCard: View {
                         Capsule()
                             .fill(.ultraThinMaterial)
                     )
+                    .padding(AppSpacing.sm)
+                }
+
+                // Share button overlay (top-right)
+                if let shareAction = onShareTap {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button(action: shareAction) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                    .frame(width: 36, height: 36)
+                                    .background(
+                                        Circle()
+                                            .fill(.ultraThinMaterial)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        Spacer()
+                    }
                     .padding(AppSpacing.sm)
                 }
             }
@@ -147,7 +170,8 @@ struct EventCard: View {
                     event: event,
                     isLiked: false,
                     onLikeTap: {},
-                    onCardTap: {}
+                    onCardTap: {},
+                    onShareTap: {}
                 )
             }
         }
