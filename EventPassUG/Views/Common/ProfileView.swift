@@ -11,6 +11,7 @@ import StoreKit
 
 struct ProfileView: View {
     @EnvironmentObject var authService: MockAuthService
+    @StateObject private var followManager = FollowManager.shared
     @State private var showingRoleSwitch = false
     @State private var showingLogoutConfirmation = false
     @State private var scrollOffset: CGFloat = 0
@@ -72,6 +73,11 @@ struct ProfileView: View {
 
                                 // Role badge - FULLY RESPONSIVE
                                 roleBadge(for: geometry)
+
+                                // Follower count badge (for organizers)
+                                if authService.currentUser?.isOrganizer == true {
+                                    followerBadge(for: geometry)
+                                }
                             }
 
                             Spacer()
@@ -252,6 +258,32 @@ struct ProfileView: View {
         .padding(.vertical, AppSpacing.xs) // FIXED: Changed from xxs to xs (xxs doesn't exist)
         .background(
             RoleConfig.getPrimaryColor(for: currentActiveRole)
+        )
+        .cornerRadius(AppCornerRadius.small)
+    }
+
+    /// Follower count badge for organizers
+    @ViewBuilder
+    private func followerBadge(for geometry: GeometryProxy) -> some View {
+        let followerCount = followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID())
+
+        HStack(spacing: AppSpacing.xs) {
+            Image(systemName: "person.2.fill")
+                .font(.caption)
+
+            Text("\(followerCount) \(followerCount == 1 ? "Follower" : "Followers")")
+                .font(.caption)
+                .fontWeight(.medium)
+        }
+        .foregroundColor(Color.white)
+        .padding(.horizontal, geometry.size.width > 768 ? AppSpacing.sm : AppSpacing.xs)
+        .padding(.vertical, AppSpacing.xs)
+        .background(
+            LinearGradient(
+                colors: [Color.orange, Color.pink],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
         )
         .cornerRadius(AppCornerRadius.small)
     }

@@ -57,7 +57,7 @@ struct OrganizerNotificationCenterView: View {
                     ScrollView {
                         LazyVStack(spacing: 0) {
                             ForEach(notificationManager.notifications) { notification in
-                                NotificationRow(notification: notification)
+                                OrganizerNotificationRowView(notification: notification)
                                     .onTapGesture {
                                         notificationManager.markAsRead(notificationId: notification.id)
                                     }
@@ -112,9 +112,9 @@ struct OrganizerNotificationCenterView: View {
     }
 }
 
-// MARK: - Notification Row
+// MARK: - Organizer Notification Row
 
-struct NotificationRow: View {
+struct OrganizerNotificationRowView: View {
     let notification: NotificationModel
 
     var body: some View {

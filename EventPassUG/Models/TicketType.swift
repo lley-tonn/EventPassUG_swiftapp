@@ -59,6 +59,11 @@ struct TicketType: Identifiable, Codable, Equatable {
     }
 
     var formattedPrice: String {
+        // Show "Sold Out" if tickets are sold out
+        if isSoldOut {
+            return "Sold Out"
+        }
+
         if price == 0 {
             return "Free"
         }
@@ -88,6 +93,31 @@ struct TicketType: Identifiable, Codable, Equatable {
 
     var isPurchasable: Bool {
         isAvailableForPurchase
+    }
+
+    /// Check if ticket is available for purchase with event start date
+    /// Sales automatically end when the event starts or when sold out
+    func isAvailableForPurchase(eventStartDate: Date) -> Bool {
+        let now = Date()
+
+        // If sold out, not available
+        if isSoldOut {
+            return false
+        }
+
+        // If event has started, sales end
+        if now >= eventStartDate {
+            return false
+        }
+
+        // Check sale window
+        let effectiveEndDate = min(saleEndDate, eventStartDate)
+        return now >= saleStartDate && now <= effectiveEndDate
+    }
+
+    /// Check if ticket is purchasable (with event start date)
+    func isPurchasable(eventStartDate: Date) -> Bool {
+        isAvailableForPurchase(eventStartDate: eventStartDate)
     }
 
     // Formatted availability text

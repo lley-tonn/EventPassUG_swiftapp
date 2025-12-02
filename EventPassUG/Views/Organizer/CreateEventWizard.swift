@@ -795,129 +795,352 @@ struct Step3Review: View {
     let onEdit: (Int) -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                Text("Review your event before publishing")
-                    .font(AppTypography.body)
-                    .foregroundColor(.secondary)
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header
+                    VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                        Text("Review Your Event")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.primary)
 
-                // Event preview card
-                VStack(alignment: .leading, spacing: AppSpacing.md) {
-                    if let posterName = posterImageName {
-                        EventPosterImage(
-                            posterURL: posterName,
-                            cornerRadius: AppCornerRadius.medium
-                        )
+                        Text("Double-check everything looks perfect before publishing")
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.top, AppSpacing.md)
+                    .padding(.bottom, AppSpacing.lg)
+
+                    // Preview Card (looks like real event card)
+                    VStack(spacing: 0) {
+                        eventPreviewCard(geometry: geometry)
+                    }
+                    .padding(.horizontal, AppSpacing.md)
+
+                    // Ticket Details Section
+                    ticketDetailsSection
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.top, AppSpacing.lg)
+
+                    // Extra bottom padding for scroll
+                    Spacer(minLength: AppSpacing.xl * 2)
+                }
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+        }
+    }
+
+    // MARK: - Event Preview Card
+
+    @ViewBuilder
+    private func eventPreviewCard(geometry: GeometryProxy) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Poster Image with proper sizing
+            ZStack(alignment: .topTrailing) {
+                if let posterName = posterImageName {
+                    EventPosterImage(
+                        posterURL: posterName,
+                        height: 200,
+                        cornerRadius: 0
+                    )
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
+                    .clipped()
+                } else {
+                    Rectangle()
+                        .fill(Color(UIColor.systemGray5))
                         .frame(maxWidth: .infinity)
-                        .frame(maxHeight: 240)
-                        .clipped()
-                        .shadow(
-                            color: Color.black.opacity(0.12),
-                            radius: 10,
-                            x: 0,
-                            y: 5
+                        .frame(height: 200)
+                        .overlay(
+                            VStack(spacing: 8) {
+                                Image(systemName: "photo")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.secondary)
+                                Text("No poster selected")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         )
+                }
+
+                // Edit button overlay
+                Button(action: { onEdit(1) }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Edit")
+                            .font(.system(size: 12, weight: .semibold))
                     }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.6))
+                    .cornerRadius(6)
+                }
+                .padding(AppSpacing.sm)
+            }
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: AppCornerRadius.medium,
+                    topTrailingRadius: AppCornerRadius.medium
+                )
+            )
 
-                    Text(title)
-                        .font(AppTypography.title2)
-                        .fontWeight(.bold)
+            // Event Details
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                // Title
+                Text(title)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                    Text(description)
-                        .font(AppTypography.body)
-                        .foregroundColor(.secondary)
+                // Category
+                HStack(spacing: 6) {
+                    Image(systemName: category.iconName)
+                        .font(.system(size: 14))
+                    Text(category.rawValue)
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .foregroundColor(RoleConfig.organizerPrimary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(RoleConfig.organizerPrimary.opacity(0.1))
+                .cornerRadius(AppCornerRadius.small)
 
-                    HStack {
-                        Image(systemName: category.iconName)
-                        Text(category.rawValue)
-                    }
-                    .font(AppTypography.callout)
-                    .foregroundColor(RoleConfig.organizerPrimary)
+                Divider()
+                    .padding(.vertical, AppSpacing.xs)
 
-                    Divider()
+                // Date
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 18))
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .frame(width: 24)
 
-                    InfoRow(icon: "calendar", title: "Date", value: DateUtilities.formatEventFullDateTime(startDate, endDate: endDate))
-                    InfoRow(icon: "location.fill", title: "Venue", value: "\(venueName)\n\(venueAddress)")
-
-                    Button(action: { onEdit(1) }) {
-                        Text("Edit Details")
-                            .font(AppTypography.caption)
-                            .foregroundColor(RoleConfig.organizerPrimary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("When")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        Text(DateUtilities.formatEventFullDateTime(startDate, endDate: endDate))
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
                     }
                 }
-                .padding(AppSpacing.md)
-                .background(Color(UIColor.secondarySystemGroupedBackground))
-                .cornerRadius(AppCornerRadius.medium)
 
-                // Tickets
-                VStack(alignment: .leading, spacing: AppSpacing.md) {
-                    HStack {
-                        Text("Tickets")
-                            .font(AppTypography.headline)
-                        Spacer()
-                        Button(action: { onEdit(2) }) {
-                            Text("Edit")
-                                .font(AppTypography.caption)
-                                .foregroundColor(RoleConfig.organizerPrimary)
-                        }
-                    }
+                // Location
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .frame(width: 24)
 
-                    ForEach(ticketTypes) { type in
-                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 4) {
-                                        Text(type.name)
-                                            .font(AppTypography.callout)
-                                            .fontWeight(.medium)
-
-                                        // Status badge
-                                        HStack(spacing: 2) {
-                                            Image(systemName: type.availabilityStatus.iconName)
-                                                .font(.system(size: 10))
-                                            Text(type.availabilityStatus.rawValue)
-                                                .font(.system(size: 10, weight: .medium))
-                                        }
-                                        .foregroundColor(type.availabilityStatus.color)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(type.availabilityStatus.color.opacity(0.15))
-                                        .cornerRadius(4)
-                                    }
-
-                                    if type.isUnlimitedQuantity {
-                                        Text("Unlimited quantity")
-                                            .font(AppTypography.caption)
-                                            .foregroundColor(.secondary)
-                                    } else {
-                                        Text("\(type.quantity) available")
-                                            .font(AppTypography.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Text(type.formattedPrice)
-                                    .font(AppTypography.callout)
-                                    .fontWeight(.semibold)
-                            }
-
-                            // Sale window info
-                            HStack(spacing: 4) {
-                                Image(systemName: "clock")
-                                    .font(.system(size: 10))
-                                Text(type.formattedSaleWindow)
-                                    .font(.system(size: 11))
-                            }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Where")
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.secondary)
-                        }
-                        .padding(AppSpacing.sm)
-                        .background(Color(UIColor.tertiarySystemGroupedBackground))
-                        .cornerRadius(AppCornerRadius.small)
+                        Text(venueName)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.primary)
+                        Text(venueAddress)
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                // Description
+                if !description.isEmpty {
+                    Divider()
+                        .padding(.vertical, AppSpacing.xs)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("About")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.secondary)
+                        Text(description)
+                            .font(.system(size: 14))
+                            .foregroundColor(.primary)
+                            .lineLimit(3)
                     }
                 }
             }
             .padding(AppSpacing.md)
         }
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.medium)
+        .shadow(
+            color: Color.black.opacity(0.08),
+            radius: 12,
+            x: 0,
+            y: 4
+        )
+    }
+
+    // MARK: - Ticket Details Section
+
+    @ViewBuilder
+    private var ticketDetailsSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Ticket Types")
+                        .font(.system(size: 20, weight: .bold))
+
+                    Text("\(ticketTypes.count) \(ticketTypes.count == 1 ? "type" : "types") available")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Button(action: { onEdit(2) }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("Edit")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundColor(RoleConfig.organizerPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(RoleConfig.organizerPrimary.opacity(0.1))
+                    .cornerRadius(AppCornerRadius.small)
+                }
+            }
+
+            VStack(spacing: AppSpacing.sm) {
+                ForEach(ticketTypes) { type in
+                    ticketTypeCard(type)
+                }
+            }
+        }
+    }
+
+    // MARK: - Ticket Type Card
+
+    @ViewBuilder
+    private func ticketTypeCard(_ type: TicketType) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            // Header
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(type.name)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+
+                    // Quantity badge
+                    HStack(spacing: 4) {
+                        Image(systemName: "ticket.fill")
+                            .font(.system(size: 11))
+                        Text(type.isUnlimitedQuantity ? "Unlimited" : "\(type.quantity) available")
+                            .font(.system(size: 12))
+                    }
+                    .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                // Price or Sold Out
+                Text(type.formattedPrice)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(type.isSoldOut ? .red : RoleConfig.organizerPrimary)
+            }
+
+            // Sale Window with auto-end logic
+            saleWindowInfo(for: type)
+
+            // Perks (if any)
+            if !type.perks.isEmpty {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Includes")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+
+                    ForEach(type.perks.prefix(3), id: \.self) { perk in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.green)
+                            Text(perk)
+                                .font(.system(size: 13))
+                                .foregroundColor(.primary)
+                        }
+                    }
+
+                    if type.perks.count > 3 {
+                        Text("+\(type.perks.count - 3) more")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .padding(.leading, 20)
+                    }
+                }
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.medium)
+    }
+
+    // MARK: - Sale Window Info
+
+    @ViewBuilder
+    private func saleWindowInfo(for type: TicketType) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "clock.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(RoleConfig.organizerPrimary)
+
+                Text("Sale Period")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                // Start
+                HStack {
+                    Text("Starts:")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                    Text(type.saleStartDate.formatted(date: .abbreviated, time: .shortened))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                }
+
+                // End - automatically set to event start or when sold out
+                HStack {
+                    Text("Ends:")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+
+                    if type.isSoldOut {
+                        Text("Sold Out")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.red)
+                    } else if type.saleEndDate > startDate {
+                        // Sale end should not exceed event start
+                        Text(startDate.formatted(date: .abbreviated, time: .shortened))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.orange)
+                        Text("(Event starts)")
+                            .font(.system(size: 11))
+                            .foregroundColor(.orange)
+                    } else {
+                        Text(type.saleEndDate.formatted(date: .abbreviated, time: .shortened))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.primary)
+                    }
+                }
+            }
+            .padding(.leading, 18)
+        }
+        .padding(AppSpacing.xs)
+        .background(Color(UIColor.systemGray6).opacity(0.5))
+        .cornerRadius(AppCornerRadius.small)
     }
 }
 

@@ -239,8 +239,9 @@ struct EventDetailsView: View {
                                 TicketTypeCard(
                                     ticketType: ticketType,
                                     isSelected: selectedTicketType?.id == ticketType.id,
+                                    eventStartDate: event.startDate,
                                     onTap: {
-                                        if ticketType.isPurchasable {
+                                        if ticketType.isPurchasable(eventStartDate: event.startDate) {
                                             HapticFeedback.selection()
                                             selectedTicketType = ticketType
                                         }
@@ -391,6 +392,39 @@ struct EventDetailsView: View {
                 TicketPurchaseView(event: event, ticketType: ticketType)
             }
         }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareSheet(items: shareItems) { completed in
+                if completed {
+                    HapticFeedback.success()
+                }
+            }
+        }
+    }
+
+    // MARK: - Share Items
+
+    private var shareItems: [Any] {
+        var items: [Any] = []
+
+        // Event title
+        let eventText = """
+        🎉 Check out this event: \(event.title)
+
+        📅 \(DateUtilities.formatEventDateTime(event.startDate))
+        📍 \(event.venue.name), \(event.venue.city)
+
+        🎫 Get tickets now!
+        """
+
+        items.append(eventText)
+
+        // Add event URL if available (in production, this would be a deep link)
+        // For now, we'll add a placeholder
+        if let url = URL(string: "https://eventpassug.com/events/\(event.id)") {
+            items.append(url)
+        }
+
+        return items
     }
 
     private func openInMaps() {
@@ -438,10 +472,11 @@ struct InfoRow: View {
 struct TicketTypeCard: View {
     let ticketType: TicketType
     let isSelected: Bool
+    let eventStartDate: Date
     let onTap: () -> Void
 
     private var isDisabled: Bool {
-        !ticketType.isPurchasable
+        !ticketType.isPurchasable(eventStartDate: eventStartDate)
     }
 
     var body: some View {
@@ -479,15 +514,20 @@ struct TicketTypeCard: View {
                                 .minimumScaleFactor(0.9)
                         }
 
-                        // Quantity remaining
-                        if ticketType.isUnlimitedQuantity {
-                            Text("Unlimited tickets available")
+                        // Availability status (no specific numbers shown to attendees)
+                        if ticketType.isSoldOut {
+                            Text("Sold Out")
                                 .font(AppTypography.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.red)
+                                .fontWeight(.semibold)
+                        } else if ticketType.isUnlimitedQuantity {
+                            Text("Available")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.green)
                         } else {
-                            Text("\(ticketType.remaining) of \(ticketType.quantity) remaining")
+                            Text("Available")
                                 .font(AppTypography.caption)
-                                .foregroundColor(ticketType.isSoldOut ? .red : .secondary)
+                                .foregroundColor(.green)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

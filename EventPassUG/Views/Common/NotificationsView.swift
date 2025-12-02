@@ -102,6 +102,7 @@ struct NotificationRow: View {
         case .newEvent: return "star.fill"
         case .ticketScanned: return "qrcode"
         case .paymentReceived: return "dollarsign.circle.fill"
+        case .newFollower: return "person.badge.plus.fill"
         }
     }
 
@@ -113,6 +114,7 @@ struct NotificationRow: View {
         case .newEvent: return .purple
         case .ticketScanned: return .indigo
         case .paymentReceived: return .green
+        case .newFollower: return .pink
         }
     }
 }

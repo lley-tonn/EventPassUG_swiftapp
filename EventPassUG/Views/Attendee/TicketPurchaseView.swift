@@ -233,12 +233,12 @@ struct TicketPurchaseView: View {
                     throw NSError(domain: "User not authenticated", code: 401)
                 }
 
-                // Validate ticket availability before purchase
-                guard ticketType.isPurchasable else {
+                // Validate ticket availability before purchase (including event start check)
+                guard ticketType.isPurchasable(eventStartDate: event.startDate) else {
                     throw NSError(
                         domain: "EventPassUG",
                         code: 400,
-                        userInfo: [NSLocalizedDescriptionKey: "This ticket is no longer available for purchase. The sale window may have ended or tickets are sold out."]
+                        userInfo: [NSLocalizedDescriptionKey: "This ticket is no longer available for purchase. The event has started, the sale window has ended, or tickets are sold out."]
                     )
                 }
 

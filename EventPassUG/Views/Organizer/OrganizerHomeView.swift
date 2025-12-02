@@ -212,7 +212,7 @@ struct OrganizerHomeView: View {
                                         OrganizerEventCard(event: event)
                                     }
                                 } else {
-                                    NavigationLink(destination: OrganizerEventDetailView(event: event)) {
+                                    NavigationLink(destination: EventAnalyticsView(event: event)) {
                                         OrganizerEventCard(event: event)
                                     }
                                 }
