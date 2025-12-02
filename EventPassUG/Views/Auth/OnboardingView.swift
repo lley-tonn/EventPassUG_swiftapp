@@ -28,27 +28,12 @@ struct OnboardingView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: AppSpacing.xl) {
-                    // Logo and title
-                    VStack(spacing: AppSpacing.md) {
-                        Image(systemName: "ticket.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(RoleConfig.getPrimaryColor(for: selectedRole))
-
-                        Text("EventPass UG")
-                            .font(AppTypography.largeTitle)
-                            .fontWeight(.bold)
-
-                        Text("Discover and manage events across Uganda")
-                            .font(AppTypography.callout)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .padding(.top, AppSpacing.xxl)
-
-                    if !showingRoleSelection {
+            GeometryReader { geometry in
+                ScrollView {
+                    HStack {
+                        Spacer(minLength: 0)
+                        VStack(spacing: AppSpacing.xl) {
+                            if !showingRoleSelection {
                         // Sign up form
                         VStack(spacing: AppSpacing.md) {
                             AppInputField(
@@ -148,6 +133,7 @@ struct OnboardingView: View {
                             }
                         }
                         .padding(.horizontal, AppSpacing.xl)
+                        .padding(.top, AppSpacing.xxl)
                     } else {
                         // Role selection
                         VStack(spacing: AppSpacing.md) {
@@ -201,9 +187,14 @@ struct OnboardingView: View {
                             )
                         }
                         .padding(.horizontal, AppSpacing.xl)
-                    }
+                        .padding(.top, AppSpacing.xxl)
+                            }
 
-                    Spacer()
+                            Spacer()
+                        }
+                        .frame(maxWidth: min(geometry.size.width, 600))
+                        Spacer(minLength: 0)
+                    }
                 }
             }
             .navigationBarHidden(true)
@@ -233,6 +224,7 @@ struct OnboardingView: View {
             )
             .environmentObject(authService)
         }
+        .navigationViewStyle(.stack)
     }
 
     // MARK: - Validation
