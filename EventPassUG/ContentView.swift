@@ -63,13 +63,13 @@ struct ContentView: View {
                         }
                 } else {
                     // Edge case: authenticated but no user object
-                    OnboardingView()
+                    ModernAuthView(authService: authService)
                 }
 
             } else {
                 // USER NOT LOGGED IN: Show login/signup
                 // (Onboarding already seen, so skip it)
-                OnboardingView()
+                ModernAuthView(authService: authService)
             }
         }
         // Smooth transitions between states

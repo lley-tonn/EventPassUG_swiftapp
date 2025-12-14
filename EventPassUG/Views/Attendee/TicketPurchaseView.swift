@@ -37,160 +37,165 @@ struct TicketPurchaseView: View {
                     tickets: purchasedTickets
                 )
             } else {
-                ScrollView(.vertical, showsIndicators: true) {
-                    VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                        // Event summary
-                        HStack(spacing: AppSpacing.md) {
-                            EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: 0)
-                                .frame(width: 80, height: 80)
-                                .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: AppCornerRadius.medium)
-                                        .stroke(Color.gray.opacity(0.1), lineWidth: 0.5)
-                                )
+                GeometryReader { geometry in
+                    ScrollView(.vertical, showsIndicators: true) {
+                        VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                            // Event summary
+                            HStack(spacing: AppSpacing.md) {
+                                EventPosterImage(posterURL: event.posterURL, height: 80, cornerRadius: 0)
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: AppCornerRadius.medium))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                                            .stroke(Color.gray.opacity(0.1), lineWidth: 0.5)
+                                    )
 
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(event.title)
-                                    .font(AppTypography.headline)
-                                    .lineLimit(2)
-                                    .minimumScaleFactor(0.8)
-
-                                Text(DateUtilities.formatEventDateTime(event.startDate))
-                                    .font(AppTypography.subheadline)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(AppCornerRadius.medium)
-
-                        // Ticket type
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Ticket Type")
-                                .font(AppTypography.headline)
-
-                            VStack(spacing: AppSpacing.md) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(ticketType.name)
-                                        .font(AppTypography.body)
+                                    Text(event.title)
+                                        .font(AppDesign.Typography.cardTitle)
+                                        .lineLimit(2)
+                                        .minimumScaleFactor(0.8)
 
-                                    Text(ticketType.formattedPrice)
-                                        .font(AppTypography.title3)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(RoleConfig.attendeePrimary)
+                                    Text(DateUtilities.formatEventDateTime(event.startDate))
+                                        .font(AppDesign.Typography.secondary)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.8)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding()
+                            .frame(maxWidth: geometry.size.width - (AppSpacing.md * 2))
+                            .background(Color(UIColor.secondarySystemGroupedBackground))
+                            .cornerRadius(AppCornerRadius.medium)
 
-                                // Quantity selector
-                                HStack(spacing: 16) {
-                                    Button(action: {
-                                        if quantity > 1 {
-                                            quantity -= 1
-                                            HapticFeedback.light()
-                                        }
-                                    }) {
-                                        Image(systemName: "minus.circle.fill")
-                                            .font(.system(size: 30))
-                                            .foregroundColor(quantity > 1 ? RoleConfig.attendeePrimary : .gray)
+                            // Ticket type
+                            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                                Text("Ticket Type")
+                                    .font(AppDesign.Typography.section)
+
+                                VStack(spacing: AppSpacing.md) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(ticketType.name)
+                                            .font(AppDesign.Typography.body)
+
+                                        Text(ticketType.formattedPrice)
+                                            .font(AppDesign.Typography.cardTitle)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(AppDesign.Colors.primary)
                                     }
-                                    .disabled(quantity <= 1)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                                    Text("\(quantity)")
-                                        .font(AppTypography.title2)
-                                        .fontWeight(.semibold)
-                                        .frame(minWidth: 40)
-
-                                    Button(action: {
-                                        if quantity < min(ticketType.remaining, 10) {
-                                            quantity += 1
-                                            HapticFeedback.light()
+                                    // Quantity selector
+                                    HStack(spacing: AppSpacing.md) {
+                                        Button(action: {
+                                            if quantity > 1 {
+                                                quantity -= 1
+                                                HapticFeedback.light()
+                                            }
+                                        }) {
+                                            Image(systemName: "minus.circle.fill")
+                                                .font(.system(size: 30))
+                                                .foregroundColor(quantity > 1 ? AppDesign.Colors.primary : .gray)
                                         }
-                                    }) {
-                                        Image(systemName: "plus.circle.fill")
-                                            .font(.system(size: 30))
-                                            .foregroundColor(
-                                                quantity < min(ticketType.remaining, 10)
-                                                    ? RoleConfig.attendeePrimary
-                                                    : .gray
-                                            )
+                                        .disabled(quantity <= 1)
+
+                                        Text("\(quantity)")
+                                            .font(AppDesign.Typography.hero)
+                                            .fontWeight(.semibold)
+                                            .frame(minWidth: 50)
+
+                                        Button(action: {
+                                            if quantity < min(ticketType.remaining, 10) {
+                                                quantity += 1
+                                                HapticFeedback.light()
+                                            }
+                                        }) {
+                                            Image(systemName: "plus.circle.fill")
+                                                .font(.system(size: 30))
+                                                .foregroundColor(
+                                                    quantity < min(ticketType.remaining, 10)
+                                                        ? AppDesign.Colors.primary
+                                                        : .gray
+                                                )
+                                        }
+                                        .disabled(quantity >= min(ticketType.remaining, 10))
                                     }
-                                    .disabled(quantity >= min(ticketType.remaining, 10))
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
-
-                        Divider()
-
-                        // Payment method
-                        VStack(alignment: .leading, spacing: AppSpacing.md) {
-                            Text("Payment Method")
-                                .font(AppTypography.headline)
-
-                            VStack(spacing: AppSpacing.sm) {
-                                ForEach(PaymentMethod.allCases, id: \.self) { method in
-                                    PaymentMethodCard(
-                                        method: method,
-                                        isSelected: selectedPaymentMethod == method,
-                                        onTap: {
-                                            selectedPaymentMethod = method
-                                            HapticFeedback.selection()
-                                        }
-                                    )
+                                    .frame(maxWidth: .infinity)
                                 }
                             }
-                        }
-                        .frame(maxWidth: .infinity)
-
-                        Divider()
-
-                        // Order summary
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                            Text("Order Summary")
-                                .font(AppTypography.headline)
-
-                            HStack {
-                                Text("Subtotal (\(quantity) ticket\(quantity > 1 ? "s" : ""))")
-                                Spacer()
-                                Text("UGX \(Int(totalAmount).formatted())")
-                            }
-                            .font(AppTypography.body)
-
-                            HStack {
-                                Text("Service fee")
-                                Spacer()
-                                Text("UGX 0")
-                            }
-                            .font(AppTypography.body)
-                            .foregroundColor(.secondary)
 
                             Divider()
 
-                            HStack {
-                                Text("Total")
-                                    .fontWeight(.bold)
-                                Spacer()
-                                Text("UGX \(Int(totalAmount).formatted())")
-                                    .fontWeight(.bold)
-                                    .foregroundColor(RoleConfig.attendeePrimary)
-                            }
-                            .font(AppTypography.title3)
-                        }
+                            // Payment method
+                            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                                Text("Payment Method")
+                                    .font(AppDesign.Typography.section)
 
-                        if let error = errorMessage {
-                            Text(error)
-                                .font(AppTypography.caption)
-                                .foregroundColor(.red)
+                                VStack(spacing: AppSpacing.sm) {
+                                    ForEach(PaymentMethod.allCases, id: \.self) { method in
+                                        PaymentMethodCard(
+                                            method: method,
+                                            isSelected: selectedPaymentMethod == method,
+                                            onTap: {
+                                                selectedPaymentMethod = method
+                                                HapticFeedback.selection()
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            Divider()
+
+                            // Order summary
+                            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                                Text("Order Summary")
+                                    .font(AppDesign.Typography.section)
+
+                                HStack {
+                                    Text("Subtotal (\(quantity) ticket\(quantity > 1 ? "s" : ""))")
+                                    Spacer()
+                                    Text("UGX \(Int(totalAmount).formatted())")
+                                }
+                                .font(AppDesign.Typography.body)
+
+                                HStack {
+                                    Text("Service fee")
+                                    Spacer()
+                                    Text("UGX 0")
+                                }
+                                .font(AppDesign.Typography.secondary)
+                                .foregroundColor(.secondary)
+
+                                Divider()
+
+                                HStack {
+                                    Text("Total")
+                                        .fontWeight(.bold)
+                                    Spacer()
+                                    Text("UGX \(Int(totalAmount).formatted())")
+                                        .fontWeight(.bold)
+                                        .foregroundColor(AppDesign.Colors.primary)
+                                }
+                                .font(AppDesign.Typography.cardTitle)
+                            }
+
+                            if let error = errorMessage {
+                                HStack(spacing: AppSpacing.sm) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                    Text(error)
+                                        .font(AppDesign.Typography.caption)
+                                }
+                                .foregroundColor(AppDesign.Colors.error)
                                 .padding()
-                                .background(Color.red.opacity(0.1))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(AppDesign.Colors.error.opacity(0.1))
                                 .cornerRadius(AppCornerRadius.small)
+                            }
                         }
+                        .padding(AppSpacing.md)
                     }
-                    .padding(AppSpacing.md)
                 }
                 .navigationTitle("Purchase Tickets")
                 .navigationBarTitleDisplayMode(.inline)
@@ -210,14 +215,17 @@ struct TicketPurchaseView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text("Pay UGX \(Int(totalAmount).formatted())")
-                                    .font(AppTypography.headline)
-                                    .foregroundColor(.white)
+                                HStack(spacing: AppSpacing.sm) {
+                                    Image(systemName: "creditcard.fill")
+                                    Text("Pay UGX \(Int(totalAmount).formatted())")
+                                        .font(AppDesign.Typography.buttonPrimary)
+                                }
+                                .foregroundColor(.white)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(RoleConfig.attendeePrimary)
+                        .background(AppDesign.Colors.primary)
                         .cornerRadius(AppCornerRadius.medium)
                         .padding(AppSpacing.md)
                         .disabled(isProcessing)
@@ -301,32 +309,44 @@ struct PaymentMethodCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: AppSpacing.sm) {
-                Image(systemName: method.iconName)
-                    .font(.system(size: 24))
-                    .foregroundColor(isSelected ? RoleConfig.attendeePrimary : .primary)
-                    .frame(width: 40)
+            HStack(spacing: AppSpacing.md) {
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(isSelected ? AppDesign.Colors.primary.opacity(0.1) : Color(UIColor.systemGray6))
+                        .frame(width: 44, height: 44)
 
+                    Image(systemName: method.iconName)
+                        .font(.system(size: 20))
+                        .foregroundColor(isSelected ? AppDesign.Colors.primary : .secondary)
+                }
+
+                // Label
                 Text(method.rawValue)
-                    .font(AppTypography.body)
+                    .font(AppDesign.Typography.body)
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                Spacer(minLength: 8)
+                Spacer(minLength: AppSpacing.sm)
 
+                // Checkmark
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(RoleConfig.attendeePrimary)
+                        .font(.system(size: 24))
+                        .foregroundColor(AppDesign.Colors.primary)
                 }
             }
             .padding(AppSpacing.md)
-            .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                RoundedRectangle(cornerRadius: AppDesign.CornerRadius.card)
+                    .fill(isSelected ? AppDesign.Colors.primary.opacity(0.05) : Color(UIColor.secondarySystemGroupedBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: AppDesign.CornerRadius.card)
                     .stroke(
-                        isSelected ? RoleConfig.attendeePrimary : Color.gray.opacity(0.3),
-                        lineWidth: isSelected ? 2 : 1
+                        isSelected ? AppDesign.Colors.primary : Color.clear,
+                        lineWidth: 2
                     )
             )
         }

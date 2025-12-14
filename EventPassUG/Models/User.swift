@@ -81,6 +81,21 @@ struct User: Identifiable, Codable, Equatable {
     var favoriteEventTypes: [String]
     var hasCompletedOnboarding: Bool
 
+    // Age & Location for Personalization
+    var dateOfBirth: Date?
+    var city: String?
+    var country: String?
+    var location: UserLocation?
+    var allowLocationTracking: Bool
+
+    // Interaction Tracking for Recommendations
+    var viewedEventIds: [UUID] // Events user has viewed
+    var likedEventIds: [UUID] // Events user explicitly liked
+    var purchasedEventIds: [UUID] // Events user purchased tickets for
+
+    // Notification Preferences
+    var notificationPreferences: UserNotificationPreferences
+
     // Dual-Role Support (single account supports both roles)
     var isAttendeeRole: Bool // Can act as attendee
     var isOrganizerRole: Bool // Can act as organizer (completed onboarding)
@@ -92,6 +107,15 @@ struct User: Identifiable, Codable, Equatable {
 
     var fullName: String {
         "\(firstName) \(lastName)"
+    }
+
+    // Computed age from date of birth (privacy-safe: never store raw age)
+    var age: Int? {
+        guard let dateOfBirth = dateOfBirth else { return nil }
+        let calendar = Calendar.current
+        let now = Date()
+        let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: now)
+        return ageComponents.year
     }
 
     // Check if user needs verification for organizer actions
@@ -148,6 +172,15 @@ struct User: Identifiable, Codable, Equatable {
         pendingPhoneNumber: String? = nil,
         favoriteEventTypes: [String] = [],
         hasCompletedOnboarding: Bool = false,
+        dateOfBirth: Date? = nil,
+        city: String? = nil,
+        country: String? = nil,
+        location: UserLocation? = nil,
+        allowLocationTracking: Bool = false,
+        viewedEventIds: [UUID] = [],
+        likedEventIds: [UUID] = [],
+        purchasedEventIds: [UUID] = [],
+        notificationPreferences: UserNotificationPreferences = .default,
         isAttendeeRole: Bool? = nil,
         isOrganizerRole: Bool = false,
         isVerifiedOrganizer: Bool = false,
@@ -178,6 +211,15 @@ struct User: Identifiable, Codable, Equatable {
         self.pendingPhoneNumber = pendingPhoneNumber
         self.favoriteEventTypes = favoriteEventTypes
         self.hasCompletedOnboarding = hasCompletedOnboarding
+        self.dateOfBirth = dateOfBirth
+        self.city = city
+        self.country = country
+        self.location = location
+        self.allowLocationTracking = allowLocationTracking
+        self.viewedEventIds = viewedEventIds
+        self.likedEventIds = likedEventIds
+        self.purchasedEventIds = purchasedEventIds
+        self.notificationPreferences = notificationPreferences
         // Dual-role support: default to attendee role if role == .attendee, else based on passed value
         self.isAttendeeRole = isAttendeeRole ?? (role == .attendee)
         self.isOrganizerRole = isOrganizerRole || (role == .organizer)
@@ -193,13 +235,13 @@ extension User {
         firstName: "John",
         lastName: "Doe",
         email: "john.doe@example.com",
-        role: .attendee
+        role: UserRole.attendee
     )
 
     static let organizerSample = User(
         firstName: "Jane",
         lastName: "Smith",
         email: "jane.smith@example.com",
-        role: .organizer
+        role: UserRole.organizer
     )
 }

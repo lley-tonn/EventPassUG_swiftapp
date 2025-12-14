@@ -41,7 +41,7 @@ struct FavoriteEventsView: View {
                     HStack {
                         Button(action: { dismiss() }) {
                             Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(AppDesign.Typography.callout)
                                 .foregroundColor(.primary)
                                 .frame(width: 32, height: 32)
                                 .background(Color(UIColor.tertiarySystemFill))
@@ -63,7 +63,7 @@ struct FavoriteEventsView: View {
                                 }
                             } label: {
                                 Image(systemName: "arrow.up.arrow.down")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.primary)
                                     .frame(width: 32, height: 32)
                                     .background(Color(UIColor.tertiarySystemFill))
@@ -83,7 +83,7 @@ struct FavoriteEventsView: View {
                                 }
                             } label: {
                                 Image(systemName: "ellipsis")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.primary)
                                     .frame(width: 32, height: 32)
                                     .background(Color(UIColor.tertiarySystemFill))
@@ -97,17 +97,17 @@ struct FavoriteEventsView: View {
                     // Title section with heart icon
                     HStack(spacing: AppSpacing.sm) {
                         Image(systemName: "heart.fill")
-                            .font(.system(size: 24))
+                            .font(AppDesign.Typography.title2)
                             .foregroundColor(.pink)
 
                         Text("My Favorites")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(AppDesign.Typography.hero)
 
                         Spacer()
 
                         if !favoriteEvents.isEmpty {
                             Text("\(favoriteEvents.count)")
-                                .font(.system(size: 16, weight: .bold))
+                                .font(AppDesign.Typography.calloutEmphasized)
                                 .foregroundColor(.white)
                                 .frame(minWidth: 28)
                                 .padding(.horizontal, 8)
@@ -124,11 +124,11 @@ struct FavoriteEventsView: View {
                     if !favoriteEvents.isEmpty {
                         HStack {
                             Image(systemName: sortOption.icon)
-                                .font(.system(size: 12))
+                                .font(AppDesign.Typography.caption)
                                 .foregroundColor(.secondary)
 
                             Text("Sorted by \(sortOption.rawValue)")
-                                .font(AppTypography.caption)
+                                .font(AppDesign.Typography.caption)
                                 .foregroundColor(.secondary)
 
                             Spacer()
@@ -166,18 +166,17 @@ struct FavoriteEventsView: View {
 
                         VStack(spacing: AppSpacing.sm) {
                             Text("No Favorites Yet")
-                                .font(.system(size: 24, weight: .bold))
+                                .font(AppDesign.Typography.title2)
 
                             Text("Tap the heart icon on events\nyou'd like to save for later")
-                                .font(AppTypography.body)
+                                .font(AppDesign.Typography.body)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                         }
 
                         Button(action: { dismiss() }) {
                             Text("Browse Events")
-                                .font(AppTypography.body)
-                                .fontWeight(.semibold)
+                                .font(AppDesign.Typography.buttonPrimary)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, AppSpacing.xl)
                                 .padding(.vertical, AppSpacing.sm)
@@ -323,7 +322,7 @@ struct FavoriteEventCard: View {
                         )
 
                     Image(systemName: event.category.iconName)
-                        .font(.system(size: 24))
+                        .font(AppDesign.Typography.title2)
                         .foregroundColor(.white.opacity(0.8))
                 }
             }
@@ -334,28 +333,27 @@ struct FavoriteEventCard: View {
             // Event details
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.title)
-                    .font(AppTypography.headline)
-                    .fontWeight(.semibold)
+                    .font(AppDesign.Typography.cardTitle)
                     .lineLimit(2)
                     .foregroundColor(.primary)
 
                 HStack(spacing: 4) {
                     Image(systemName: "calendar")
-                        .font(.system(size: 12))
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
 
                     Text(event.startDate.formatted(date: .abbreviated, time: .shortened))
-                        .font(AppTypography.caption)
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
                 }
 
                 HStack(spacing: 4) {
                     Image(systemName: "mappin")
-                        .font(.system(size: 12))
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
 
                     Text(event.venue.name)
-                        .font(AppTypography.caption)
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
@@ -364,11 +362,11 @@ struct FavoriteEventCard: View {
                 HStack {
                     if isFreeEvent {
                         Text("FREE")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(AppDesign.Typography.captionEmphasized)
                             .foregroundColor(.green)
                     } else {
                         Text("From UGX \(Int(event.ticketTypes.first?.price ?? 0).formatted())")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(AppDesign.Typography.captionEmphasized)
                             .foregroundColor(.pink)
                     }
                 }
@@ -378,7 +376,7 @@ struct FavoriteEventCard: View {
             // Remove button
             Button(action: onRemove) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 20))
+                    .font(AppDesign.Typography.callout)
                     .foregroundColor(.pink)
                     .frame(width: 44, height: 44)
                     .background(Color.pink.opacity(0.1))

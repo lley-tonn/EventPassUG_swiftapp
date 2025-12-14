@@ -57,7 +57,7 @@ struct EditProfileView: View {
                             .foregroundColor(RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee))
                     }
                     .onChange(of: profileImageItem) { newValue in
-                        Task {
+                        Task { @MainActor in
                             if let data = try? await newValue?.loadTransferable(type: Data.self) {
                                 profileImageData = data
                             }

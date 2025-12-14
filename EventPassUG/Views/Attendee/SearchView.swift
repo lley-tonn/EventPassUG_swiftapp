@@ -88,15 +88,14 @@ struct SearchView: View {
 
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 60))
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
 
                             Text(searchText.isEmpty ? "Start searching" : "No results found")
-                                .font(AppTypography.title3)
-                                .fontWeight(.semibold)
+                                .font(AppDesign.Typography.section)
 
                             if !searchText.isEmpty {
                                 Text("Try adjusting your search or filters")
-                                    .font(AppTypography.body)
+                                    .font(AppDesign.Typography.body)
                                     .foregroundColor(.secondary)
                             }
 

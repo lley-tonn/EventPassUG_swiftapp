@@ -799,33 +799,33 @@ struct Step3Review: View {
             ScrollView {
                 VStack(spacing: 0) {
                     // Header
-                    VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                         Text("Review Your Event")
-                            .font(.system(size: 24, weight: .bold))
+                            .font(AppDesign.Typography.hero)
                             .foregroundColor(.primary)
 
                         Text("Double-check everything looks perfect before publishing")
-                            .font(.system(size: 15))
+                            .font(AppDesign.Typography.secondary)
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, AppSpacing.md)
-                    .padding(.top, AppSpacing.md)
-                    .padding(.bottom, AppSpacing.lg)
+                    .padding(.horizontal, AppDesign.Spacing.md)
+                    .padding(.top, AppDesign.Spacing.md)
+                    .padding(.bottom, AppDesign.Spacing.lg)
 
                     // Preview Card (looks like real event card)
                     VStack(spacing: 0) {
                         eventPreviewCard(geometry: geometry)
                     }
-                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.horizontal, AppDesign.Spacing.md)
 
                     // Ticket Details Section
                     ticketDetailsSection
-                        .padding(.horizontal, AppSpacing.md)
-                        .padding(.top, AppSpacing.lg)
+                        .padding(.horizontal, AppDesign.Spacing.md)
+                        .padding(.top, AppDesign.Spacing.lg)
 
                     // Extra bottom padding for scroll
-                    Spacer(minLength: AppSpacing.xl * 2)
+                    Spacer(minLength: AppDesign.Spacing.xl * 2)
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -869,30 +869,30 @@ struct Step3Review: View {
                 Button(action: { onEdit(1) }) {
                     HStack(spacing: 4) {
                         Image(systemName: "pencil")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(AppDesign.Typography.caption)
                         Text("Edit")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(AppDesign.Typography.captionEmphasized)
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, AppDesign.Spacing.sm)
                     .padding(.vertical, 6)
-                    .background(Color.black.opacity(0.6))
-                    .cornerRadius(6)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(AppDesign.CornerRadius.badge)
                 }
-                .padding(AppSpacing.sm)
+                .padding(AppDesign.Spacing.sm)
             }
             .clipShape(
                 UnevenRoundedRectangle(
-                    topLeadingRadius: AppCornerRadius.medium,
-                    topTrailingRadius: AppCornerRadius.medium
+                    topLeadingRadius: AppDesign.CornerRadius.card,
+                    topTrailingRadius: AppDesign.CornerRadius.card
                 )
             )
 
             // Event Details
-            VStack(alignment: .leading, spacing: AppSpacing.md) {
+            VStack(alignment: .leading, spacing: AppDesign.Spacing.md) {
                 // Title
                 Text(title)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(AppDesign.Typography.section)
                     .foregroundColor(.primary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -900,52 +900,52 @@ struct Step3Review: View {
                 // Category
                 HStack(spacing: 6) {
                     Image(systemName: category.iconName)
-                        .font(.system(size: 14))
+                        .font(AppDesign.Typography.caption)
                     Text(category.rawValue)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(AppDesign.Typography.captionEmphasized)
                 }
-                .foregroundColor(RoleConfig.organizerPrimary)
-                .padding(.horizontal, 12)
+                .foregroundColor(AppDesign.Colors.primary)
+                .padding(.horizontal, AppDesign.Spacing.sm)
                 .padding(.vertical, 6)
-                .background(RoleConfig.organizerPrimary.opacity(0.1))
-                .cornerRadius(AppCornerRadius.small)
+                .background(AppDesign.Colors.primary.opacity(0.1))
+                .cornerRadius(AppDesign.CornerRadius.badge)
 
                 Divider()
-                    .padding(.vertical, AppSpacing.xs)
+                    .padding(.vertical, AppDesign.Spacing.xs)
 
                 // Date
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: AppDesign.Spacing.md) {
                     Image(systemName: "calendar")
-                        .font(.system(size: 18))
-                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .font(AppDesign.Typography.callout)
+                        .foregroundColor(AppDesign.Colors.primary)
                         .frame(width: 24)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("When")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(AppDesign.Typography.captionEmphasized)
                             .foregroundColor(.secondary)
                         Text(DateUtilities.formatEventFullDateTime(startDate, endDate: endDate))
-                            .font(.system(size: 14))
+                            .font(AppDesign.Typography.body)
                             .foregroundColor(.primary)
                     }
                 }
 
                 // Location
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: AppDesign.Spacing.md) {
                     Image(systemName: "location.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .font(AppDesign.Typography.callout)
+                        .foregroundColor(AppDesign.Colors.primary)
                         .frame(width: 24)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Where")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(AppDesign.Typography.captionEmphasized)
                             .foregroundColor(.secondary)
                         Text(venueName)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(AppDesign.Typography.bodyEmphasized)
                             .foregroundColor(.primary)
                         Text(venueAddress)
-                            .font(.system(size: 13))
+                            .font(AppDesign.Typography.secondary)
                             .foregroundColor(.secondary)
                     }
                 }
@@ -953,29 +953,24 @@ struct Step3Review: View {
                 // Description
                 if !description.isEmpty {
                     Divider()
-                        .padding(.vertical, AppSpacing.xs)
+                        .padding(.vertical, AppDesign.Spacing.xs)
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.xs) {
                         Text("About")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(AppDesign.Typography.captionEmphasized)
                             .foregroundColor(.secondary)
                         Text(description)
-                            .font(.system(size: 14))
+                            .font(AppDesign.Typography.body)
                             .foregroundColor(.primary)
                             .lineLimit(3)
                     }
                 }
             }
-            .padding(AppSpacing.md)
+            .padding(AppDesign.Spacing.md)
         }
         .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(AppCornerRadius.medium)
-        .shadow(
-            color: Color.black.opacity(0.08),
-            radius: 12,
-            x: 0,
-            y: 4
-        )
+        .cornerRadius(AppDesign.CornerRadius.card)
+        .cardShadow()
     }
 
     // MARK: - Ticket Details Section

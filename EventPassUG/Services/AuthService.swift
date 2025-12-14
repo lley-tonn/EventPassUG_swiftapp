@@ -10,6 +10,7 @@ import Combine
 
 // MARK: - Protocol
 
+@MainActor
 protocol AuthServiceProtocol: AnyObject {
     var currentUser: User? { get }
     var isAuthenticated: Bool { get }
@@ -52,6 +53,7 @@ protocol AuthServiceProtocol: AnyObject {
 
 // MARK: - Mock Implementation
 
+@MainActor
 class MockAuthService: AuthServiceProtocol, ObservableObject {
     @Published private(set) var currentUser: User?
 

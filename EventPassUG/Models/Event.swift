@@ -86,6 +86,31 @@ enum EventStatus: String, Codable {
     case cancelled
 }
 
+enum AgeRestriction: Int, Codable {
+    case none = 0
+    case thirteen = 13
+    case sixteen = 16
+    case eighteen = 18
+    case twentyOne = 21
+
+    var displayName: String {
+        switch self {
+        case .none: return "All Ages"
+        case .thirteen: return "13+"
+        case .sixteen: return "16+"
+        case .eighteen: return "18+"
+        case .twentyOne: return "21+"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .none: return "person.3.fill"
+        case .thirteen, .sixteen, .eighteen, .twentyOne: return "exclamationmark.triangle.fill"
+        }
+    }
+}
+
 struct Venue: Codable, Equatable {
     let name: String
     let address: String
@@ -120,6 +145,7 @@ struct Event: Identifiable, Codable, Equatable {
     var likeCount: Int
     var createdAt: Date
     var updatedAt: Date
+    var ageRestriction: AgeRestriction // Age restriction for the event
 
     // Computed properties
     var isHappeningNow: Bool {
@@ -172,7 +198,8 @@ struct Event: Identifiable, Codable, Equatable {
         totalRatings: Int = 0,
         likeCount: Int = 0,
         createdAt: Date = Date(),
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        ageRestriction: AgeRestriction = .none
     ) {
         self.id = id
         self.title = title
@@ -191,6 +218,7 @@ struct Event: Identifiable, Codable, Equatable {
         self.likeCount = likeCount
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.ageRestriction = ageRestriction
     }
 }
 

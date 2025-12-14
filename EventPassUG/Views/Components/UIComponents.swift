@@ -145,81 +145,6 @@ struct AppButton: View {
     }
 }
 
-// MARK: - Social Auth Button
-
-struct SocialAuthButton: View {
-    enum Provider {
-        case google
-        case apple
-        case phone
-
-        var iconName: String {
-            switch self {
-            case .google: return "g.circle.fill"
-            case .apple: return "apple.logo"
-            case .phone: return "phone.fill"
-            }
-        }
-
-        var title: String {
-            switch self {
-            case .google: return "Continue with Google"
-            case .apple: return "Continue with Apple"
-            case .phone: return "Continue with Phone"
-            }
-        }
-    }
-
-    let provider: Provider
-    var isLoading: Bool = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: {
-            if !isLoading {
-                HapticFeedback.light()
-                action()
-            }
-        }) {
-            HStack(spacing: AppSpacing.sm) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .primary))
-                        .scaleEffect(0.9)
-                } else {
-                    if provider == .google {
-                        // Custom Google logo - FIXED: Using design system values
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 22, height: 22) // Slightly larger for better visibility
-                            .overlay(
-                                Text("G")
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.blue)
-                            )
-                    } else {
-                        Image(systemName: provider.iconName)
-                            .font(.system(size: 20, weight: .medium)) // Increased from 18 for consistency
-                    }
-
-                    Text(provider.title)
-                        .font(AppTypography.buttonMedium)
-                }
-            }
-            .foregroundColor(.primary)
-            .frame(maxWidth: .infinity)
-            .frame(height: AppButtonDimensions.mediumHeight)
-            .background(Color(UIColor.secondarySystemBackground))
-            .cornerRadius(AppCornerRadius.medium)
-            .overlay(
-                RoundedRectangle(cornerRadius: AppCornerRadius.medium)
-                    .stroke(AppBorder.lightColor, lineWidth: AppBorder.width)
-            )
-        }
-        .disabled(isLoading)
-    }
-}
-
 // MARK: - App Card
 
 struct AppCard<Content: View>: View {
@@ -616,10 +541,6 @@ extension View {
             AppButton(title: "With Icon", style: .primary, icon: "arrow.right", iconPosition: .trailing) {}
             AppButton(title: "Loading", style: .primary, isLoading: true) {}
             AppButton(title: "Disabled", style: .primary, isDisabled: true) {}
-
-            SocialAuthButton(provider: .google) {}
-            SocialAuthButton(provider: .apple) {}
-            SocialAuthButton(provider: .phone) {}
         }
         .padding()
     }

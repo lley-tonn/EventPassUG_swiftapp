@@ -1,11 +1,27 @@
-# EventPass UG - Native iOS App
+# EventPassUG - Native iOS Event Management App
 
 A complete, production-ready native iOS application for discovering and managing events across Uganda. Built with **Swift** and **SwiftUI** targeting iOS 16+.
 
 ![Platform](https://img.shields.io/badge/platform-iOS%2016%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![Xcode](https://img.shields.io/badge/Xcode-15%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## 📋 Table of Contents
+
+1. [Features](#-features)
+2. [Quick Start](#-quick-start)
+3. [Architecture](#-architecture)
+4. [Project Structure](#-project-structure)
+5. [Design System](#-design-system)
+6. [Authentication](#-authentication)
+7. [Backend Integration](#-backend-integration)
+8. [Testing](#-testing)
+9. [Deployment](#-deployment)
+10. [Troubleshooting](#-troubleshooting)
+
+---
 
 ## 🎯 Features
 
@@ -17,208 +33,395 @@ A complete, production-ready native iOS application for discovering and managing
 ### Attendee Features
 - ✅ Event discovery with category and time-based filters
 - ✅ Interactive MapKit integration for venue locations
-- ✅ Ticket purchase with multiple payment methods (Mobile Money, Credit Card, Bank Transfer)
-- ✅ QR code generation for tickets (CoreImage)
+- ✅ Ticket purchase with multiple payment methods
+- ✅ QR code generation for tickets
+- ✅ Search events by name, location, and category
+- ✅ Favorite events with persistent storage
 - ✅ Event ratings and reviews
-- ✅ Favorite events
-- ✅ Real-time "Happening now" indicators with pulsing animation
-- ✅ Add to Apple Wallet (stub with instructions)
+- ✅ Real-time "Happening now" indicators
+- ✅ **Time-based ticket sales** (automatically stops when event starts)
 
 ### Organizer Features
 - ✅ 3-step event creation wizard with draft saving
 - ✅ Multiple ticket types with pricing configuration
 - ✅ Analytics dashboard (revenue, tickets sold, active events)
-- ✅ QR code scanner for ticket validation (AVFoundation)
+- ✅ QR code scanner for ticket validation
 - ✅ Event management (published/draft/ongoing states)
 - ✅ Earnings withdrawal UI
 
+### Authentication System
+- ✅ Modern authentication UI with pill-style toggle
+- ✅ Email/password login and registration
+- ✅ OTP phone authentication with 6-digit code entry
+- ✅ Social login (Apple, Google, Facebook)
+- ✅ **Production-grade test database** with multi-user support
+- ✅ Password hashing (SHA256 + salt)
+- ✅ Session persistence across app launches
+
 ### UI/UX Polish
 - ✅ Platform-native iOS design with SwiftUI
+- ✅ **Unified SF Pro typography system**
+- ✅ **Centralized design tokens** (colors, spacing, shadows)
 - ✅ Dark/light mode support
 - ✅ Role-based theming (Attendee: #FF7A00, Organizer: #FFA500)
 - ✅ Haptic feedback for interactions
-- ✅ Smooth animations (pulsing dot, like button, notification badge)
+- ✅ Smooth animations
 - ✅ Accessibility support (VoiceOver, Dynamic Type)
-- ✅ Reduce Motion support
 - ✅ Responsive layout (iPhone & iPad)
-
-### Architecture
-- **MVVM** architecture pattern
-- **Combine** & **async/await** for reactive state management
-- **Protocol-oriented** services layer for easy backend swapping
-- **Core Data** for local persistence
-- **Dependency Injection** via ServiceContainer
 
 ---
 
-## 📋 Requirements
+## 🚀 Quick Start
 
+### Prerequisites
 - macOS 13.0+ (Ventura or later)
 - Xcode 15.0+
 - iOS 16.0+ deployment target
 - Swift 5.9+
-- CocoaPods or Swift Package Manager (SPM)
 
----
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository
+### 1. Open the Project
 
 ```bash
-git clone https://github.com/yourusername/EventPassUG-MobileApp.git
-cd EventPassUG-MobileApp
-```
-
-### 2. Open in Xcode
-
-```bash
+cd /Users/lley-tonn/Documents/projects/EventPassUG-MobileApp
 open EventPassUG.xcodeproj
 ```
 
-If you don't have an `.xcodeproj` file, create one:
-1. Open Xcode
-2. File → New → Project
-3. Choose **iOS** → **App**
-4. Product Name: `EventPassUG`
-5. Interface: **SwiftUI**
-6. Language: **Swift**
-7. Use Core Data: **Yes**
-8. Bundle Identifier: `com.eventpass.ug`
-9. Drag all source files from this repository into the project
+### 2. Build and Run
 
-### 3. Build and Run
-
-1. Select a simulator or connected device (iOS 16.0+)
+1. Select a simulator: **iPhone 15 Pro** (or any iOS 16+ device)
 2. Press **⌘ + R** to build and run
-3. The app will launch with mock data
+3. The app will launch with test data
 
-### 4. Test Onboarding
+### 3. Test Authentication
 
-- Enter any email/password and choose a role (Attendee or Organizer)
-- Mock authentication will create a session automatically
-- You can switch roles anytime from the Profile tab
+**Email Login (Test Users):**
+- Attendees:
+  - john@example.com / password123
+  - jane@example.com / password123
+  - alice@example.com / password123
+
+- Organizers:
+  - bob@events.com / organizer123
+  - sarah@events.com / organizer123
+
+**Phone Login:**
+- Phone: +256700123456
+- OTP: 123456 (any 6-digit code works in mock mode)
+
+**Create New Account:**
+- Click "Register" and fill in the form
+- Choose role (Attendee or Organizer)
+- Account is created immediately in test database
+
+### 4. Explore Features
+
+**As Attendee:**
+- Browse events with category filters
+- Search events (tap search icon)
+- Favorite events (tap heart icon)
+- Purchase tickets (automatically stops when event starts)
+- View QR codes in Tickets tab
+
+**As Organizer:**
+- Switch role from Profile tab
+- Create events (3-step wizard)
+- View analytics dashboard
+- Scan tickets with QR scanner
 
 ---
 
-## 🔑 API Keys Configuration
+## 🏗 Architecture
 
-### Google Maps (Optional - Currently using MapKit)
+### Design Pattern
+- **MVVM** (Model-View-ViewModel)
+- **Protocol-Oriented** programming for services
+- **Dependency Injection** via ServiceContainer
+- **Reactive** state management with Combine and async/await
 
-The app currently uses Apple's native **MapKit** which requires no API key. If you want to integrate Google Maps:
+### Core Technologies
+- **SwiftUI** - 100% SwiftUI UI framework
+- **Combine** - Reactive data binding
+- **async/await** - Modern concurrency
+- **CryptoKit** - SHA256 password hashing
+- **UserDefaults** - Data persistence (test database)
+- **CoreImage** - QR code generation
+- **MapKit** - Venue mapping
+- **AVFoundation** - Camera for QR scanning
+- **PhotosUI** - Image picker
 
-#### Option 1: Keep MapKit (Recommended)
-No action needed. MapKit works out of the box and provides excellent integration with iOS.
+### Layer Separation
 
-#### Option 2: Add Google Maps SDK
+```
+┌─────────────────────────────────────┐
+│         Views (SwiftUI)              │  ← UI Layer
+├─────────────────────────────────────┤
+│    ViewModels (@Published state)     │  ← Presentation Logic
+├─────────────────────────────────────┤
+│  Services (Protocol-based)           │  ← Business Logic
+├─────────────────────────────────────┤
+│  Models (Codable, Identifiable)      │  ← Data Layer
+├─────────────────────────────────────┤
+│  TestDatabase / Core Data            │  ← Persistence
+└─────────────────────────────────────┘
+```
 
-1. Get a Google Maps API key from [Google Cloud Console](https://console.cloud.google.com/)
-2. Enable the following APIs:
-   - Maps SDK for iOS
-   - Places API (for venue search)
+---
 
-3. Add the API key to `EventPassUGApp.swift`:
+## 📁 Project Structure
+
+```
+EventPassUG/
+├── EventPassUGApp.swift          # App entry point
+├── ContentView.swift             # Root view with auth routing
+├── Info.plist                    # App configuration
+│
+├── Models/                       # Data Models
+│   ├── User.swift                # User with dual-role support
+│   ├── Event.swift               # Event and venue models
+│   ├── Ticket.swift              # Ticket purchase records
+│   ├── TicketType.swift          # Ticket tier definitions
+│   └── NotificationModel.swift   # Notification model
+│
+├── Services/                     # Business Logic Layer
+│   ├── ServiceContainer.swift    # DI container
+│   ├── AuthService.swift         # Auth protocol + Mock
+│   ├── EventService.swift        # Event CRUD + Mock
+│   ├── TicketService.swift       # Ticket operations + Mock
+│   ├── PaymentService.swift      # Payment processing + Mock
+│   └── Database/
+│       └── TestDatabase.swift    # Multi-user test database
+│
+├── Views/
+│   ├── Components/               # Reusable UI Components
+│   │   ├── EventCard.swift
+│   │   ├── CategoryTile.swift
+│   │   ├── QRCodeView.swift
+│   │   ├── SalesCountdownTimer.swift  # NEW: Real-time countdown
+│   │   └── ...
+│   │
+│   ├── Auth/
+│   │   ├── ModernAuthView.swift  # NEW: Modern auth UI
+│   │   ├── AuthComponents.swift  # NEW: Reusable components
+│   │   └── AuthViewModel.swift   # NEW: State management
+│   │
+│   ├── Attendee/
+│   │   ├── AttendeeHomeView.swift
+│   │   ├── EventDetailsView.swift
+│   │   ├── TicketPurchaseView.swift
+│   │   ├── TicketsView.swift
+│   │   ├── SearchView.swift
+│   │   └── FavoriteEventsView.swift
+│   │
+│   ├── Organizer/
+│   │   ├── OrganizerHomeView.swift
+│   │   ├── CreateEventWizard.swift
+│   │   ├── OrganizerDashboardView.swift
+│   │   └── QRScannerView.swift
+│   │
+│   └── Common/
+│       ├── ProfileView.swift
+│       └── NotificationsView.swift
+│
+├── Config/
+│   └── AppDesignSystem.swift    # NEW: Complete design tokens
+│
+├── Extensions/
+│   └── Event+TicketSales.swift  # NEW: Time-based sales logic
+│
+├── Utilities/
+│   ├── DateUtilities.swift
+│   ├── QRCodeGenerator.swift
+│   ├── HapticFeedback.swift
+│   └── FavoriteManager.swift
+│
+└── Assets.xcassets/             # Images and colors
+```
+
+---
+
+## 🎨 Design System
+
+### AppDesign Tokens
+
+The app uses a centralized design system in `AppDesignSystem.swift`:
 
 ```swift
-import GoogleMaps
+// Colors
+AppDesign.Colors.primary          // #FF7A00
+AppDesign.Colors.success          // Green
+AppDesign.Colors.error            // Red
+AppDesign.Colors.warning          // Orange
 
-@main
-struct EventPassUGApp: App {
-    init() {
-        GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
-        // ...
+// Typography (SF Pro)
+AppDesign.Typography.hero         // .largeTitle + .bold
+AppDesign.Typography.section      // .title3 + .semibold
+AppDesign.Typography.cardTitle    // .headline + .semibold
+AppDesign.Typography.body         // .body
+AppDesign.Typography.secondary    // .subheadline
+AppDesign.Typography.caption      // .caption
+
+// Spacing
+AppDesign.Spacing.xs              // 4pt
+AppDesign.Spacing.sm              // 8pt
+AppDesign.Spacing.md              // 16pt
+AppDesign.Spacing.lg              // 24pt
+AppDesign.Spacing.xl              // 32pt
+
+// Corner Radius
+AppDesign.CornerRadius.card       // 12pt
+AppDesign.CornerRadius.button     // 12pt
+AppDesign.CornerRadius.input      // 10pt
+
+// Shadows
+view.cardShadow()                 // Standard card shadow
+view.elevatedShadow()             // Elevated component shadow
+```
+
+### Role-Based Theming
+
+```swift
+// Attendee: #FF7A00 (Orange)
+// Organizer: #FFA500 (Light Orange)
+RoleConfig.getPrimaryColor(for: userRole)
+```
+
+---
+
+## 🔐 Authentication
+
+### Test Database
+
+The app includes a production-grade test database (`TestDatabase.swift`) with:
+
+- **Multi-user support** - Register and login multiple users
+- **Password hashing** - SHA256 with random salt
+- **Session persistence** - Survives app restarts
+- **6 pre-seeded test users** (see Quick Start section)
+
+### Authentication Methods
+
+1. **Email/Password**
+   - Full registration with validation
+   - Secure password hashing
+
+2. **Phone OTP**
+   - 6-digit code verification
+   - Mock OTP: "123456"
+
+3. **Social Login**
+   - Apple Sign In (mock)
+   - Google Sign In (mock)
+   - Facebook Sign In (mock)
+
+### Modern Auth UI
+
+Located in `Views/Auth/ModernAuthView.swift`:
+- Pill-style toggle (Login/Register/OTP)
+- Real-time form validation
+- Inline error messages
+- Loading states
+- Haptic feedback
+
+---
+
+## 🎫 Time-Based Ticket Sales
+
+### Automatic Sales Cutoff
+
+Events automatically stop ticket sales when the event starts:
+
+```swift
+// Event+TicketSales.swift
+extension Event {
+    var isTicketSalesOpen: Bool {
+        guard status == .published else { return false }
+        guard !hasStarted else { return false }
+        return true
+    }
+
+    var hasStarted: Bool {
+        Date() >= startDate
+    }
+
+    var timeUntilSalesClose: TimeInterval? {
+        guard isTicketSalesOpen else { return nil }
+        return startDate.timeIntervalSinceNow
     }
 }
 ```
 
-4. Add Google Maps SDK via SPM:
-```swift
-.package(url: "https://github.com/googlemaps/ios-maps-sdk", from: "8.0.0")
-```
+### Real-Time Countdown Timer
 
-### Apple Maps Integration
-
-The "Open in Maps" feature uses native Apple Maps - no configuration needed.
-
-### Push Notifications (Optional)
-
-Currently using local notifications (UNUserNotificationCenter). To enable remote push notifications:
-
-1. Enable Push Notifications capability in Xcode
-2. Configure APNs in Apple Developer Portal
-3. Update `EventPassUGApp.swift` to register for remote notifications
-4. Implement `NotificationService` backend integration
+`SalesCountdownTimer` component shows urgency:
+- **Badge style**: Compact countdown (e.g., "2h 30m")
+- **Inline style**: "Sales end in 2 hours 30 minutes"
+- **Card style**: Full card with icon and details
+- **Color-coded urgency**:
+  - Red: < 1 hour
+  - Orange: < 1 day
+  - Green: > 1 day
 
 ---
 
-## 🔄 Backend Integration
+## 🔌 Backend Integration
 
-The app currently uses **mock services** (`MockAuthService`, `MockEventService`, etc.) for development. Here's how to swap them with real backends:
+All services use protocols for easy backend swapping:
 
-### Option 1: Firebase Backend
-
-#### Setup Firebase
-
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Add an iOS app with bundle ID: `com.eventpass.ug`
-3. Download `GoogleService-Info.plist` and add to Xcode project
-4. Add Firebase SPM dependencies:
+### Service Protocols
 
 ```swift
-// In Xcode: File → Add Packages
-dependencies: [
-    .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "10.0.0")
-]
+protocol AuthServiceProtocol {
+    func signIn(email: String, password: String) async throws -> User
+    func signUp(...) async throws -> User
+    func signInWithPhone(...) async throws -> String
+    func verifyPhoneCode(...) async throws -> User
+}
+
+protocol EventServiceProtocol {
+    func fetchEvents() async throws -> [Event]
+    func createEvent(_ event: Event) async throws -> Event
+    func updateEvent(_ event: Event) async throws
+    func deleteEvent(_ id: UUID) async throws
+}
+
+protocol TicketServiceProtocol {
+    func purchaseTicket(...) async throws -> [Ticket]
+    func scanTicket(qrCode: String) async throws -> Ticket
+    func getUserTickets(userId: UUID) async throws -> [Ticket]
+}
+
+protocol PaymentServiceProtocol {
+    func initiatePayment(...) async throws -> Payment
+    func processPayment(paymentId: UUID) async throws -> PaymentStatus
+}
 ```
 
-#### Implement Real Services
-
-Create `FirebaseAuthService.swift`:
+### Option 1: Firebase Backend
 
 ```swift
 import Firebase
 import FirebaseAuth
-import Combine
+import FirebaseFirestore
 
 class FirebaseAuthService: AuthServiceProtocol {
-    @Published private(set) var currentUser: User?
-
-    init() {
-        FirebaseApp.configure()
-        // Implement Firebase Auth methods
-    }
-
     func signIn(email: String, password: String) async throws -> User {
         let result = try await Auth.auth().signIn(withEmail: email, password: password)
         // Map Firebase user to your User model
-        // ...
+        return mapToUser(result.user)
     }
-
-    // Implement other protocol methods
+    // Implement other methods...
 }
-```
 
-#### Swap Services in `EventPassUGApp.swift`:
-
-```swift
-@main
-struct EventPassUGApp: App {
-    let services: ServiceContainer
-
-    init() {
-        services = ServiceContainer(
-            authService: FirebaseAuthService(),        // ✅ Real service
-            eventService: FirestoreEventService(),     // ✅ Real service
-            ticketService: FirestoreTicketService(),   // ✅ Real service
-            paymentService: StripePaymentService()     // ✅ Real service
-        )
-    }
-}
+// Update ServiceContainer in EventPassUGApp.swift
+services = ServiceContainer(
+    authService: FirebaseAuthService(),
+    eventService: FirestoreEventService(),
+    ticketService: FirestoreTicketService(),
+    paymentService: StripePaymentService()
+)
 ```
 
 ### Option 2: REST API Backend
-
-Create REST-based services:
 
 ```swift
 class RESTAuthService: AuthServiceProtocol {
@@ -240,135 +443,31 @@ class RESTAuthService: AuthServiceProtocol {
             throw AuthError.invalidCredentials
         }
 
-        let user = try JSONDecoder().decode(User.self, from: data)
-        await MainActor.run {
-            self.currentUser = user
-        }
-        return user
+        return try JSONDecoder().decode(User.self, from: data)
     }
-
-    // Implement other protocol methods
+    // Implement other methods...
 }
 ```
 
-### Payment Gateway Integration
+### Payment Integration
 
 #### Flutterwave (Recommended for Uganda)
 
 ```swift
 class FlutterwavePaymentService: PaymentServiceProtocol {
-    private let publicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY"  // ⚠️ Add here
+    private let publicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY"
 
     func initiatePayment(amount: Double, method: PaymentMethod, userId: UUID, eventId: UUID) async throws -> Payment {
         // Integrate Flutterwave Standard SDK
-        // Documentation: https://developer.flutterwave.com/docs/ios-sdk
+        // See: https://developer.flutterwave.com/docs/ios-sdk
     }
 }
 ```
 
-#### Paystack Alternative
-
-```swift
-class PaystackPaymentService: PaymentServiceProtocol {
-    private let publicKey = "YOUR_PAYSTACK_PUBLIC_KEY"  // ⚠️ Add here
-
-    // Implement Paystack integration
-    // Documentation: https://paystack.com/docs/libraries/ios
-}
-```
-
----
-
-## 📦 Dependencies
-
-All dependencies are managed via **Swift Package Manager (SPM)**. No third-party dependencies are required for the base app to run, but you can add these for extended functionality:
-
-### Optional Dependencies
-
-#### Firebase (for backend)
-```swift
-.package(url: "https://github.com/firebase/firebase-ios-sdk", from: "10.0.0")
-```
-
-#### Alamofire (for REST APIs)
-```swift
-.package(url: "https://github.com/Alamofire/Alamofire", from: "5.8.0")
-```
-
-#### Flutterwave SDK (for payments)
-Follow installation guide: https://developer.flutterwave.com/docs/ios-sdk
-
-#### Google Maps (optional)
-```swift
-.package(url: "https://github.com/googlemaps/ios-maps-sdk", from: "8.0.0")
-```
-
----
-
-## 💳 Apple Wallet (PassKit) Integration
-
-The app includes a **stub** for "Add to Wallet" functionality. To implement:
-
-### Prerequisites
-
-- Apple Developer Program membership ($99/year)
-- Pass Type ID certificate
-
-### Setup Steps
-
-1. **Create Pass Type ID**:
-   - Go to [Apple Developer Portal](https://developer.apple.com/account/)
-   - Certificates, Identifiers & Profiles → Identifiers → Pass Type IDs
-   - Create new Pass Type ID: `pass.com.eventpass.ug.ticket`
-
-2. **Generate Certificate**:
-   - Create Certificate Signing Request (CSR)
-   - Download Pass Type ID Certificate
-   - Install in Keychain
-
-3. **Implement PassKit**:
-
-```swift
-import PassKit
-
-class PassKitService {
-    func createPass(for ticket: Ticket) throws -> PKPass {
-        // Create pass JSON
-        let passJSON: [String: Any] = [
-            "formatVersion": 1,
-            "passTypeIdentifier": "pass.com.eventpass.ug.ticket",
-            "serialNumber": ticket.id.uuidString,
-            "teamIdentifier": "YOUR_TEAM_ID",
-            "organizationName": "EventPass UG",
-            "description": "Event Ticket",
-            // ... more fields
-        ]
-
-        // Generate .pkpass file
-        // See Apple's PassKit documentation
-    }
-}
-```
-
-4. **Update `TicketQRView.swift`**:
-
-```swift
-Button(action: {
-    let passKitService = PassKitService()
-    let pass = try? passKitService.createPass(for: ticket)
-    // Present PKAddPassesViewController
-}) {
-    HStack {
-        Image(systemName: "wallet.pass")
-        Text("Add to Wallet")
-    }
-}
-.disabled(false)  // Enable the button
-```
-
-**Resources**:
-- [PassKit Documentation](https://developer.apple.com/documentation/passkit)
-- [Wallet Developer Guide](https://developer.apple.com/wallet/)
+Payment methods supported:
+- **MTN Mobile Money** (Yellow branding)
+- **Airtel Money** (Red branding)
+- **Card** (Visa/Mastercard)
 
 ---
 
@@ -386,54 +485,19 @@ xcodebuild test -scheme EventPassUG -destination 'platform=iOS Simulator,name=iP
 
 ### Test Coverage
 
-Current unit tests cover:
-- ✅ Greeting logic (time-based)
 - ✅ Date formatting utilities
+- ✅ Greeting logic (time-based)
 - ✅ Event category filtering
 - ✅ "Happening now" detection
 - ✅ Price range calculation
 
-### UI Testing
+### Manual Testing
 
-A stub UI test is included in `EventPassUGUITests/EventPassUGUITests.swift`:
-
-```swift
-func testEventCreationFlow() {
-    let app = XCUIApplication()
-    app.launch()
-
-    // Test sign-in → role selection → create event → publish
-}
-```
-
----
-
-## 🎨 Design Tokens
-
-### Colors
-
-```swift
-// Defined in RoleConfig.swift
-Attendee Primary: #FF7A00
-Organizer Primary: #FFA500
-Light Background: #FBFBF7
-Dark Background: #000000
-Happening Now: #7CFC66
-```
-
-### Typography
-
-Uses **SF Pro Rounded** system font with semantic sizes defined in `AppTypography`.
-
-### Spacing
-
-Defined in `AppSpacing`:
-- XS: 4pt
-- SM: 8pt
-- MD: 16pt
-- LG: 24pt
-- XL: 32pt
-- XXL: 48pt
+**Test Data:**
+- 6 pre-seeded users (see Authentication section)
+- Sample events with various categories
+- Test ticket purchases
+- QR code generation
 
 ---
 
@@ -448,10 +512,10 @@ Defined in `AppSpacing`:
 - Optimized split-view layouts
 
 ### Accessibility
-- VoiceOver labels on all interactive elements
-- Dynamic Type support
-- High contrast support
-- Reduce Motion support
+- ✅ VoiceOver labels on all interactive elements
+- ✅ Dynamic Type support
+- ✅ High contrast support
+- ✅ Reduce Motion support
 
 ---
 
@@ -464,107 +528,38 @@ The app requests the following permissions (configured in `Info.plist`):
 | Camera | QR code scanning for ticket validation | Yes (Organizers) |
 | Photo Library | Selecting event posters | Yes (Organizers) |
 | Notifications | Event reminders and updates | Optional |
-| Location (When In Use) | Showing nearby events (future feature) | Optional |
+| Location (When In Use) | Showing nearby events | Optional |
 
 ---
 
-## 🗂 Project Structure
+## 🚀 Deployment
 
-```
-EventPassUG/
-├── EventPassUGApp.swift          # App entry point
-├── ContentView.swift              # Root view with auth routing
-│
-├── Models/                        # Data models
-│   ├── User.swift
-│   ├── Event.swift
-│   ├── Ticket.swift
-│   ├── TicketType.swift
-│   └── NotificationModel.swift
-│
-├── Services/                      # Business logic layer
-│   ├── ServiceContainer.swift     # DI container
-│   ├── AuthService.swift          # Auth protocol + mock
-│   ├── EventService.swift         # Event CRUD + mock
-│   ├── TicketService.swift        # Ticket purchase + scanning
-│   └── PaymentService.swift       # Payment processing
-│
-├── Views/
-│   ├── Components/                # Reusable UI components
-│   │   ├── PulsingDot.swift
-│   │   ├── AnimatedLikeButton.swift
-│   │   ├── NotificationBadge.swift
-│   │   ├── HeaderBar.swift
-│   │   ├── CategoryTile.swift
-│   │   ├── EventCard.swift
-│   │   ├── QRCodeView.swift
-│   │   └── LoadingView.swift
-│   │
-│   ├── Navigation/
-│   │   └── MainTabView.swift      # Role-based tab navigation
-│   │
-│   ├── Auth/
-│   │   └── OnboardingView.swift   # Sign up + role selection
-│   │
-│   ├── Attendee/
-│   │   ├── AttendeeHomeView.swift       # Event feed + categories
-│   │   ├── EventDetailsView.swift       # Event details + MapKit
-│   │   ├── TicketPurchaseView.swift     # Purchase flow
-│   │   └── TicketsView.swift            # User's tickets + QR
-│   │
-│   ├── Organizer/
-│   │   ├── OrganizerHomeView.swift      # Event list
-│   │   ├── CreateEventWizard.swift      # 3-step event creation
-│   │   ├── OrganizerDashboardView.swift # Analytics + QR scanner
-│   │   └── QRScannerView.swift          # AVFoundation camera
-│   │
-│   └── Common/
-│       ├── ProfileView.swift            # Profile + role switcher
-│       └── NotificationsView.swift      # Notifications list
-│
-├── Config/
-│   └── RoleConfig.swift           # Theme colors and tokens
-│
-├── Utilities/
-│   ├── DateUtilities.swift        # Date formatting + greeting logic
-│   ├── QRCodeGenerator.swift      # CoreImage QR generation
-│   └── HapticFeedback.swift       # Haptic utilities
-│
-├── CoreData/
-│   ├── PersistenceController.swift
-│   └── EventPassUG.xcdatamodeld   # Core Data model
-│
-├── Info.plist                     # App configuration + permissions
-│
-└── Assets.xcassets/
-    ├── Colors/                    # Role-based colors
-    ├── Images/                    # Placeholder event posters
-    └── AppIcon.appiconset/        # App icon
-```
+### Production Checklist
 
----
+#### 1. Backend Integration
+- [ ] Replace `TestDatabase` with real database
+- [ ] Replace mock services with real API calls
+- [ ] Add API endpoint configuration
+- [ ] Implement error handling and retry logic
 
-## 🚧 Future Enhancements
+#### 2. Security
+- [ ] Enable SSL pinning for API calls
+- [ ] Secure storage for auth tokens (Keychain)
+- [ ] Implement rate limiting
+- [ ] Add fraud detection
 
-### High Priority
-- [ ] Real Firebase/REST backend integration
-- [ ] Payment gateway integration (Flutterwave/Paystack)
-- [ ] PassKit ticket integration
-- [ ] Push notifications
-- [ ] Social sharing (event details)
+#### 3. Payment Integration
+- [ ] Integrate Flutterwave/Paystack SDK
+- [ ] Configure API keys (secure storage)
+- [ ] Test payment flows
+- [ ] Implement refund handling
 
-### Medium Priority
-- [ ] Google Places API for venue search
-- [ ] Event search functionality
-- [ ] User reviews with photos
-- [ ] Organizer analytics export (CSV/PDF)
-- [ ] Multi-language support (English, Luganda)
-
-### Low Priority
-- [ ] Apple Sign In / Google Sign In
-- [ ] Event recommendations based on interests
-- [ ] Offline mode improvements
-- [ ] Widget support (upcoming events)
+#### 4. App Store
+- [ ] Create App Store listing
+- [ ] Prepare screenshots (all device sizes)
+- [ ] Write app description
+- [ ] Add privacy policy URL
+- [ ] Submit for review
 
 ---
 
@@ -572,16 +567,25 @@ EventPassUG/
 
 ### Build Errors
 
-**Error: "No such module 'Firebase'"**
+**Error: "No such module 'MapKit'"**
 ```bash
-# Solution: Add Firebase via SPM
-File → Add Packages → https://github.com/firebase/firebase-ios-sdk
+# Solution: Clean build folder
+⌘ + Shift + K
+# Then rebuild
+⌘ + B
 ```
 
-**Error: "Info.plist not found"**
+**Error: "Cannot find type 'Event' in scope"**
 ```bash
-# Solution: Ensure Info.plist is added to target
-Select Info.plist → File Inspector → Target Membership → Check EventPassUG
+# Solution: Ensure all files are added to target
+# Select file → File Inspector → Target Membership → Check EventPassUG
+```
+
+**Error: Asset Catalog Compilation Failed**
+```bash
+# Solution: Clean derived data
+rm -rf ~/Library/Developer/Xcode/DerivedData/EventPassUG-*
+# Then rebuild
 ```
 
 ### Runtime Issues
@@ -598,17 +602,89 @@ Select Info.plist → File Inspector → Target Membership → Check EventPassUG
 # Build Phases → Link Binary With Libraries → Add CoreImage.framework
 ```
 
+**Test users not appearing**
+```bash
+# Solution: Reset test database
+# Delete app from device/simulator
+# Reinstall - database will reseed automatically
+```
+
+---
+
+## 📊 Project Statistics
+
+- **Total Files**: 50+ Swift source files
+- **Lines of Code**: ~10,000 LOC
+- **Models**: 6 (User, Event, Ticket, TicketType, NotificationModel, Payment)
+- **Services**: 5 protocols with mock implementations
+- **Views**: 30+ SwiftUI views
+- **Components**: 10+ reusable UI components
+- **Tests**: 2 test suites with 10+ test cases
+
+---
+
+## 🎓 Key Features Documentation
+
+### 1. Auto-Scroll Fix
+The app uses MVVM with `@StateObject` ViewModels to prevent auto-scrolling issues:
+- Uses `.task` instead of `.onAppear` for data loading
+- Implements `withAnimation(.none)` for state updates
+- Stable scroll positions with ScrollViewReader
+- Prevents re-loading with `hasLoadedInitialData` flag
+
+### 2. Onboarding Flow
+- Shows only once on first app install
+- Uses `@AppStorage` for persistence
+- Proper flow: Onboarding → Login → Main App
+- Never shows again for logged-in or returning users
+
+### 3. Poster Management System
+- Image validation (minimum 900×1125px)
+- JPEG compression with quality settings
+- Protocol-based architecture (easy backend swap)
+- Ready for Firebase Storage integration
+
+---
+
+## 🌟 Best Practices Used
+
+### Code Quality
+- ✅ Consistent naming conventions
+- ✅ Clear separation of concerns
+- ✅ Reusable components
+- ✅ Protocol-oriented design
+- ✅ Dependency injection
+- ✅ Error handling with Swift Result types
+- ✅ Async/await for concurrency
+
+### SwiftUI Patterns
+- ✅ @State for local state
+- ✅ @Binding for two-way binding
+- ✅ @EnvironmentObject for dependency injection
+- ✅ @Published for observable state
+- ✅ @StateObject for ViewModels
+- ✅ Views are declarative and composable
+
+### iOS Platform Integration
+- ✅ Haptic feedback for user actions
+- ✅ Native animations (spring, easing)
+- ✅ SF Symbols for icons
+- ✅ System fonts with Dynamic Type
+- ✅ Accessibility labels and hints
+- ✅ VoiceOver support
+- ✅ Dark mode adaptation
+
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Apple** - SwiftUI, MapKit, PassKit, AVFoundation
+- **Apple** - SwiftUI, MapKit, AVFoundation, CryptoKit
 - **SF Symbols** - Icon system
 - **Uganda Tech Community** - Inspiration and support
 
@@ -617,32 +693,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 For questions, suggestions, or support:
-
 - **Email**: support@eventpass.ug
 - **GitHub**: [@yourusername](https://github.com/yourusername)
-- **Twitter**: [@eventpassug](https://twitter.com/eventpassug)
-
----
-
-## ✅ Acceptance Criteria Checklist
-
-- [x] Install and run on iOS Simulator
-- [x] Sign in with mock account and pick role
-- [x] **Attendee**:
-  - [x] Category grid with filtered event list
-  - [x] Event Details with MapKit pin
-  - [x] Like event (persists)
-  - [x] Buy ticket with mock payment
-  - [x] View QR code under Tickets tab
-  - [x] Rate event after end time
-  - [x] See pulsing "Happening now" for live events
-- [x] **Organizer**:
-  - [x] 3-step Create Event wizard
-  - [x] Publish event to Attendee feed
-  - [x] Dashboard analytics
-  - [x] QR scanner validates tickets
-- [x] Dark/light theme with role-based colors
-- [x] All assets and colors match specs
 
 ---
 

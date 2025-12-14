@@ -313,27 +313,41 @@ struct AnalyticsCard: View {
     let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            HStack {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            // Icon in circle
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 48, height: 48)
+
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(color)
-                Spacer()
             }
 
-            Text(value)
-                .font(AppTypography.title2)
-                .fontWeight(.bold)
+            Spacer()
 
+            // Value
+            Text(value)
+                .font(AppDesign.Typography.hero)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            // Title
             Text(title)
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(AppSpacing.md)
+        .padding(AppDesign.Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(minHeight: 140)
         .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppCornerRadius.medium)
-        .shadow(color: Color.black.opacity(0.05), radius: 4)
+        .cornerRadius(AppDesign.CornerRadius.card)
+        .cardShadow()
     }
 }
 
@@ -347,60 +361,93 @@ struct EventAnalyticsRow: View {
         return Double(totalSold) / Double(totalCapacity)
     }
 
+    private var statusColor: Color {
+        switch event.status {
+        case .published: return AppDesign.Colors.success
+        case .ongoing: return AppDesign.Colors.primary
+        case .draft: return AppDesign.Colors.warning
+        case .completed: return Color.gray
+        case .cancelled: return AppDesign.Colors.error
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
+            // Title and status
             HStack {
                 Text(event.title)
-                    .font(AppTypography.callout)
-                    .fontWeight(.semibold)
+                    .font(AppDesign.Typography.cardTitle)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+
                 Spacer()
-                Text(event.status.rawValue.capitalized)
-                    .font(AppTypography.caption)
-                    .foregroundColor(.secondary)
+
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 8, height: 8)
+                    Text(event.status.rawValue.capitalized)
+                        .font(AppDesign.Typography.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, AppDesign.Spacing.sm)
+                .padding(.vertical, 4)
+                .background(statusColor.opacity(0.1))
+                .cornerRadius(AppDesign.CornerRadius.badge)
             }
 
-            HStack(spacing: AppSpacing.lg) {
+            // Stats
+            HStack(spacing: AppDesign.Spacing.xl) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Sold")
-                        .font(AppTypography.caption)
+                    Text("Tickets Sold")
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
                     Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
-                        .font(AppTypography.callout)
+                        .font(AppDesign.Typography.cardTitle)
                         .fontWeight(.semibold)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Revenue")
-                        .font(AppTypography.caption)
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
                     Text("UGX \(Int(event.ticketTypes.reduce(0) { $0 + ($1.price * Double($1.sold)) }).formatted())")
-                        .font(AppTypography.callout)
+                        .font(AppDesign.Typography.cardTitle)
                         .fontWeight(.semibold)
-                        .foregroundColor(RoleConfig.organizerPrimary)
+                        .foregroundColor(AppDesign.Colors.success)
                 }
             }
 
             // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(UIColor.systemGray5))
-                        .frame(height: 6)
+            VStack(alignment: .leading, spacing: 4) {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color(UIColor.systemGray6))
+                            .frame(height: 8)
 
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(RoleConfig.organizerPrimary)
-                        .frame(width: geometry.size.width * soldPercentage, height: 6)
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(
+                                LinearGradient(
+                                    colors: [AppDesign.Colors.primary, AppDesign.Colors.primary.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geometry.size.width * soldPercentage, height: 8)
+                    }
                 }
-            }
-            .frame(height: 6)
+                .frame(height: 8)
 
-            Text("\(Int(soldPercentage * 100))% sold")
-                .font(AppTypography.caption)
-                .foregroundColor(.secondary)
+                Text("\(Int(soldPercentage * 100))% sold")
+                    .font(AppDesign.Typography.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding(AppSpacing.md)
+        .padding(AppDesign.Spacing.md)
         .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppCornerRadius.medium)
+        .cornerRadius(AppDesign.CornerRadius.card)
+        .cardShadow()
         .shadow(color: Color.black.opacity(0.05), radius: 4)
     }
 }
