@@ -33,56 +33,13 @@ struct ProfileView: View {
         NavigationView {
             GeometryReader { geometry in
                 VStack(spacing: 0) {
-                    // Collapsible Profile Header
+                    // Compact Profile Header
                     CollapsibleHeader(title: authService.currentUser?.fullName ?? "Profile", scrollOffset: scrollOffset) {
-                        HStack(spacing: AppSpacing.md) {
-                            // Profile image - RESPONSIVE SIZE
-                            Image(systemName: "person.circle.fill")
-                                .font(.system(size: profileIconSize(for: geometry)))
-                                .foregroundColor(
-                                    RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee)
-                                )
-
-                            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                                HStack(spacing: AppSpacing.xs) {
-                                    Text(authService.currentUser?.fullName ?? "Guest")
-                                        .font(AppTypography.title2)
-                                        .fontWeight(.bold)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.8)
-
-                                    // Account Verified Badge - RESPONSIVE SIZE
-                                    if authService.currentUser?.isVerified == true {
-                                        Image(systemName: "checkmark.seal.fill")
-                                            .font(.system(size: badgeIconSize(for: geometry)))
-                                            .foregroundColor(.green)
-                                    }
-                                }
-
-                                if authService.currentUser?.isVerified == true {
-                                    Text("Account Verified")
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(.green)
-                                } else {
-                                    Text(authService.currentUser?.email ?? authService.currentUser?.phoneNumber ?? "")
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(Color.secondary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.8)
-                                }
-
-                                // Role badge - FULLY RESPONSIVE
-                                roleBadge(for: geometry)
-
-                                // Follower count badge (for organizers)
-                                if authService.currentUser?.isOrganizer == true {
-                                    followerBadge(for: geometry)
-                                }
-                            }
-
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity)
+                        CompactProfileHeader(
+                            user: authService.currentUser,
+                            followerCount: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID())
+                        )
+                        .padding(.vertical, AppDesign.Spacing.xs)
                     }
 
                     // Settings List
@@ -194,28 +151,6 @@ struct ProfileView: View {
 
     // MARK: - Responsive Sizing Functions
 
-    /// Calculate profile icon size based on screen size
-    private func profileIconSize(for geometry: GeometryProxy) -> CGFloat {
-        let baseSize: CGFloat = 60
-        let screenWidth = geometry.size.width
-
-        // Scale up for iPad (width > 768)
-        if screenWidth > 768 {
-            return min(baseSize * 1.5, 90) // Max 90pt on large iPads
-        }
-        // Slightly smaller on very small phones
-        else if screenWidth < 375 {
-            return max(baseSize * 0.9, 50) // Min 50pt
-        }
-        return baseSize
-    }
-
-    /// Calculate badge icon size
-    private func badgeIconSize(for geometry: GeometryProxy) -> CGFloat {
-        let screenWidth = geometry.size.width
-        return screenWidth > 768 ? 22 : 18
-    }
-
     /// Calculate social icon size
     private func socialIconSize(for geometry: GeometryProxy) -> CGFloat {
         let screenWidth = geometry.size.width
@@ -231,61 +166,6 @@ struct ProfileView: View {
     /// Calculate social icon container size (44pt minimum for touch target)
     private func socialIconContainerSize(for geometry: GeometryProxy) -> CGFloat {
         max(socialIconSize(for: geometry) + 16, 44) // Add padding, ensure 44pt minimum
-    }
-
-    /// Responsive role badge
-    @ViewBuilder
-    private func roleBadge(for geometry: GeometryProxy) -> some View {
-        HStack(spacing: AppSpacing.xs) { // FIXED: Changed from xxs to xs (xxs doesn't exist)
-            Image(systemName: currentActiveRole == .organizer
-                  ? "briefcase.fill"
-                  : "person.fill"
-            )
-            .font(.caption)
-
-            Text(currentActiveRole.displayName)
-                .font(.caption)
-
-            // Show dual-role indicator if user has both roles
-            if authService.currentUser?.hasBothRoles == true {
-                Text("(Switch)")
-                    .font(.system(size: geometry.size.width > 768 ? 10 : 8))
-                    .opacity(0.8)
-            }
-        }
-        .foregroundColor(Color.white)
-        .padding(.horizontal, geometry.size.width > 768 ? AppSpacing.sm : AppSpacing.xs)
-        .padding(.vertical, AppSpacing.xs) // FIXED: Changed from xxs to xs (xxs doesn't exist)
-        .background(
-            RoleConfig.getPrimaryColor(for: currentActiveRole)
-        )
-        .cornerRadius(AppCornerRadius.small)
-    }
-
-    /// Follower count badge for organizers
-    @ViewBuilder
-    private func followerBadge(for geometry: GeometryProxy) -> some View {
-        let followerCount = followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID())
-
-        HStack(spacing: AppSpacing.xs) {
-            Image(systemName: "person.2.fill")
-                .font(.caption)
-
-            Text("\(followerCount) \(followerCount == 1 ? "Follower" : "Followers")")
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .foregroundColor(Color.white)
-        .padding(.horizontal, geometry.size.width > 768 ? AppSpacing.sm : AppSpacing.xs)
-        .padding(.vertical, AppSpacing.xs)
-        .background(
-            LinearGradient(
-                colors: [Color.orange, Color.pink],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        )
-        .cornerRadius(AppCornerRadius.small)
     }
 
     // MARK: - View Sections

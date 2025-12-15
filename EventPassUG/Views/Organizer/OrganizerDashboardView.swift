@@ -50,37 +50,37 @@ struct OrganizerDashboardView: View {
 
                         ScrollOffsetReader(content: {
                             VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {
-                        // Analytics cards - responsive grid
-                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 2, spacing: ResponsiveSpacing.md(geometry)), spacing: ResponsiveSpacing.md(geometry)) {
-                            AnalyticsCard(
+                        // Analytics cards - compact 2-column grid
+                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 2, spacing: ResponsiveSpacing.sm(geometry)), spacing: ResponsiveSpacing.sm(geometry)) {
+                            CompactMetricCard(
                                 title: "Total Revenue",
-                                value: "UGX \(Int(totalRevenue).formatted())",
+                                value: "UGX \(formatCompactCurrency(totalRevenue))",
                                 icon: "dollarsign.circle.fill",
                                 color: .green
                             )
 
-                            AnalyticsCard(
+                            CompactMetricCard(
                                 title: "Tickets Sold",
                                 value: "\(totalTicketsSold)",
                                 icon: "ticket.fill",
                                 color: RoleConfig.organizerPrimary
                             )
 
-                            AnalyticsCard(
+                            CompactMetricCard(
                                 title: "Active Events",
                                 value: "\(activeEvents)",
                                 icon: "calendar",
                                 color: .blue
                             )
 
-                            AnalyticsCard(
+                            CompactMetricCard(
                                 title: "Total Events",
                                 value: "\(events.count)",
                                 icon: "chart.bar.fill",
                                 color: .purple
                             )
 
-                            AnalyticsCard(
+                            CompactMetricCard(
                                 title: "Followers",
                                 value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
                                 icon: "person.2.fill",
@@ -117,14 +117,33 @@ struct OrganizerDashboardView: View {
 
                     Divider()
 
-                    // Recent events
-                    VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    // Recent events with progress indicators
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
                         Text("Your Events")
                             .font(AppTypography.title3)
                             .fontWeight(.semibold)
+                            .padding(.bottom, AppSpacing.xs)
 
                         ForEach(events.prefix(5)) { event in
-                            EventAnalyticsRow(event: event)
+                            NavigationLink(destination: EventAnalyticsView(event: event)) {
+                                EventDashboardCard(event: event)
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if events.count > 5 {
+                            Button(action: {}) {
+                                HStack {
+                                    Text("View All Events")
+                                        .font(AppDesign.Typography.callout)
+                                        .foregroundColor(RoleConfig.organizerPrimary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(RoleConfig.organizerPrimary)
+                                }
+                                .padding(.vertical, AppSpacing.sm)
+                            }
                         }
                     }
 
@@ -249,6 +268,16 @@ struct OrganizerDashboardView: View {
             }
     }
 
+    private func formatCompactCurrency(_ value: Double) -> String {
+        if value >= 1_000_000 {
+            return String(format: "%.1fM", value / 1_000_000)
+        } else if value >= 1_000 {
+            return String(format: "%.0fK", value / 1_000)
+        } else {
+            return "\(Int(value))"
+        }
+    }
+
     private func loadAnalytics() {
         Task {
             do {
@@ -306,151 +335,8 @@ struct OrganizerDashboardView: View {
     }
 }
 
-struct AnalyticsCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
-            // Icon in circle
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: 48, height: 48)
-
-                Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(color)
-            }
-
-            Spacer()
-
-            // Value
-            Text(value)
-                .font(AppDesign.Typography.hero)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
-            // Title
-            Text(title)
-                .font(AppDesign.Typography.caption)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(AppDesign.Spacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(minHeight: 140)
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppDesign.CornerRadius.card)
-        .cardShadow()
-    }
-}
-
-struct EventAnalyticsRow: View {
-    let event: Event
-
-    private var soldPercentage: Double {
-        let totalCapacity = event.ticketTypes.reduce(0) { $0 + $1.quantity }
-        let totalSold = event.ticketTypes.reduce(0) { $0 + $1.sold }
-        guard totalCapacity > 0 else { return 0 }
-        return Double(totalSold) / Double(totalCapacity)
-    }
-
-    private var statusColor: Color {
-        switch event.status {
-        case .published: return AppDesign.Colors.success
-        case .ongoing: return AppDesign.Colors.primary
-        case .draft: return AppDesign.Colors.warning
-        case .completed: return Color.gray
-        case .cancelled: return AppDesign.Colors.error
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
-            // Title and status
-            HStack {
-                Text(event.title)
-                    .font(AppDesign.Typography.cardTitle)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(statusColor)
-                        .frame(width: 8, height: 8)
-                    Text(event.status.rawValue.capitalized)
-                        .font(AppDesign.Typography.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, AppDesign.Spacing.sm)
-                .padding(.vertical, 4)
-                .background(statusColor.opacity(0.1))
-                .cornerRadius(AppDesign.CornerRadius.badge)
-            }
-
-            // Stats
-            HStack(spacing: AppDesign.Spacing.xl) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Tickets Sold")
-                        .font(AppDesign.Typography.caption)
-                        .foregroundColor(.secondary)
-                    Text("\(event.ticketTypes.reduce(0) { $0 + $1.sold })")
-                        .font(AppDesign.Typography.cardTitle)
-                        .fontWeight(.semibold)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Revenue")
-                        .font(AppDesign.Typography.caption)
-                        .foregroundColor(.secondary)
-                    Text("UGX \(Int(event.ticketTypes.reduce(0) { $0 + ($1.price * Double($1.sold)) }).formatted())")
-                        .font(AppDesign.Typography.cardTitle)
-                        .fontWeight(.semibold)
-                        .foregroundColor(AppDesign.Colors.success)
-                }
-            }
-
-            // Progress bar
-            VStack(alignment: .leading, spacing: 4) {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color(UIColor.systemGray6))
-                            .frame(height: 8)
-
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(
-                                LinearGradient(
-                                    colors: [AppDesign.Colors.primary, AppDesign.Colors.primary.opacity(0.7)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: geometry.size.width * soldPercentage, height: 8)
-                    }
-                }
-                .frame(height: 8)
-
-                Text("\(Int(soldPercentage * 100))% sold")
-                    .font(AppDesign.Typography.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(AppDesign.Spacing.md)
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(AppDesign.CornerRadius.card)
-        .cardShadow()
-        .shadow(color: Color.black.opacity(0.05), radius: 4)
-    }
-}
+// Old components removed - replaced with CompactMetricCard and EventDashboardCard
+// See DashboardComponents.swift for the new implementations
 
 #Preview {
     OrganizerDashboardView()
