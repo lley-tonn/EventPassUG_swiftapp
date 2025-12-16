@@ -417,21 +417,21 @@ extension RecommendationService {
     func trackEventView(eventId: UUID, userId: UUID) {
         // In a real app, this would update the backend and local user model
         // For now, this is a placeholder
-        print("=Ê Tracked view: Event \(eventId) by User \(userId)")
+        print("=ÃŠ Tracked view: Event \(eventId) by User \(userId)")
     }
 
     /// Track that user liked an event
     func trackEventLike(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked like: Event \(eventId) by User \(userId)")
+        print("=ÃŠ Tracked like: Event \(eventId) by User \(userId)")
     }
 
     /// Track that user purchased tickets for an event
     func trackEventPurchase(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked purchase: Event \(eventId) by User \(userId)")
+        print("=ÃŠ Tracked purchase: Event \(eventId) by User \(userId)")
     }
 
     /// Track that user shared an event
     func trackEventShare(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked share: Event \(eventId) by User \(userId)")
+        print("=ÃŠ Tracked share: Event \(eventId) by User \(userId)")
     }
 }

@@ -13,6 +13,7 @@ import Photos
 import CoreBluetooth
 import AppTrackingTransparency
 import AVFoundation
+import EventKit
 
 struct PermissionsView: View {
     @StateObject private var viewModel = PermissionsViewModel()
@@ -175,7 +176,7 @@ struct PermissionsView: View {
         }
         .padding(AppDesign.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                 .fill(Color.blue.opacity(0.1))
         )
     }
@@ -191,7 +192,7 @@ struct PermissionsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(AppDesign.Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+                        RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                             .fill(Color.accentColor)
                     )
             }
@@ -254,7 +255,7 @@ struct PermissionCard: View {
         }
         .padding(AppDesign.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                 .fill(Color(UIColor.secondarySystemGroupedBackground))
         )
     }
@@ -308,7 +309,7 @@ struct PermissionCard: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, AppDesign.Spacing.sm)
                 .background(
-                    RoundedRectangle(cornerRadius: AppDesign.CornerRadius.small)
+                    RoundedRectangle(cornerRadius: AppDesign.CornerRadius.sm)
                         .fill(statusColor)
                 )
         }

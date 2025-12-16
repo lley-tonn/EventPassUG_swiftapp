@@ -9,9 +9,9 @@
 import Foundation
 import UserNotifications
 
-// MARK: - Notification Type
+// MARK: - Push Notification Type
 
-enum NotificationType: String {
+enum PushNotificationType: String {
     case eventReminder24h = "event_reminder_24h"
     case eventReminder2h = "event_reminder_2h"
     case eventStartingSoon = "event_starting_soon"
@@ -92,7 +92,7 @@ class AppNotificationService: NSObject, ObservableObject {
     }
 
     /// Check if notifications are enabled for a specific type
-    func shouldSendNotification(userId: UUID, preferences: UserNotificationPreferences, type: NotificationType) -> Bool {
+    func shouldSendNotification(userId: UUID, preferences: UserNotificationPreferences, type: PushNotificationType) -> Bool {
         // Check if notifications are globally enabled
         guard preferences.isEnabled, isEnabled else { return false }
 
@@ -138,13 +138,13 @@ class AppNotificationService: NSObject, ObservableObject {
         guard notificationDate > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NotificationType.eventReminder24h.title
+        content.title = PushNotificationType.eventReminder24h.title
         content.body = "\(event.title) starts tomorrow at \(formatTime(event.startDate))"
         content.sound = .default
-        content.categoryIdentifier = NotificationType.eventReminder24h.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.eventReminder24h.categoryIdentifier
         content.userInfo = [
             "eventId": event.id.uuidString,
-            "type": NotificationType.eventReminder24h.rawValue
+            "type": PushNotificationType.eventReminder24h.rawValue
         ]
 
         let trigger = UNCalendarNotificationTrigger(
@@ -168,13 +168,13 @@ class AppNotificationService: NSObject, ObservableObject {
         guard notificationDate > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NotificationType.eventReminder2h.title
+        content.title = PushNotificationType.eventReminder2h.title
         content.body = "\(event.title) starts in 2 hours at \(event.venue.name)"
         content.sound = .default
-        content.categoryIdentifier = NotificationType.eventReminder2h.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.eventReminder2h.categoryIdentifier
         content.userInfo = [
             "eventId": event.id.uuidString,
-            "type": NotificationType.eventReminder2h.rawValue
+            "type": PushNotificationType.eventReminder2h.rawValue
         ]
 
         let trigger = UNCalendarNotificationTrigger(
@@ -198,13 +198,13 @@ class AppNotificationService: NSObject, ObservableObject {
         guard notificationDate > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NotificationType.eventStartingSoon.title
+        content.title = PushNotificationType.eventStartingSoon.title
         content.body = "\(event.title) is starting soon! Get ready to head to \(event.venue.name)"
         content.sound = .default
-        content.categoryIdentifier = NotificationType.eventStartingSoon.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.eventStartingSoon.categoryIdentifier
         content.userInfo = [
             "eventId": event.id.uuidString,
-            "type": NotificationType.eventStartingSoon.rawValue
+            "type": PushNotificationType.eventStartingSoon.rawValue
         ]
 
         let trigger = UNCalendarNotificationTrigger(
@@ -242,13 +242,13 @@ class AppNotificationService: NSObject, ObservableObject {
         guard shouldSendNotification(userId: userId, preferences: preferences, type: .ticketPurchase) else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NotificationType.ticketPurchase.title
+        content.title = PushNotificationType.ticketPurchase.title
         content.body = "You purchased \(quantity) x \(ticketType.name) for \(event.title)"
         content.sound = .default
-        content.categoryIdentifier = NotificationType.ticketPurchase.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.ticketPurchase.categoryIdentifier
         content.userInfo = [
             "eventId": event.id.uuidString,
-            "type": NotificationType.ticketPurchase.rawValue
+            "type": PushNotificationType.ticketPurchase.rawValue
         ]
 
         let identifier = "ticket_purchase_\(UUID().uuidString)"
@@ -265,10 +265,10 @@ class AppNotificationService: NSObject, ObservableObject {
         content.title = "\(event.title) - Update"
         content.body = updateMessage
         content.sound = .default
-        content.categoryIdentifier = NotificationType.eventUpdate.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.eventUpdate.categoryIdentifier
         content.userInfo = [
             "eventId": event.id.uuidString,
-            "type": NotificationType.eventUpdate.rawValue
+            "type": PushNotificationType.eventUpdate.rawValue
         ]
 
         let identifier = "event_update_\(UUID().uuidString)"
@@ -282,7 +282,7 @@ class AppNotificationService: NSObject, ObservableObject {
         guard shouldSendNotification(userId: userId, preferences: preferences, type: .recommendation) else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = NotificationType.recommendation.title
+        content.title = PushNotificationType.recommendation.title
 
         if events.count == 1, let event = events.first {
             content.body = "\(event.title) - \(formatDate(event.startDate))"
@@ -291,9 +291,9 @@ class AppNotificationService: NSObject, ObservableObject {
         }
 
         content.sound = .default
-        content.categoryIdentifier = NotificationType.recommendation.categoryIdentifier
+        content.categoryIdentifier = PushNotificationType.recommendation.categoryIdentifier
         content.userInfo = [
-            "type": NotificationType.recommendation.rawValue,
+            "type": PushNotificationType.recommendation.rawValue,
             "eventIds": events.map { $0.id.uuidString }
         ]
 
@@ -317,7 +317,7 @@ class AppNotificationService: NSObject, ObservableObject {
 
     /// Remove all pending notifications
     func removeAllPendingNotifications() {
-        notificationCenter.removeAllPendingNotifications()
+        notificationCenter.removeAllPendingNotificationRequests()
     }
 
     /// Remove all delivered notifications
@@ -375,7 +375,7 @@ extension AppNotificationService: UNUserNotificationCenterDelegate {
            let eventId = UUID(uuidString: eventIdString) {
             // Navigate to event detail
             // In a real app, you'd use a deep linking coordinator or navigation manager
-            print("= Navigate to event: \(eventId)")
+            print("= Navigate to event: \(eventId)")
 
             // Post notification for app coordinator to handle
             NotificationCenter.default.post(
@@ -387,16 +387,16 @@ extension AppNotificationService: UNUserNotificationCenterDelegate {
 
         // Handle different notification types
         if let typeString = userInfo["type"] as? String,
-           let type = NotificationType(rawValue: typeString) {
+           let type = PushNotificationType(rawValue: typeString) {
             switch type {
             case .recommendation:
                 // Navigate to discovery/recommendations
-                print("= Navigate to recommendations")
+                print("= Navigate to recommendations")
                 NotificationCenter.default.post(name: NSNotification.Name("NavigateToRecommendations"), object: nil)
 
             case .ticketPurchase:
                 // Navigate to tickets
-                print("= Navigate to tickets")
+                print("= Navigate to tickets")
                 NotificationCenter.default.post(name: NSNotification.Name("NavigateToTickets"), object: nil)
 
             default:
@@ -414,7 +414,7 @@ extension AppNotificationService {
         let categories: Set<UNNotificationCategory> = [
             // Event reminder category
             UNNotificationCategory(
-                identifier: NotificationType.eventReminder24h.categoryIdentifier,
+                identifier: PushNotificationType.eventReminder24h.categoryIdentifier,
                 actions: [
                     UNNotificationAction(identifier: "VIEW", title: "View Event", options: .foreground),
                     UNNotificationAction(identifier: "ADD_CALENDAR", title: "Add to Calendar", options: [])
@@ -425,7 +425,7 @@ extension AppNotificationService {
 
             // Event starting soon category
             UNNotificationCategory(
-                identifier: NotificationType.eventStartingSoon.categoryIdentifier,
+                identifier: PushNotificationType.eventStartingSoon.categoryIdentifier,
                 actions: [
                     UNNotificationAction(identifier: "VIEW", title: "View Event", options: .foreground),
                     UNNotificationAction(identifier: "DIRECTIONS", title: "Get Directions", options: .foreground)
@@ -436,7 +436,7 @@ extension AppNotificationService {
 
             // Recommendation category
             UNNotificationCategory(
-                identifier: NotificationType.recommendation.categoryIdentifier,
+                identifier: PushNotificationType.recommendation.categoryIdentifier,
                 actions: [
                     UNNotificationAction(identifier: "EXPLORE", title: "Explore", options: .foreground),
                     UNNotificationAction(identifier: "DISMISS", title: "Not Interested", options: [])

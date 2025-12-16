@@ -89,7 +89,7 @@ struct CalendarConflictView: View {
             }
             .padding(AppDesign.Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+                RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                     .fill(Color(UIColor.secondarySystemGroupedBackground))
             )
         }
@@ -110,7 +110,7 @@ struct CalendarConflictView: View {
                     .frame(maxWidth: .infinity)
                     .padding(AppDesign.Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+                        RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                             .fill(Color.orange)
                     )
             }
@@ -207,7 +207,7 @@ struct ConflictCard: View {
                     Image(systemName: conflictTypeIcon)
                         .font(.caption2)
                     Text(conflictTypeText)
-                        .font(AppTypography.caption2)
+                        .font(AppDesign.Typography.caption)
                         .fontWeight(.semibold)
                 }
                 .foregroundColor(.white)
@@ -223,7 +223,7 @@ struct ConflictCard: View {
         }
         .padding(AppDesign.Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.medium)
+            RoundedRectangle(cornerRadius: AppDesign.CornerRadius.md)
                 .fill(Color(UIColor.secondarySystemGroupedBackground))
         )
     }

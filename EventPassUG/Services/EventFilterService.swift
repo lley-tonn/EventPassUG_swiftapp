@@ -20,7 +20,7 @@ class EventFilterService {
     // MARK: - Age Validation
 
     /// Check if user meets age requirement for an event
-    func canUserAccessEvent(_ event: Event, user: User) -> Bool {
+    nonisolated func canUserAccessEvent(_ event: Event, user: User) -> Bool {
         // No age restriction - everyone can access
         guard event.ageRestriction != .none else { return true }
 
@@ -32,7 +32,7 @@ class EventFilterService {
     }
 
     /// Get reason why user cannot access an event
-    func accessDenialReason(for event: Event, user: User) -> String? {
+    nonisolated func accessDenialReason(for event: Event, user: User) -> String? {
         guard !canUserAccessEvent(event, user: user) else { return nil }
 
         if let userAge = user.age {
@@ -128,7 +128,7 @@ class EventFilterService {
     // MARK: - Discovery Logic
 
     /// Sort events by discovery priority for a specific user
-    /// Priority: eligible by age ’ same city ’ nearby ’ interests ’ popularity ’ upcoming
+    /// Priority: eligible by age Â’ same city Â’ nearby Â’ interests Â’ popularity Â’ upcoming
     func sortByDiscoveryPriority(_ events: [Event], user: User, userLocation: UserLocation?) -> [Event] {
         events.sorted { event1, event2 in
             // 1. Age eligibility (eligible events first)

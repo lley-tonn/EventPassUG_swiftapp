@@ -8,6 +8,7 @@
 
 import Foundation
 import UserNotifications
+import UIKit
 
 @MainActor
 class NotificationSettingsViewModel: ObservableObject {
@@ -116,12 +117,12 @@ class NotificationSettingsViewModel: ObservableObject {
     }
 
     func updateQuietHoursStart(hour: Int, minute: Int) {
-        preferences.quietHoursStart = NotificationPreferences.QuietHourTime(hour: hour, minute: minute)
+        preferences.quietHoursStart = UserNotificationPreferences.QuietHourTime(hour: hour, minute: minute)
         savePreferences()
     }
 
     func updateQuietHoursEnd(hour: Int, minute: Int) {
-        preferences.quietHoursEnd = NotificationPreferences.QuietHourTime(hour: hour, minute: minute)
+        preferences.quietHoursEnd = UserNotificationPreferences.QuietHourTime(hour: hour, minute: minute)
         savePreferences()
     }
 

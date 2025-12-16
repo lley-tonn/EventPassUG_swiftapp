@@ -166,9 +166,9 @@ struct TicketType: Identifiable, Codable, Equatable {
         self.sold = sold
         self.description = description
         self.perks = perks
-        // Default: sales start immediately and end far in the future
+        // Default: sales start immediately and end 30 days from now (organizer should set to event start date)
         self.saleStartDate = saleStartDate ?? Date()
-        self.saleEndDate = saleEndDate ?? Date().addingTimeInterval(365 * 24 * 60 * 60) // 1 year default
+        self.saleEndDate = saleEndDate ?? Date().addingTimeInterval(30 * 24 * 60 * 60) // 30 days default
         self.isUnlimitedQuantity = isUnlimitedQuantity
     }
 }

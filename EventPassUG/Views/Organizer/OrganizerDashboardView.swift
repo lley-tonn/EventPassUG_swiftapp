@@ -30,14 +30,14 @@ struct OrganizerDashboardView: View {
                 VStack(spacing: 0) {
                     // Collapsible header
                     CollapsibleHeader(title: "Dashboard", scrollOffset: scrollOffset) {
-                        VStack(spacing: AppSpacing.md) {
+                        VStack(spacing: AppDesign.Spacing.md) {
                             Text("Dashboard")
-                                .font(AppTypography.largeTitle)
+                                .font(AppDesign.Typography.largeTitle)
                                 .fontWeight(.bold)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             Text("Track your events and earnings")
-                                .font(AppTypography.body)
+                                .font(AppDesign.Typography.body)
                                 .foregroundColor(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -46,17 +46,17 @@ struct OrganizerDashboardView: View {
                     // Content with scroll tracking
                     GeometryReader { geometry in
                         let isLandscape = geometry.size.width > geometry.size.height
-                        let _ = ResponsiveGrid.columns(isLandscape: isLandscape, baseColumns: 2)
+                        let columns = Array(repeating: GridItem(.flexible(), spacing: AppDesign.Spacing.sm), count: isLandscape ? 4 : 2)
 
                         ScrollOffsetReader(content: {
-                            VStack(alignment: .leading, spacing: ResponsiveSpacing.lg(geometry)) {
+                            VStack(alignment: .leading, spacing: AppDesign.Spacing.lg) {
                         // Analytics cards - compact 2-column grid
-                        LazyVGrid(columns: ResponsiveGrid.gridItems(isLandscape: isLandscape, baseColumns: 2, spacing: ResponsiveSpacing.sm(geometry)), spacing: ResponsiveSpacing.sm(geometry)) {
+                        LazyVGrid(columns: columns, spacing: AppDesign.Spacing.sm) {
                             CompactMetricCard(
                                 title: "Total Revenue",
                                 value: "UGX \(formatCompactCurrency(totalRevenue))",
                                 icon: "dollarsign.circle.fill",
-                                color: .green
+                                color: Color.green
                             )
 
                             CompactMetricCard(
@@ -96,10 +96,10 @@ struct OrganizerDashboardView: View {
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Manage Scanner Devices")
-                                    .font(AppTypography.headline)
+                                    .font(AppDesign.Typography.cardTitle)
 
                                 Text("Authorize devices for ticket scanning")
-                                    .font(AppTypography.caption)
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.secondary)
                             }
 
@@ -109,20 +109,20 @@ struct OrganizerDashboardView: View {
                                 .foregroundColor(.secondary)
                         }
                         .foregroundColor(.primary)
-                        .padding(AppSpacing.md)
+                        .padding(AppDesign.Spacing.md)
                         .background(Color(UIColor.systemBackground))
-                        .cornerRadius(AppCornerRadius.medium)
+                        .cornerRadius(AppDesign.CornerRadius.md)
                         .shadow(color: Color.black.opacity(0.05), radius: 4)
                     }
 
                     Divider()
 
                     // Recent events with progress indicators
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                         Text("Your Events")
-                            .font(AppTypography.title3)
+                            .font(AppDesign.Typography.section)
                             .fontWeight(.semibold)
-                            .padding(.bottom, AppSpacing.xs)
+                            .padding(.bottom, AppDesign.Spacing.xs)
 
                         ForEach(events.prefix(5)) { event in
                             NavigationLink(destination: EventAnalyticsView(event: event)) {
@@ -142,25 +142,25 @@ struct OrganizerDashboardView: View {
                                         .font(.caption)
                                         .foregroundColor(RoleConfig.organizerPrimary)
                                 }
-                                .padding(.vertical, AppSpacing.sm)
+                                .padding(.vertical, AppDesign.Spacing.sm)
                             }
                         }
                     }
 
                     // Withdraw earnings section
-                    VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.md) {
                         Text("Earnings")
-                            .font(AppTypography.title3)
+                            .font(AppDesign.Typography.section)
                             .fontWeight(.semibold)
 
-                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                             HStack {
                                 Text("Available Balance")
-                                    .font(AppTypography.callout)
+                                    .font(AppDesign.Typography.callout)
                                     .foregroundColor(.secondary)
                                 Spacer()
                                 Text("UGX \(Int(totalRevenue).formatted())")
-                                    .font(AppTypography.title2)
+                                    .font(AppDesign.Typography.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(RoleConfig.organizerPrimary)
                             }
@@ -170,23 +170,23 @@ struct OrganizerDashboardView: View {
                                     Image(systemName: "arrow.down.circle.fill")
                                     Text("Withdraw Funds")
                                 }
-                                .font(AppTypography.headline)
+                                .font(AppDesign.Typography.cardTitle)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(RoleConfig.organizerPrimary)
-                                .cornerRadius(AppCornerRadius.medium)
+                                .cornerRadius(AppDesign.CornerRadius.md)
                             }
                             .disabled(totalRevenue <= 0)
                             .opacity(totalRevenue > 0 ? 1.0 : 0.5)
                         }
-                        .padding(AppSpacing.md)
+                        .padding(AppDesign.Spacing.md)
                         .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(AppCornerRadius.medium)
+                        .cornerRadius(AppDesign.CornerRadius.md)
                     }
                 }
-                .padding(.horizontal, ResponsiveSpacing.md(geometry))
-                .padding(.vertical, ResponsiveSpacing.sm(geometry))
+                .padding(.horizontal, AppDesign.Spacing.md)
+                .padding(.vertical, AppDesign.Spacing.sm)
                         }, onOffsetChange: { offset in
                             scrollOffset = offset
                         })
@@ -198,23 +198,23 @@ struct OrganizerDashboardView: View {
 
                 // Verification Required Overlay
                 if authService.currentUser?.needsVerificationForOrganizerActions == true {
-                    VStack(spacing: AppSpacing.lg) {
+                    VStack(spacing: AppDesign.Spacing.lg) {
                         Spacer()
 
-                        VStack(spacing: AppSpacing.md) {
+                        VStack(spacing: AppDesign.Spacing.md) {
                             Image(systemName: "exclamationmark.shield.fill")
                                 .font(.system(size: 80))
                                 .foregroundColor(.orange)
 
                             Text("Verification Required")
-                                .font(AppTypography.title2)
+                                .font(AppDesign.Typography.title2)
                                 .fontWeight(.bold)
 
                             Text("You must verify your National ID before accessing organizer features.")
-                                .font(AppTypography.body)
+                                .font(AppDesign.Typography.body)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, AppSpacing.xl)
+                                .padding(.horizontal, AppDesign.Spacing.xl)
 
                             Button(action: {
                                 showingVerification = true
@@ -228,15 +228,15 @@ struct OrganizerDashboardView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(RoleConfig.organizerPrimary)
-                                .cornerRadius(AppCornerRadius.medium)
+                                .cornerRadius(AppDesign.CornerRadius.md)
                             }
-                            .padding(.horizontal, AppSpacing.xl)
+                            .padding(.horizontal, AppDesign.Spacing.xl)
                         }
-                        .padding(AppSpacing.xl)
+                        .padding(AppDesign.Spacing.xl)
                         .background(Color(UIColor.systemBackground))
-                        .cornerRadius(AppCornerRadius.large)
+                        .cornerRadius(AppDesign.CornerRadius.lg)
                         .shadow(radius: 10)
-                        .padding(AppSpacing.md)
+                        .padding(AppDesign.Spacing.md)
 
                         Spacer()
                     }
@@ -347,4 +347,68 @@ struct OrganizerDashboardView: View {
             ticketService: MockTicketService(),
             paymentService: MockPaymentService()
         ))
+}
+
+// MARK: - Dashboard Components (Inlined)
+
+private struct CompactMetricCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: AppDesign.Spacing.sm) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(color)
+                .frame(width: 36, height: 36)
+                .background(color.opacity(0.12))
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(AppDesign.Typography.cardTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primary)
+                
+                Text(title)
+                    .font(AppDesign.Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(AppDesign.Spacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(AppDesign.CornerRadius.card)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+}
+
+private struct EventDashboardCard: View {
+    let event: Event
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
+            HStack {
+                Text(event.title)
+                    .font(AppDesign.Typography.cardTitle)
+                    .foregroundColor(.primary)
+                Spacer()
+                Text(event.status.rawValue.capitalized)
+                    .font(AppDesign.Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text(DateUtilities.formatEventDateTime(event.startDate))
+                .font(AppDesign.Typography.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(AppDesign.Spacing.md)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(AppDesign.CornerRadius.card)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
 }

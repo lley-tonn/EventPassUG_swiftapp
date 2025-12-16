@@ -44,7 +44,7 @@ struct ProfileView: View {
 
                     // Settings List
                     ScrollOffsetReader(content: {
-                        VStack(spacing: AppSpacing.lg) {
+                        VStack(spacing: AppDesign.Spacing.lg) {
                             // Role switcher and verification (conditional)
                             accountSection
 
@@ -71,9 +71,9 @@ struct ProfileView: View {
                             // App info
                             appInfoSection
 
-                            Spacer(minLength: AppSpacing.xl)
+                            Spacer(minLength: AppDesign.Spacing.xl)
                         }
-                        .padding(.top, AppSpacing.md)
+                        .padding(.top, AppDesign.Spacing.md)
                         .frame(maxWidth: .infinity)
                     }, onOffsetChange: { offset in
                         scrollOffset = offset
@@ -171,11 +171,11 @@ struct ProfileView: View {
     // MARK: - View Sections
 
     private var accountSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
             Text("Account")
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, AppDesign.Spacing.md)
 
             VStack(spacing: 1) {
                 // Verification Status (for organizers)
@@ -191,7 +191,7 @@ struct ProfileView: View {
                                     .foregroundColor(.primary)
                                 if let verificationDate = authService.currentUser?.verificationDate {
                                     Text("Verified on \(verificationDate.formatted(date: .abbreviated, time: .omitted))")
-                                        .font(AppTypography.caption)
+                                        .font(AppDesign.Typography.caption)
                                         .foregroundColor(.secondary)
                                 }
                             }
@@ -212,7 +212,7 @@ struct ProfileView: View {
                                     Text("Verification Required")
                                         .foregroundColor(.primary)
                                     Text("Complete verification to access organizer features")
-                                        .font(AppTypography.caption)
+                                        .font(AppDesign.Typography.caption)
                                         .foregroundColor(.secondary)
                                 }
 
@@ -258,7 +258,7 @@ struct ProfileView: View {
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
-            .padding(.horizontal, AppSpacing.md)
+            .padding(.horizontal, AppDesign.Spacing.md)
         }
     }
 
@@ -284,7 +284,7 @@ struct ProfileView: View {
                     Spacer()
 
                     Text(currentActiveRole == .attendee ? "To Organizer" : "To Attendee")
-                        .font(AppTypography.caption)
+                        .font(AppDesign.Typography.caption)
                         .foregroundColor(.secondary)
 
                     Image(systemName: "chevron.right")
@@ -304,7 +304,7 @@ struct ProfileView: View {
                             .foregroundColor(.primary)
 
                         Text("Host events and sell tickets")
-                            .font(AppTypography.caption)
+                            .font(AppDesign.Typography.caption)
                             .foregroundColor(.secondary)
                     }
 
@@ -320,11 +320,11 @@ struct ProfileView: View {
     }
 
     private var settingsSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
             Text("Settings")
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, AppDesign.Spacing.md)
 
             VStack(spacing: 1) {
                 settingsRow(icon: "person", title: "Edit Profile", destination: AnyView(EditProfileView().environmentObject(authService)))
@@ -334,16 +334,16 @@ struct ProfileView: View {
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
-            .padding(.horizontal, AppSpacing.md)
+            .padding(.horizontal, AppDesign.Spacing.md)
         }
     }
 
     private func communitySection(geometry: GeometryProxy) -> some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
             Text("Community")
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, AppDesign.Spacing.md)
 
             VStack(spacing: 1) {
                 // Invite Friends
@@ -378,10 +378,10 @@ struct ProfileView: View {
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
-            .padding(.horizontal, AppSpacing.md)
+            .padding(.horizontal, AppDesign.Spacing.md)
 
             // Social Media Icons - FULLY RESPONSIVE
-            HStack(spacing: AppSpacing.md) {
+            HStack(spacing: AppDesign.Spacing.md) {
                 Spacer()
 
                 socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .white, geometry: geometry)
@@ -392,16 +392,16 @@ struct ProfileView: View {
 
                 Spacer()
             }
-            .padding(.vertical, AppSpacing.sm)
+            .padding(.vertical, AppDesign.Spacing.sm)
         }
     }
 
     private var supportSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
             Text("Support")
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, AppDesign.Spacing.md)
 
             VStack(spacing: 1) {
                 settingsRow(icon: "questionmark.circle", title: "Help Center", destination: AnyView(HelpCenterView().environmentObject(authService)))
@@ -410,12 +410,12 @@ struct ProfileView: View {
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
-            .padding(.horizontal, AppSpacing.md)
+            .padding(.horizontal, AppDesign.Spacing.md)
         }
     }
 
     private var appInfoSection: some View {
-        VStack(spacing: AppSpacing.sm) {
+        VStack(spacing: AppDesign.Spacing.sm) {
             HStack {
                 Text("Version")
                 Spacer()
@@ -441,7 +441,7 @@ struct ProfileView: View {
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
         }
-        .padding(.horizontal, AppSpacing.md)
+        .padding(.horizontal, AppDesign.Spacing.md)
     }
 
     // MARK: - Helper Views
@@ -606,11 +606,11 @@ struct ContactVerificationSection: View {
     @Binding var isVerifyingEmail: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
             Text("Contact Information")
-                .font(AppTypography.caption)
+                .font(AppDesign.Typography.caption)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, AppSpacing.md)
+                .padding(.horizontal, AppDesign.Spacing.md)
 
             VStack(spacing: 1) {
                 // Email Status/Actions
@@ -624,7 +624,7 @@ struct ContactVerificationSection: View {
                                 Text("Email Verified")
                                     .foregroundColor(.primary)
                                 Text(email)
-                                    .font(AppTypography.caption)
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.secondary)
                             }
 
@@ -646,7 +646,7 @@ struct ContactVerificationSection: View {
                                     Text("Verify Email")
                                         .foregroundColor(.primary)
                                     Text(email)
-                                        .font(AppTypography.caption)
+                                        .font(AppDesign.Typography.caption)
                                         .foregroundColor(.secondary)
                                 }
 
@@ -694,7 +694,7 @@ struct ContactVerificationSection: View {
                                 Text("Phone Verified")
                                     .foregroundColor(.primary)
                                 Text(phone)
-                                    .font(AppTypography.caption)
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.secondary)
                             }
 
@@ -716,7 +716,7 @@ struct ContactVerificationSection: View {
                                     Text("Verify Phone Number")
                                         .foregroundColor(.primary)
                                     Text(phone)
-                                        .font(AppTypography.caption)
+                                        .font(AppDesign.Typography.caption)
                                         .foregroundColor(.secondary)
                                 }
 
@@ -766,7 +766,7 @@ struct ContactVerificationSection: View {
                                 Text("Link Accounts")
                                     .foregroundColor(.primary)
                                 Text("Add more sign-in options")
-                                    .font(AppTypography.caption)
+                                    .font(AppDesign.Typography.caption)
                                     .foregroundColor(.secondary)
                             }
 
@@ -782,7 +782,7 @@ struct ContactVerificationSection: View {
             }
             .background(Color(UIColor.secondarySystemGroupedBackground))
             .cornerRadius(AppCornerRadius.medium)
-            .padding(.horizontal, AppSpacing.md)
+            .padding(.horizontal, AppDesign.Spacing.md)
         }
     }
 }
@@ -799,30 +799,30 @@ struct EmailVerificationSheet: View {
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                VStack(spacing: AppSpacing.xl) {
+                VStack(spacing: AppDesign.Spacing.xl) {
                     Spacer()
 
-                    VStack(spacing: AppSpacing.md) {
+                    VStack(spacing: AppDesign.Spacing.md) {
                         Image(systemName: "envelope.circle.fill")
                             .font(.system(size: max(geometry.size.width * 0.15, 60)))
                             .foregroundColor(RoleConfig.attendeePrimary)
 
                         Text("Verify Your Email")
-                            .font(AppTypography.title2)
+                            .font(AppDesign.Typography.title2)
                             .fontWeight(.bold)
 
                         if let email = authService.currentUser?.email {
                             Text("We'll send a verification link to:")
-                                .font(AppTypography.body)
+                                .font(AppDesign.Typography.body)
                                 .foregroundColor(.secondary)
 
                             Text(email)
-                                .font(AppTypography.headline)
+                                .font(AppDesign.Typography.bodyEmphasized)
                                 .foregroundColor(RoleConfig.attendeePrimary)
                         }
 
                         Text("Click the link in the email to verify your address")
-                            .font(AppTypography.callout)
+                            .font(AppDesign.Typography.callout)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
@@ -834,14 +834,14 @@ struct EmailVerificationSheet: View {
                     } else {
                         Button(action: sendVerificationEmail) {
                             Text("Send Verification Email")
-                                .font(AppTypography.headline)
+                                .font(AppDesign.Typography.buttonPrimary)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(RoleConfig.attendeePrimary)
                                 .cornerRadius(AppCornerRadius.medium)
                         }
-                        .padding(.horizontal, AppSpacing.xl)
+                        .padding(.horizontal, AppDesign.Spacing.xl)
                     }
 
                     Spacer()
@@ -902,26 +902,26 @@ struct AccountLinkingView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                VStack(alignment: .leading, spacing: AppDesign.Spacing.lg) {
                     // Header
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                         Text("Link Accounts")
-                            .font(AppTypography.title2)
+                            .font(AppDesign.Typography.title2)
                             .fontWeight(.bold)
 
                         Text("Add more ways to sign in to your account")
-                            .font(AppTypography.body)
+                            .font(AppDesign.Typography.body)
                             .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, AppSpacing.md)
-                    .padding(.top, AppSpacing.md)
+                    .padding(.horizontal, AppDesign.Spacing.md)
+                    .padding(.top, AppDesign.Spacing.md)
 
                     // Current Providers
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                         Text("Connected")
-                            .font(AppTypography.caption)
+                            .font(AppDesign.Typography.caption)
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, AppSpacing.md)
+                            .padding(.horizontal, AppDesign.Spacing.md)
 
                         VStack(spacing: 1) {
                             ForEach(authService.currentUser?.authProviders ?? [], id: \.self) { provider in
@@ -942,17 +942,17 @@ struct AccountLinkingView: View {
                         }
                         .background(Color(UIColor.secondarySystemGroupedBackground))
                         .cornerRadius(AppCornerRadius.medium)
-                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.horizontal, AppDesign.Spacing.md)
                     }
 
                     // Available to Link
-                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
                         Text("Available to Link")
-                            .font(AppTypography.caption)
+                            .font(AppDesign.Typography.caption)
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, AppSpacing.md)
+                            .padding(.horizontal, AppDesign.Spacing.md)
 
-                        VStack(spacing: AppSpacing.md) {
+                        VStack(spacing: AppDesign.Spacing.md) {
                             if !(authService.currentUser?.authProviders.contains("google.com") ?? false) {
                                 linkButton(
                                     icon: "g.circle.fill",
@@ -977,10 +977,10 @@ struct AccountLinkingView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.horizontal, AppDesign.Spacing.md)
                     }
                 }
-                .padding(.bottom, AppSpacing.xl)
+                .padding(.bottom, AppDesign.Spacing.xl)
             }
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.systemGroupedBackground))
@@ -1005,7 +1005,7 @@ struct AccountLinkingView: View {
         Button(action: action) {
             HStack {
                 Image(systemName: icon)
-                    .font(AppTypography.body)
+                    .font(AppDesign.Typography.body)
                     .foregroundColor(RoleConfig.attendeePrimary)
 
                 Text(title)
@@ -1089,6 +1089,99 @@ struct AccountLinkingView: View {
         case "phone": return "Phone Number"
         case "email": return "Email & Password"
         default: return provider
+        }
+    }
+}
+
+// MARK: - Compact Profile Header
+
+/// Compact profile header component (inlined to avoid project file issues)
+private struct CompactProfileHeader: View {
+    let user: User?
+    let followerCount: Int
+
+    private var displayRole: UserRole {
+        user?.role ?? .attendee
+    }
+
+    private var isOrganizer: Bool {
+        user?.isOrganizer == true
+    }
+
+    private var isVerified: Bool {
+        user?.isVerified == true
+    }
+
+    var body: some View {
+        HStack(spacing: AppDesign.Spacing.md) {
+            // Avatar
+            Image(systemName: "person.circle.fill")
+                .font(.system(size: 56))
+                .foregroundColor(RoleConfig.getPrimaryColor(for: displayRole))
+                .frame(width: 56, height: 56)
+
+            // Name and metadata
+            VStack(alignment: .leading, spacing: 4) {
+                // Name with verification badge
+                HStack(spacing: 6) {
+                    Text(user?.fullName ?? "Guest")
+                        .font(AppDesign.Typography.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
+                    if isVerified {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.green)
+                    }
+                }
+
+                // Follower count + Role
+                HStack(spacing: 6) {
+                    if isOrganizer {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 10, weight: .medium))
+
+                            Text(formattedFollowerCount)
+                                .font(AppDesign.Typography.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(.secondary)
+
+                        Text("•")
+                            .font(AppDesign.Typography.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack(spacing: 4) {
+                        Image(systemName: displayRole == .organizer ? "briefcase.fill" : "person.fill")
+                            .font(.system(size: 10, weight: .medium))
+
+                        Text(displayRole.displayName)
+                            .font(AppDesign.Typography.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(RoleConfig.getPrimaryColor(for: displayRole))
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var formattedFollowerCount: String {
+        if followerCount >= 1_000_000 {
+            return String(format: "%.1fM followers", Double(followerCount) / 1_000_000)
+        } else if followerCount >= 1_000 {
+            return String(format: "%.1fK followers", Double(followerCount) / 1_000)
+        } else if followerCount == 1 {
+            return "1 follower"
+        } else {
+            return "\(followerCount) followers"
         }
     }
 }

@@ -250,10 +250,13 @@ class CalendarService: ObservableObject {
         existingEvent: EKEvent,
         bufferMinutes: Int
     ) -> CalendarConflict? {
+        guard let existingStart = existingEvent.startDate,
+              let existingEnd = existingEvent.endDate else {
+            return nil
+        }
+
         let newStart = newEvent.startDate
         let newEnd = newEvent.endDate
-        let existingStart = existingEvent.startDate
-        let existingEnd = existingEvent.endDate
 
         // Check for exact time conflict
         if newStart == existingStart && newEnd == existingEnd {

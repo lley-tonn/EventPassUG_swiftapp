@@ -231,6 +231,16 @@ struct CreateEventWizard: View {
                     return
                 }
 
+                // Normalize ticket sale dates to event start date if not explicitly set
+                let normalizedTickets = ticketTypes.map { ticket in
+                    var normalized = ticket
+                    // If saleEndDate is more than 60 days away, assume it's using default and set to event start
+                    if normalized.saleEndDate.timeIntervalSinceNow > (60 * 24 * 60 * 60) {
+                        normalized.saleEndDate = startDate
+                    }
+                    return normalized
+                }
+
                 let event = Event(
                     id: draftId ?? UUID(),
                     title: title.isEmpty ? "Untitled Event" : title,
@@ -247,7 +257,7 @@ struct CreateEventWizard: View {
                         city: venueCity,
                         coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
                     ),
-                    ticketTypes: ticketTypes,
+                    ticketTypes: normalizedTickets,
                     status: .draft
                 )
 
@@ -305,6 +315,16 @@ struct CreateEventWizard: View {
                     return
                 }
 
+                // Normalize ticket sale dates to event start date if not explicitly set
+                let normalizedTickets = ticketTypes.map { ticket in
+                    var normalized = ticket
+                    // If saleEndDate is more than 60 days away, assume it's using default and set to event start
+                    if normalized.saleEndDate.timeIntervalSinceNow > (60 * 24 * 60 * 60) {
+                        normalized.saleEndDate = startDate
+                    }
+                    return normalized
+                }
+
                 let event = Event(
                     title: title,
                     description: description,
@@ -320,7 +340,7 @@ struct CreateEventWizard: View {
                         city: venueCity,
                         coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
                     ),
-                    ticketTypes: ticketTypes,
+                    ticketTypes: normalizedTickets,
                     status: .published
                 )
 
