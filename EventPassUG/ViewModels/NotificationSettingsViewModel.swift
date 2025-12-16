@@ -84,6 +84,11 @@ class NotificationSettingsViewModel: ObservableObject {
         savePreferences()
     }
 
+    func updateEventReminder30m(_ enabled: Bool) {
+        preferences.eventReminders30m = enabled
+        savePreferences()
+    }
+
     func updateEventStartingSoon(_ enabled: Bool) {
         preferences.eventStartingSoon = enabled
         savePreferences()
@@ -107,6 +112,27 @@ class NotificationSettingsViewModel: ObservableObject {
 
     func updateMarketing(_ enabled: Bool) {
         preferences.marketing = enabled
+        savePreferences()
+    }
+
+    /// Update organizer notification preferences
+    func updateOrganizerTicketSold(_ enabled: Bool) {
+        preferences.organizerTicketSold = enabled
+        savePreferences()
+    }
+
+    func updateOrganizerLowInventory(_ enabled: Bool) {
+        preferences.organizerLowInventory = enabled
+        savePreferences()
+    }
+
+    func updateOrganizerCheckIns(_ enabled: Bool) {
+        preferences.organizerCheckIns = enabled
+        savePreferences()
+    }
+
+    func updateOrganizerEventReminders(_ enabled: Bool) {
+        preferences.organizerEventReminders = enabled
         savePreferences()
     }
 

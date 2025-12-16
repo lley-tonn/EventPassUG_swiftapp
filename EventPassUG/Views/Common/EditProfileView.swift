@@ -29,7 +29,9 @@ struct EditProfileView: View {
     @State private var showingAddPhone = false
 
     var body: some View {
-        Form {
+        let currentRole = authService.currentUser?.role ?? .attendee
+
+        return Form {
             // Profile Photo Section
             Section {
                 VStack(spacing: AppSpacing.md) {
@@ -43,18 +45,18 @@ struct EditProfileView: View {
                             .clipShape(Circle())
                             .overlay(
                                 Circle()
-                                    .stroke(RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee), lineWidth: 3)
+                                    .stroke(RoleConfig.getPrimaryColor(for: currentRole), lineWidth: 3)
                             )
                     } else {
                         Image(systemName: "person.circle.fill")
                             .font(.system(size: 80))
-                            .foregroundColor(RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee))
+                            .foregroundColor(RoleConfig.getPrimaryColor(for: currentRole))
                     }
 
                     PhotosPicker(selection: $profileImageItem, matching: .images) {
                         Text("Change Photo")
                             .font(AppTypography.subheadline)
-                            .foregroundColor(RoleConfig.getPrimaryColor(for: authService.currentUser?.role ?? .attendee))
+                            .foregroundColor(RoleConfig.getPrimaryColor(for: currentRole))
                     }
                     .onChange(of: profileImageItem) { newValue in
                         Task { @MainActor in

@@ -13,9 +13,9 @@ class EventFilterService {
 
     // MARK: - Singleton
 
-    static let shared = EventFilterService()
+    nonisolated static let shared = EventFilterService()
 
-    private init() {}
+    nonisolated private init() {}
 
     // MARK: - Age Validation
 
@@ -35,7 +35,7 @@ class EventFilterService {
     nonisolated func accessDenialReason(for event: Event, user: User) -> String? {
         guard !canUserAccessEvent(event, user: user) else { return nil }
 
-        if let userAge = user.age {
+        if user.age != nil {
             return "This event is restricted to ages \(event.ageRestriction.displayName). You must be at least \(event.ageRestriction.rawValue) years old."
         } else {
             return "This event has an age restriction (\(event.ageRestriction.displayName)). Please add your date of birth to verify eligibility."

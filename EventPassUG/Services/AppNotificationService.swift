@@ -12,20 +12,30 @@ import UserNotifications
 // MARK: - Push Notification Type
 
 enum PushNotificationType: String {
+    // Attendee notifications
     case eventReminder24h = "event_reminder_24h"
     case eventReminder2h = "event_reminder_2h"
+    case eventReminder30m = "event_reminder_30m"
     case eventStartingSoon = "event_starting_soon"
     case ticketPurchase = "ticket_purchase"
     case eventUpdate = "event_update"
     case recommendation = "recommendation"
     case marketing = "marketing"
 
+    // Organizer notifications
+    case ticketSold = "ticket_sold"
+    case lowTicketInventory = "low_ticket_inventory"
+    case attendeeCheckIn = "attendee_check_in"
+    case eventAboutToStartOrganizer = "event_about_to_start_organizer"
+
     var title: String {
         switch self {
         case .eventReminder24h:
             return "Event Tomorrow"
         case .eventReminder2h:
-            return "Event Starting Soon"
+            return "Event in 2 Hours"
+        case .eventReminder30m:
+            return "Event in 30 Minutes"
         case .eventStartingSoon:
             return "Event Starting Now"
         case .ticketPurchase:
@@ -36,11 +46,54 @@ enum PushNotificationType: String {
             return "Events You Might Like"
         case .marketing:
             return "EventPass"
+        case .ticketSold:
+            return "Ticket Sold!"
+        case .lowTicketInventory:
+            return "Low Ticket Inventory"
+        case .attendeeCheckIn:
+            return "Attendee Checked In"
+        case .eventAboutToStartOrganizer:
+            return "Your Event Starts Soon"
         }
     }
 
     var categoryIdentifier: String {
         "eventpass.\(rawValue)"
+    }
+
+    /// Interruption level for Focus Mode (iOS 15+)
+    @available(iOS 15.0, *)
+    var interruptionLevel: UNNotificationInterruptionLevel {
+        switch self {
+        case .eventReminder24h, .recommendation, .marketing:
+            return .passive // Don't break through Focus
+        case .eventReminder2h, .ticketPurchase, .ticketSold, .attendeeCheckIn:
+            return .active // Standard notifications
+        case .eventReminder30m, .eventStartingSoon, .eventUpdate, .lowTicketInventory, .eventAboutToStartOrganizer:
+            return .timeSensitive // Break through Focus
+        }
+    }
+
+    /// Relevance score for notification prioritization (iOS 15+)
+    var relevanceScore: Double {
+        switch self {
+        case .eventStartingSoon, .eventAboutToStartOrganizer:
+            return 1.0 // Highest priority
+        case .eventReminder30m, .lowTicketInventory:
+            return 0.9
+        case .eventReminder2h, .ticketSold, .attendeeCheckIn:
+            return 0.8
+        case .ticketPurchase:
+            return 0.7
+        case .eventUpdate:
+            return 0.6
+        case .eventReminder24h:
+            return 0.5
+        case .recommendation:
+            return 0.4
+        case .marketing:
+            return 0.3
+        }
     }
 }
 
@@ -77,7 +130,7 @@ class AppNotificationService: NSObject, ObservableObject {
         let options: UNAuthorizationOptions = [.alert, .badge, .sound]
 
         let granted = try await notificationCenter.requestAuthorization(options: options)
-        await checkAuthorizationStatus()
+        checkAuthorizationStatus()
 
         return granted
     }
@@ -100,8 +153,8 @@ class AppNotificationService: NSObject, ObservableObject {
         if preferences.isInQuietHours() {
             // Allow critical notifications during quiet hours
             switch type {
-            case .ticketPurchase, .eventUpdate:
-                break // Always allow
+            case .ticketPurchase, .eventUpdate, .ticketSold, .attendeeCheckIn, .lowTicketInventory:
+                break // Always allow critical notifications
             default:
                 return false // Block during quiet hours
             }
@@ -113,6 +166,8 @@ class AppNotificationService: NSObject, ObservableObject {
             return preferences.eventReminders24h
         case .eventReminder2h:
             return preferences.eventReminders2h
+        case .eventReminder30m:
+            return preferences.eventReminders30m ?? true // Default to true for new preference
         case .eventStartingSoon:
             return preferences.eventStartingSoon
         case .ticketPurchase:
@@ -123,6 +178,14 @@ class AppNotificationService: NSObject, ObservableObject {
             return preferences.recommendations
         case .marketing:
             return preferences.marketing
+        case .ticketSold:
+            return preferences.organizerTicketSold ?? true // Organizer notifications default to true
+        case .lowTicketInventory:
+            return preferences.organizerLowInventory ?? true
+        case .attendeeCheckIn:
+            return preferences.organizerCheckIns ?? true
+        case .eventAboutToStartOrganizer:
+            return preferences.organizerEventReminders ?? true
         }
     }
 
@@ -177,6 +240,12 @@ class AppNotificationService: NSObject, ObservableObject {
             "type": PushNotificationType.eventReminder2h.rawValue
         ]
 
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .eventReminder2h)
+
+        // Add rich media if available
+        await addEventImage(to: content, event: event)
+
         let trigger = UNCalendarNotificationTrigger(
             dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate),
             repeats: false
@@ -186,6 +255,48 @@ class AppNotificationService: NSObject, ObservableObject {
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
         try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .eventReminder2h, eventId: event.id, userId: userId)
+    }
+
+    /// Schedule 30-minute reminder for an event
+    func scheduleEventReminder30m(event: Event, userId: UUID, preferences: UserNotificationPreferences) async throws {
+        guard shouldSendNotification(userId: userId, preferences: preferences, type: .eventReminder30m) else { return }
+
+        let notificationDate = event.startDate.addingTimeInterval(-30 * 60)
+
+        // Don't schedule if event is less than 30 minutes away
+        guard notificationDate > Date() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = PushNotificationType.eventReminder30m.title
+        content.body = "\(event.title) starts soon at \(event.venue.name). Time to get ready!"
+        content.sound = .default
+        content.categoryIdentifier = PushNotificationType.eventReminder30m.categoryIdentifier
+        content.userInfo = [
+            "eventId": event.id.uuidString,
+            "type": PushNotificationType.eventReminder30m.rawValue
+        ]
+
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .eventReminder30m)
+
+        // Add rich media if available
+        await addEventImage(to: content, event: event)
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate),
+            repeats: false
+        )
+
+        let identifier = "event_30m_\(event.id.uuidString)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .eventReminder30m, eventId: event.id, userId: userId)
     }
 
     /// Schedule starting soon notification (15 minutes before)
@@ -222,6 +333,7 @@ class AppNotificationService: NSObject, ObservableObject {
     func scheduleAllReminders(for event: Event, userId: UUID, preferences: UserNotificationPreferences) async throws {
         try await scheduleEventReminder24h(event: event, userId: userId, preferences: preferences)
         try await scheduleEventReminder2h(event: event, userId: userId, preferences: preferences)
+        try await scheduleEventReminder30m(event: event, userId: userId, preferences: preferences)
         try await scheduleEventStartingSoon(event: event, userId: userId, preferences: preferences)
     }
 
@@ -230,6 +342,7 @@ class AppNotificationService: NSObject, ObservableObject {
         let identifiers = [
             "event_24h_\(eventId.uuidString)",
             "event_2h_\(eventId.uuidString)",
+            "event_30m_\(eventId.uuidString)",
             "event_starting_\(eventId.uuidString)"
         ]
         notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
@@ -297,10 +410,169 @@ class AppNotificationService: NSObject, ObservableObject {
             "eventIds": events.map { $0.id.uuidString }
         ]
 
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .recommendation)
+
         let identifier = "recommendation_\(UUID().uuidString)"
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
 
         try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .recommendation, eventId: events.first?.id, userId: userId)
+    }
+
+    // MARK: - Organizer Notifications
+
+    /// Notify organizer when a ticket is sold
+    func notifyOrganizerTicketSold(
+        event: Event,
+        ticketType: TicketType,
+        quantity: Int,
+        organizerId: UUID,
+        preferences: UserNotificationPreferences
+    ) async throws {
+        guard shouldSendNotification(userId: organizerId, preferences: preferences, type: .ticketSold) else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = PushNotificationType.ticketSold.title
+        content.body = "\(quantity) x \(ticketType.name) sold for \(event.title)"
+        content.sound = .default
+        content.badge = NSNumber(value: 1) // Increment badge
+        content.categoryIdentifier = PushNotificationType.ticketSold.categoryIdentifier
+        content.threadIdentifier = "organizer_\(organizerId.uuidString)"
+        content.userInfo = [
+            "eventId": event.id.uuidString,
+            "ticketTypeId": ticketType.id.uuidString,
+            "quantity": quantity,
+            "type": PushNotificationType.ticketSold.rawValue
+        ]
+
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .ticketSold)
+
+        // Add event image
+        await addEventImage(to: content, event: event)
+
+        let identifier = "ticket_sold_\(UUID().uuidString)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+        try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .ticketSold, eventId: event.id, userId: organizerId)
+    }
+
+    /// Notify organizer when ticket inventory is low
+    func notifyOrganizerLowInventory(
+        event: Event,
+        ticketType: TicketType,
+        remainingCount: Int,
+        organizerId: UUID,
+        preferences: UserNotificationPreferences
+    ) async throws {
+        guard shouldSendNotification(userId: organizerId, preferences: preferences, type: .lowTicketInventory) else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = PushNotificationType.lowTicketInventory.title
+        content.body = "Only \(remainingCount) \(ticketType.name) tickets left for \(event.title)"
+        content.sound = .default
+        content.categoryIdentifier = PushNotificationType.lowTicketInventory.categoryIdentifier
+        content.threadIdentifier = "organizer_\(organizerId.uuidString)"
+        content.userInfo = [
+            "eventId": event.id.uuidString,
+            "ticketTypeId": ticketType.id.uuidString,
+            "remainingCount": remainingCount,
+            "type": PushNotificationType.lowTicketInventory.rawValue
+        ]
+
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .lowTicketInventory)
+
+        let identifier = "low_inventory_\(event.id.uuidString)_\(ticketType.id.uuidString)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+        try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .lowTicketInventory, eventId: event.id, userId: organizerId)
+    }
+
+    /// Notify organizer when an attendee checks in
+    func notifyOrganizerCheckIn(
+        event: Event,
+        attendeeName: String,
+        ticketType: TicketType,
+        organizerId: UUID,
+        preferences: UserNotificationPreferences
+    ) async throws {
+        guard shouldSendNotification(userId: organizerId, preferences: preferences, type: .attendeeCheckIn) else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = PushNotificationType.attendeeCheckIn.title
+        content.body = "\(attendeeName) checked in with \(ticketType.name) ticket"
+        content.sound = .default
+        content.categoryIdentifier = PushNotificationType.attendeeCheckIn.categoryIdentifier
+        content.threadIdentifier = "event_\(event.id.uuidString)"
+        content.userInfo = [
+            "eventId": event.id.uuidString,
+            "type": PushNotificationType.attendeeCheckIn.rawValue
+        ]
+
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .attendeeCheckIn)
+
+        let identifier = "check_in_\(UUID().uuidString)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+        try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .attendeeCheckIn, eventId: event.id, userId: organizerId)
+    }
+
+    /// Notify organizer when their event is about to start
+    func notifyOrganizerEventStarting(
+        event: Event,
+        organizerId: UUID,
+        preferences: UserNotificationPreferences
+    ) async throws {
+        guard shouldSendNotification(userId: organizerId, preferences: preferences, type: .eventAboutToStartOrganizer) else { return }
+
+        let notificationDate = event.startDate.addingTimeInterval(-30 * 60) // 30 minutes before
+
+        // Don't schedule if event is less than 30 minutes away
+        guard notificationDate > Date() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = PushNotificationType.eventAboutToStartOrganizer.title
+        content.body = "\(event.title) starts in 30 minutes. \(event.ticketTypes.reduce(0) { $0 + $1.sold }) attendees expected."
+        content.sound = .default
+        content.categoryIdentifier = PushNotificationType.eventAboutToStartOrganizer.categoryIdentifier
+        content.threadIdentifier = "organizer_\(organizerId.uuidString)"
+        content.userInfo = [
+            "eventId": event.id.uuidString,
+            "type": PushNotificationType.eventAboutToStartOrganizer.rawValue
+        ]
+
+        // Apply Focus Mode settings
+        applyFocusModeSettings(to: content, type: .eventAboutToStartOrganizer)
+
+        // Add event image
+        await addEventImage(to: content, event: event)
+
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate),
+            repeats: false
+        )
+
+        let identifier = "organizer_event_starting_\(event.id.uuidString)"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        try await notificationCenter.add(request)
+
+        // Track analytics
+        trackNotificationScheduled(type: .eventAboutToStartOrganizer, eventId: event.id, userId: organizerId)
     }
 
     // MARK: - Notification Management
@@ -338,6 +610,73 @@ class AppNotificationService: NSObject, ObservableObject {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+
+    /// Apply Focus Mode settings to notification content (iOS 15+)
+    private func applyFocusModeSettings(to content: UNMutableNotificationContent, type: PushNotificationType) {
+        if #available(iOS 15.0, *) {
+            content.interruptionLevel = type.interruptionLevel
+            content.relevanceScore = type.relevanceScore
+        }
+    }
+
+    /// Add event poster image as rich media attachment
+    private func addEventImage(to content: UNMutableNotificationContent, event: Event) async {
+        guard let posterURL = event.posterURL,
+              let url = URL(string: posterURL) else { return }
+
+        do {
+            // Download image data
+            let (data, _) = try await URLSession.shared.data(from: url)
+
+            // Save to temporary file
+            let tempDir = FileManager.default.temporaryDirectory
+            let imageURL = tempDir.appendingPathComponent("\(event.id.uuidString).jpg")
+            try data.write(to: imageURL)
+
+            // Create attachment
+            let attachment = try UNNotificationAttachment(
+                identifier: "event_image",
+                url: imageURL,
+                options: [UNNotificationAttachmentOptionsTypeHintKey: "public.jpeg"]
+            )
+            content.attachments = [attachment]
+        } catch {
+            print("⚠️ Failed to attach event image: \(error.localizedDescription)")
+        }
+    }
+
+    /// Track notification scheduled event for analytics
+    private func trackNotificationScheduled(type: PushNotificationType, eventId: UUID?, userId: UUID) {
+        let analytics = NotificationAnalytics.shared
+        analytics.trackNotificationScheduled(
+            type: type.rawValue,
+            eventId: eventId,
+            userId: userId,
+            timestamp: Date()
+        )
+    }
+
+    /// Track notification delivered event for analytics
+    private func trackNotificationDelivered(type: PushNotificationType, eventId: UUID?, userId: UUID) {
+        let analytics = NotificationAnalytics.shared
+        analytics.trackNotificationDelivered(
+            type: type.rawValue,
+            eventId: eventId,
+            userId: userId,
+            timestamp: Date()
+        )
+    }
+
+    /// Track notification opened event for analytics
+    private func trackNotificationOpened(type: PushNotificationType, eventId: UUID?, userId: UUID) {
+        let analytics = NotificationAnalytics.shared
+        analytics.trackNotificationOpened(
+            type: type.rawValue,
+            eventId: eventId,
+            userId: userId,
+            timestamp: Date()
+        )
     }
 }
 

@@ -50,13 +50,24 @@ struct UserLocation: Codable, Equatable {
 /// User's notification settings for personalization system
 struct UserNotificationPreferences: Codable, Equatable {
     var isEnabled: Bool
+
+    // Attendee notifications
     var eventReminders24h: Bool // Reminder 24 hours before event
     var eventReminders2h: Bool // Reminder 2 hours before event
-    var eventStartingSoon: Bool // Notification when event is starting
+    var eventReminders30m: Bool? // Reminder 30 minutes before event (new)
+    var eventStartingSoon: Bool // Notification when event is starting (15 min)
     var ticketPurchaseConfirmation: Bool
     var eventUpdates: Bool // Organizer updates to events user has tickets for
     var recommendations: Bool // Personalized event recommendations
     var marketing: Bool // Marketing and promotional notifications
+
+    // Organizer notifications (optional for backward compatibility)
+    var organizerTicketSold: Bool? // Notification when ticket is sold
+    var organizerLowInventory: Bool? // Low ticket inventory alert
+    var organizerCheckIns: Bool? // Attendee check-in notifications
+    var organizerEventReminders: Bool? // Organizer-specific event reminders
+
+    // Quiet hours
     var quietHoursEnabled: Bool
     var quietHoursStart: QuietHourTime
     var quietHoursEnd: QuietHourTime
@@ -103,11 +114,16 @@ struct UserNotificationPreferences: Codable, Equatable {
         isEnabled: true,
         eventReminders24h: true,
         eventReminders2h: true,
+        eventReminders30m: true, // New 30-minute reminder enabled by default
         eventStartingSoon: true,
         ticketPurchaseConfirmation: true,
         eventUpdates: true,
         recommendations: false, // Opt-in for recommendations
         marketing: false, // Opt-in for marketing
+        organizerTicketSold: true, // Organizer notifications enabled by default
+        organizerLowInventory: true,
+        organizerCheckIns: true,
+        organizerEventReminders: true,
         quietHoursEnabled: true,
         quietHoursStart: .defaultStart,
         quietHoursEnd: .defaultEnd

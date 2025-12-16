@@ -76,6 +76,7 @@
 		7CA49CA9E6C0586D84605E6F /* CalendarConflictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489068B437ACDC3AC58105B6 /* CalendarConflictView.swift */; };
 		808BA265CAA541BB9A38C82D /* ScrollHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD37950CF22C49CBA9004C4D /* ScrollHelpers.swift */; };
 		80CB9B20A51A4972A7E8D00F /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FD57AB39F4C11981D8E38 /* SearchView.swift */; };
+		8A977EEB51F83F25929CB708 /* NotificationAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E85BF8B7E5881D1CC3AF5A99 /* NotificationAnalytics.swift */; };
 		8D6C71EB50C8AF8888F0F39A /* PosterUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83361E49EEBDB885D9A261AC /* PosterUploadManager.swift */; };
 		8DD27BC784D08E93DA93AEA8 /* ImageCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECCC9A20D266818001386AD /* ImageCompressor.swift */; };
 		8DEA425EE2B3A4501120017E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8265D580E7C405A20B6293F /* QRCodeView.swift */; };
@@ -239,6 +240,7 @@
 		E301369EE1AFD80BE1DB5517 /* AuthComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthComponents.swift; sourceTree = "<group>"; };
 		E52FA8ABEC868CFAE1616A0C /* OrganizerTermsAgreementStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUG/Views/Organizer/Steps/OrganizerTermsAgreementStep.swift; sourceTree = SOURCE_ROOT; };
 		E8265D580E7C405A20B6293F /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QRCodeView.swift; path = Views/Components/QRCodeView.swift; sourceTree = "<group>"; };
+		E85BF8B7E5881D1CC3AF5A99 /* NotificationAnalytics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationAnalytics.swift; sourceTree = "<group>"; };
 		E8D32EC360933C8F80FCE939 /* FAQSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUG/Views/Support/FAQSectionView.swift; sourceTree = SOURCE_ROOT; };
 		EC0FE852D1E3FFC4F448DA28 /* CardScanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardScanner.swift; sourceTree = "<group>"; };
 		ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				B881DDECB73B7EDE817F4F2D /* AppNotificationService.swift */,
 				92A06C40298E7D2263DDEBA5 /* CalendarService.swift */,
 				77CF15F9A551A8A2ABB35A3E /* UserLocationService.swift */,
+				E85BF8B7E5881D1CC3AF5A99 /* NotificationAnalytics.swift */,
 			);
 			name = Services;
 			path = Services;
@@ -668,6 +671,7 @@
 				1620C79B73F9284C4DEB9F96 /* ModernAuthView.swift in Sources */,
 				DC96BBF6232D43C15E899A39 /* AuthComponents.swift in Sources */,
 				E774613B0A4376492332E4A4 /* EventAnalyticsView.swift in Sources */,
+				8A977EEB51F83F25929CB708 /* NotificationAnalytics.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

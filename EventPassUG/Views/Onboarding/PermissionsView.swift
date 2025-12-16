@@ -502,6 +502,10 @@ class PermissionsViewModel: ObservableObject {
             return .denied
         case .notDetermined:
             return .notDetermined
+        case .fullAccess:
+            return .authorized
+        case .writeOnly:
+            return .authorized
         @unknown default:
             return .notDetermined
         }
@@ -515,6 +519,8 @@ class PermissionsViewModel: ObservableObject {
             return .denied
         case .notDetermined:
             return .notDetermined
+        case .limited:
+            return .authorized
         @unknown default:
             return .notDetermined
         }
