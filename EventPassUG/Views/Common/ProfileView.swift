@@ -1101,7 +1101,7 @@ private struct CompactProfileHeader: View {
     let followerCount: Int
 
     private var displayRole: UserRole {
-        user?.role ?? .attendee
+        user?.currentActiveRole ?? user?.role ?? .attendee
     }
 
     private var isOrganizer: Bool {
