@@ -94,4 +94,17 @@ iOSInjectionProject/
 
 # macOS
 .DS_Store
-.rb
+
+
+*.rb
+/vendor/bundle/
+/.bundle/
+.ruby-version
+.ruby-gemset
+*.rbc
+*.log
+*.tmp
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/log/*
+/tmp/*

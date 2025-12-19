@@ -96,6 +96,9 @@ struct User: Identifiable, Codable, Equatable {
     // Notification Preferences
     var notificationPreferences: UserNotificationPreferences
 
+    // User Interests for Recommendations
+    var interests: UserInterests
+
     // Dual-Role Support (single account supports both roles)
     var isAttendeeRole: Bool // Can act as attendee
     var isOrganizerRole: Bool // Can act as organizer (completed onboarding)
@@ -181,6 +184,7 @@ struct User: Identifiable, Codable, Equatable {
         likedEventIds: [UUID] = [],
         purchasedEventIds: [UUID] = [],
         notificationPreferences: UserNotificationPreferences = .default,
+        interests: UserInterests = .default,
         isAttendeeRole: Bool? = nil,
         isOrganizerRole: Bool = false,
         isVerifiedOrganizer: Bool = false,
@@ -220,6 +224,7 @@ struct User: Identifiable, Codable, Equatable {
         self.likedEventIds = likedEventIds
         self.purchasedEventIds = purchasedEventIds
         self.notificationPreferences = notificationPreferences
+        self.interests = interests
         // Dual-role support: default to attendee role if role == .attendee, else based on passed value
         self.isAttendeeRole = isAttendeeRole ?? (role == .attendee)
         self.isOrganizerRole = isOrganizerRole || (role == .organizer)

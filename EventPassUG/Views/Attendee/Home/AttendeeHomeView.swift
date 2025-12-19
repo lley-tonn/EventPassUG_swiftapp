@@ -57,6 +57,18 @@ struct AttendeeHomeView: View {
             if viewModel.eventService is MockEventService {
                 viewModel.updateEventService(services.eventService)
             }
+
+            // Inject current user for personalized recommendations
+            viewModel.setCurrentUser(authService.currentUser)
+        }
+        .onChange(of: authService.currentUser) { newUser in
+            // Update recommendations when user changes
+            viewModel.setCurrentUser(newUser)
+            if let user = newUser {
+                Task {
+                    await viewModel.generateRecommendations(for: user)
+                }
+            }
         }
         // CRITICAL: Load data in task, not onAppear
         // This prevents animations from affecting scroll position
@@ -307,20 +319,27 @@ struct AttendeeHomeView: View {
                                 .id("skeleton_\(index)")
                         }
                     } else {
-                        // Show actual event cards
-                        ForEach(viewModel.filteredEvents, id: \.id) { event in
+                        // Show actual event cards (ranked by recommendations)
+                        ForEach(viewModel.rankedEvents, id: \.id) { event in
                             NavigationLink(destination: EventDetailsView(event: event)) {
                                 EventCard(
                                     event: event,
                                     isLiked: favoriteManager.isFavorite(eventId: event.id),
                                     onLikeTap: {
                                         favoriteManager.toggleFavorite(eventId: event.id)
+                                        // Record like interaction for recommendations
+                                        viewModel.recordEventInteraction(event: event, type: .like)
                                         HapticFeedback.light()
                                     },
-                                    onCardTap: {},
+                                    onCardTap: {
+                                        // Record view interaction for recommendations
+                                        viewModel.recordEventInteraction(event: event, type: .view)
+                                    },
                                     onShareTap: {
                                         shareEvent = event
                                         showingShareSheet = true
+                                        // Record share interaction for recommendations
+                                        viewModel.recordEventInteraction(event: event, type: .share)
                                         HapticFeedback.light()
                                     }
                                 )

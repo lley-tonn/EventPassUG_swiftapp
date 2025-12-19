@@ -2,436 +2,679 @@
 //  RecommendationService.swift
 //  EventPassUG
 //
-//  Personalized event recommendation engine
-//  Uses multi-factor scoring: location, categories, interactions, popularity, time
+//  Enhanced personalized event recommendation engine
+//  Uses deterministic multi-factor scoring: interests, location, behavior, popularity, time
 //
 
 import Foundation
+import CoreLocation
 
-// MARK: - Recommendation Result
+// MARK: - Recommendation Category
 
-struct RecommendedEvent: Identifiable {
-    let id: UUID
-    let event: Event
-    let score: Double
-    let reason: RecommendationReason
-
-    init(event: Event, score: Double, reason: RecommendationReason) {
-        self.id = event.id
-        self.event = event
-        self.score = score
-        self.reason = reason
-    }
-}
-
-enum RecommendationReason {
-    case nearYou(distance: Double)
-    case inYourCity(city: String)
-    case matchesInterests(categories: [EventCategory])
-    case becauseYouLiked(eventTitle: String, category: EventCategory)
-    case becauseYouPurchased(eventTitle: String, category: EventCategory)
-    case trending
-    case popular
-
-    var displayText: String {
-        switch self {
-        case .nearYou(let distance):
-            return String(format: "%.1f km away", distance)
-        case .inYourCity(let city):
-            return "In \(city)"
-        case .matchesInterests(let categories):
-            if categories.count == 1 {
-                return "You like \(categories[0].rawValue)"
-            } else {
-                return "Matches your interests"
-            }
-        case .becauseYouLiked(_, let category):
-            return "Because you liked \(category.rawValue) events"
-        case .becauseYouPurchased(_, let category):
-            return "Because you attended \(category.rawValue) events"
-        case .trending:
-            return "Trending now"
-        case .popular:
-            return "Popular event"
-        }
-    }
+enum RecommendationCategory: String, CaseIterable {
+    case forYou = "Recommended for You"
+    case basedOnInterests = "Based on Your Interests"
+    case nearYou = "Events Near You"
+    case popularNow = "Popular Right Now"
+    case happeningNow = "Happening Now"
+    case freeEvents = "Free Events"
+    case thisWeekend = "This Weekend"
 
     var icon: String {
         switch self {
-        case .nearYou, .inYourCity:
-            return "location.fill"
-        case .matchesInterests:
-            return "heart.fill"
-        case .becauseYouLiked:
-            return "hand.thumbsup.fill"
-        case .becauseYouPurchased:
-            return "ticket.fill"
-        case .trending:
-            return "flame.fill"
-        case .popular:
-            return "star.fill"
+        case .forYou: return "star.fill"
+        case .basedOnInterests: return "heart.fill"
+        case .nearYou: return "location.fill"
+        case .popularNow: return "flame.fill"
+        case .happeningNow: return "clock.fill"
+        case .freeEvents: return "gift.fill"
+        case .thisWeekend: return "calendar.badge.clock"
         }
     }
 }
 
-// MARK: - Recommendation Service
+// MARK: - Scored Event
+
+/// Event with recommendation score and reasoning
+struct ScoredEvent: Identifiable {
+    let event: Event
+    let score: Double
+    let reasons: [String]
+
+    var id: UUID { event.id }
+
+    var primaryReason: String {
+        reasons.first ?? "Popular event"
+    }
+}
+
+// MARK: - Recommendation Service Protocol
+
+protocol RecommendationServiceProtocol {
+    /// Get personalized event recommendations for a user
+    func getRecommendedEvents(
+        for user: User,
+        from events: [Event],
+        limit: Int?
+    ) async -> [ScoredEvent]
+
+    /// Get events by specific recommendation category
+    func getEventsByCategory(
+        for user: User,
+        from events: [Event],
+        category: RecommendationCategory,
+        limit: Int
+    ) async -> [Event]
+
+    /// Update user interests based on interaction
+    func recordInteraction(
+        user: inout User,
+        event: Event,
+        type: UserInteractionType
+    )
+
+    /// Get explanation for why an event was recommended
+    func getRecommendationReason(
+        event: Event,
+        user: User
+    ) -> String
+}
+
+// MARK: - Recommendation Service Implementation
 
 @MainActor
-class RecommendationService: ObservableObject {
-
+class RecommendationService: ObservableObject, RecommendationServiceProtocol {
     // MARK: - Singleton
 
     static let shared = RecommendationService()
 
     // MARK: - Published Properties
 
-    @Published var recommendations: [RecommendedEvent] = []
+    @Published var recommendations: [ScoredEvent] = []
     @Published var isLoading = false
 
-    // MARK: - Private Properties
+    // MARK: - Scoring Weights (Tunable for A/B testing)
 
-    private let filterService = EventFilterService.shared
+    private struct Weights {
+        // Category matching
+        static let categoryExactMatch: Double = 40.0
+        static let categoryPurchaseHistory: Double = 35.0
+        static let categoryLikeHistory: Double = 25.0
+        static let categoryViewHistory: Double = 10.0
 
-    // MARK: - Configuration
+        // Location proximity
+        static let sameCity: Double = 20.0
+        static let nearbyEvent: Double = 15.0 // Within max travel distance
+        static let farEvent: Double = -10.0 // Outside max distance
 
-    private struct Config {
-        // Scoring weights
-        static let sameCityBonus: Double = 50.0
-        static let nearbyBonus: Double = 20.0
-        static let nearbyRadiusKm: Double = 50.0
-        static let categoryMatchBonus: Double = 30.0
-        static let likeBonus: Double = 80.0
-        static let viewBonus: Double = 20.0
-        static let purchaseBonus: Double = 100.0
-        static let popularityWeight: Double = 0.1
-        static let timeDecayDays: Double = 30.0
+        // Social signals
+        static let followedOrganizer: Double = 30.0
+        static let popularEvent: Double = 10.0 // High ticket sales ratio
 
-        // Minimum scores for inclusion
-        static let minimumScore: Double = 10.0
+        // Temporal signals
+        static let happeningNow: Double = 25.0
+        static let upcomingSoon: Double = 15.0 // Within 7 days
+        static let thisWeekend: Double = 10.0
+
+        // User behavior signals
+        static let similarEventPurchased: Double = 15.0
+        static let similarEventLiked: Double = 10.0
+
+        // Price preference
+        static let priceMatch: Double = 8.0
+        static let freeEvent: Double = 5.0 // Bonus for free events
+
+        // Event quality
+        static let highRating: Double = 5.0 // Rating >= 4.0
+        static let wellReviewed: Double = 3.0 // Many ratings
+
+        // Recency bonus
+        static let recentlyAdded: Double = 5.0 // Created in last 7 days
     }
 
     private init() {}
 
-    // MARK: - Public Methods
+    // MARK: - Main Recommendation Method
 
-    /// Generate personalized recommendations for a user
-    func generateRecommendations(
+    func getRecommendedEvents(
+        for user: User,
         from events: [Event],
-        user: User,
-        limit: Int = 20
-    ) async -> [RecommendedEvent] {
+        limit: Int? = nil
+    ) async -> [ScoredEvent] {
         isLoading = true
         defer { isLoading = false }
 
-        // Filter eligible events (age, published, upcoming)
-        let eligibleEvents = filterService.filterEligibleEvents(events, for: user)
-        let publishedEvents = eligibleEvents.filter { $0.status == .published }
-        let upcomingEvents = publishedEvents.filter { $0.startDate > Date() }
+        // Filter out past events and drafts
+        let upcomingEvents = events.filter { $0.endDate >= Date() && $0.status == .published }
 
-        // Calculate scores
-        let scoredEvents = upcomingEvents.compactMap { event -> RecommendedEvent? in
-            let score = calculateScore(for: event, user: user, userLocation: user.location)
-            guard score >= Config.minimumScore else { return nil }
-
-            let reason = determineReason(for: event, user: user, score: score)
-            return RecommendedEvent(event: event, score: score, reason: reason)
+        // Score all events
+        let scoredEvents = upcomingEvents.map { event in
+            let (score, reasons) = calculateScore(for: event, user: user)
+            return ScoredEvent(event: event, score: score, reasons: reasons)
         }
 
-        // Sort by score and limit
-        let sortedEvents = scoredEvents.sorted { $0.score > $1.score }
-        recommendations = Array(sortedEvents.prefix(limit))
+        // Sort by score descending
+        let sorted = scoredEvents.sorted { $0.score > $1.score }
 
-        return recommendations
-    }
-
-    /// Get events recommended because user liked similar events
-    func getRecommendationsBasedOnLikes(
-        from events: [Event],
-        user: User,
-        limit: Int = 10
-    ) -> [RecommendedEvent] {
-        // Get categories of liked events
-        let likedCategories = getLikedCategories(user: user, from: events)
-        guard !likedCategories.isEmpty else { return [] }
-
-        // Filter eligible events
-        let eligibleEvents = filterService.filterEligibleEvents(events, for: user)
-        let publishedEvents = eligibleEvents.filter { $0.status == .published }
-        let upcomingEvents = publishedEvents.filter { $0.startDate > Date() }
-
-        // Find events in liked categories that user hasn't interacted with
-        let recommendedEvents = upcomingEvents
-            .filter { event in
-                likedCategories.contains(event.category) &&
-                !user.likedEventIds.contains(event.id) &&
-                !user.purchasedEventIds.contains(event.id)
-            }
-            .map { event in
-                let score = calculateScore(for: event, user: user, userLocation: user.location)
-                return RecommendedEvent(
-                    event: event,
-                    score: score,
-                    reason: .matchesInterests(categories: [event.category])
-                )
-            }
-            .sorted { $0.score > $1.score }
-
-        return Array(recommendedEvents.prefix(limit))
-    }
-
-    /// Get events near the user's location
-    func getNearbyRecommendations(
-        from events: [Event],
-        user: User,
-        userLocation: UserLocation,
-        limit: Int = 10
-    ) -> [RecommendedEvent] {
-        // Get nearby events using filter service
-        let nearbyEvents = filterService.getNearbyEvents(
-            from: events,
-            user: user,
-            userLocation: userLocation,
-            radiusKm: Config.nearbyRadiusKm,
-            limit: limit * 2 // Get more to score and filter
-        )
-
-        // Calculate scores and create recommendations
-        let recommendedEvents = nearbyEvents.compactMap { event -> RecommendedEvent? in
-            guard let distance = distanceToEvent(event, from: userLocation) else { return nil }
-
-            let score = calculateScore(for: event, user: user, userLocation: userLocation)
-            return RecommendedEvent(
-                event: event,
-                score: score,
-                reason: .nearYou(distance: distance)
-            )
+        // Apply limit if specified
+        if let limit = limit {
+            recommendations = Array(sorted.prefix(limit))
+            return recommendations
         }
-        .sorted { $0.score > $1.score }
 
-        return Array(recommendedEvents.prefix(limit))
+        recommendations = sorted
+        return sorted
     }
 
-    /// Get trending events (high engagement recently)
-    func getTrendingEvents(
+    // MARK: - Category-Specific Recommendations
+
+    func getEventsByCategory(
+        for user: User,
         from events: [Event],
-        user: User,
+        category: RecommendationCategory,
         limit: Int = 10
-    ) -> [RecommendedEvent] {
-        // Filter eligible events
-        let eligibleEvents = filterService.filterEligibleEvents(events, for: user)
-        let publishedEvents = eligibleEvents.filter { $0.status == .published }
-        let upcomingEvents = publishedEvents.filter { $0.startDate > Date() }
+    ) async -> [Event] {
+        let upcomingEvents = events.filter { $0.endDate >= Date() && $0.status == .published }
 
-        // Sort by engagement (likes + ratings)
-        let trendingEvents = upcomingEvents
-            .sorted { event1, event2 in
-                let engagement1 = Double(event1.likeCount) + (event1.rating * Double(event1.totalRatings))
-                let engagement2 = Double(event2.likeCount) + (event2.rating * Double(event2.totalRatings))
-                return engagement1 > engagement2
-            }
-            .prefix(limit)
-            .map { event in
-                let score = calculateScore(for: event, user: user, userLocation: user.location)
-                return RecommendedEvent(event: event, score: score, reason: .trending)
-            }
+        switch category {
+        case .forYou:
+            let scored = await getRecommendedEvents(for: user, from: upcomingEvents, limit: limit)
+            return scored.map { $0.event }
 
-        return Array(trendingEvents)
-    }
+        case .basedOnInterests:
+            return await getInterestBasedEvents(for: user, from: upcomingEvents, limit: limit)
 
-    /// Get events in user's city
-    func getEventsInCity(
-        from events: [Event],
-        user: User,
-        userLocation: UserLocation,
-        limit: Int = 10
-    ) -> [RecommendedEvent] {
-        // Get city events using filter service
-        let cityEvents = filterService.getEventsInCity(
-            from: events,
-            user: user,
-            userLocation: userLocation,
-            limit: limit * 2
-        )
+        case .nearYou:
+            return await getNearbyEvents(for: user, from: upcomingEvents, limit: limit)
 
-        // Calculate scores and create recommendations
-        let recommendedEvents = cityEvents.map { event in
-            let score = calculateScore(for: event, user: user, userLocation: userLocation)
-            return RecommendedEvent(
-                event: event,
-                score: score,
-                reason: .inYourCity(city: userLocation.city)
-            )
+        case .popularNow:
+            return getPopularEvents(from: upcomingEvents, limit: limit)
+
+        case .happeningNow:
+            return getHappeningNowEvents(from: upcomingEvents, limit: limit)
+
+        case .freeEvents:
+            return getFreeEvents(from: upcomingEvents, limit: limit)
+
+        case .thisWeekend:
+            return getWeekendEvents(from: upcomingEvents, limit: limit)
         }
-        .sorted { $0.score > $1.score }
-
-        return Array(recommendedEvents.prefix(limit))
     }
 
-    // MARK: - Scoring Algorithm
+    // MARK: - Interaction Recording
 
-    /// Calculate recommendation score for an event
-    /// Higher score = better recommendation
-    private func calculateScore(for event: Event, user: User, userLocation: UserLocation?) -> Double {
+    func recordInteraction(
+        user: inout User,
+        event: Event,
+        type: UserInteractionType
+    ) {
+        // Update user interaction arrays
+        switch type {
+        case .view:
+            if !user.viewedEventIds.contains(event.id) {
+                user.viewedEventIds.append(event.id)
+            }
+            user.interests.recordEventView(category: event.category)
+
+        case .like, .favorite:
+            if !user.likedEventIds.contains(event.id) {
+                user.likedEventIds.append(event.id)
+            }
+            user.interests.recordEventLike(category: event.category)
+
+        case .purchase:
+            if !user.purchasedEventIds.contains(event.id) {
+                user.purchasedEventIds.append(event.id)
+            }
+            user.interests.recordEventPurchase(category: event.category)
+
+        case .share:
+            // Share is a weaker signal, just update interests
+            user.interests.recordEventView(category: event.category)
+        }
+    }
+
+    // MARK: - Recommendation Explanation
+
+    func getRecommendationReason(event: Event, user: User) -> String {
+        let (_, reasons) = calculateScore(for: event, user: user)
+
+        if reasons.isEmpty {
+            return "This event might interest you"
+        }
+
+        // Return the top reason
+        return reasons.first ?? "Popular event"
+    }
+
+    // MARK: - Private Scoring Logic
+
+    private func calculateScore(
+        for event: Event,
+        user: User
+    ) -> (score: Double, reasons: [String]) {
+        var score: Double = 0.0
+        var reasons: [String] = []
+
+        // 1. Category Matching
+        let categoryScore = calculateCategoryScore(event: event, user: user, reasons: &reasons)
+        score += categoryScore
+
+        // 2. Location Proximity
+        let locationScore = calculateLocationScore(event: event, user: user, reasons: &reasons)
+        score += locationScore
+
+        // 3. Social Signals
+        let socialScore = calculateSocialScore(event: event, user: user, reasons: &reasons)
+        score += socialScore
+
+        // 4. Temporal Signals
+        let temporalScore = calculateTemporalScore(event: event, user: user, reasons: &reasons)
+        score += temporalScore
+
+        // 5. Price Preference
+        let priceScore = calculatePriceScore(event: event, user: user, reasons: &reasons)
+        score += priceScore
+
+        // 6. Event Quality
+        let qualityScore = calculateQualityScore(event: event, reasons: &reasons)
+        score += qualityScore
+
+        // 7. Recency Bonus
+        let recencyScore = calculateRecencyScore(event: event, reasons: &reasons)
+        score += recencyScore
+
+        return (score, reasons)
+    }
+
+    // MARK: - Individual Scoring Components
+
+    private func calculateCategoryScore(
+        event: Event,
+        user: User,
+        reasons: inout [String]
+    ) -> Double {
         var score: Double = 0.0
 
-        // 1. Location Proximity Score
-        if let location = userLocation {
-            // Same city bonus
-            if event.venue.city.lowercased() == location.city.lowercased() {
-                score += Config.sameCityBonus
+        // Exact match with preferred categories
+        if user.interests.preferredCategories.contains(event.category) {
+            score += Weights.categoryExactMatch
+            reasons.append("Matches your \(event.category.rawValue) interests")
+        }
+
+        // Match with purchase history
+        if let count = user.interests.purchasedEventCategories[event.category], count > 0 {
+            score += Weights.categoryPurchaseHistory * min(Double(count), 3.0) / 3.0
+            reasons.append("Similar to events you've attended")
+        }
+
+        // Match with like history
+        if let count = user.interests.likedEventCategories[event.category], count > 0 {
+            score += Weights.categoryLikeHistory * min(Double(count), 3.0) / 3.0
+            if reasons.count < 3 {
+                reasons.append("Based on events you liked")
             }
-
-            // Nearby bonus (within configured radius)
-            if let distance = distanceToEvent(event, from: location),
-               distance <= Config.nearbyRadiusKm {
-                // Closer = higher score (inverse distance)
-                let proximityScore = Config.nearbyBonus * (1.0 - (distance / Config.nearbyRadiusKm))
-                score += proximityScore
-            }
         }
 
-        // 2. Category Match Score
-        if user.favoriteEventTypes.contains(event.category.rawValue) {
-            score += Config.categoryMatchBonus
+        // Match with view history (weaker signal)
+        if let count = user.interests.viewedEventCategories[event.category], count >= 3 {
+            score += Weights.categoryViewHistory
         }
 
-        // 3. User Interaction Score
-        // Check if user liked events in this category
-        let likedCategoriesScore = getLikedCategoryScore(for: event.category, user: user, from: [])
-        score += likedCategoriesScore
-
-        // Check if user viewed this specific event
-        if user.viewedEventIds.contains(event.id) {
-            score += Config.viewBonus
-        }
-
-        // Check if user liked this specific event
-        if user.likedEventIds.contains(event.id) {
-            score += Config.likeBonus
-        }
-
-        // 4. Popularity Score
-        let popularityScore = event.rating * Double(event.totalRatings) + Double(event.likeCount)
-        score += popularityScore * Config.popularityWeight
-
-        // 5. Time Decay (prefer upcoming events, decay for distant events)
-        let daysUntilEvent = event.startDate.timeIntervalSinceNow / 86400
-        if daysUntilEvent > 0 {
-            let timeDecayFactor = max(0, 1.0 - (daysUntilEvent / Config.timeDecayDays))
-            score *= (0.5 + 0.5 * timeDecayFactor) // Scale score by time decay
-        }
-
-        return max(score, 0)
+        return score
     }
 
-    /// Determine the primary reason for recommendation
-    private func determineReason(for event: Event, user: User, score: Double) -> RecommendationReason {
-        // Check location first
-        if let location = user.location {
-            if event.venue.city.lowercased() == location.city.lowercased() {
-                if let distance = distanceToEvent(event, from: location), distance <= 10.0 {
-                    return .nearYou(distance: distance)
+    private func calculateLocationScore(
+        event: Event,
+        user: User,
+        reasons: inout [String]
+    ) -> Double {
+        var score: Double = 0.0
+
+        // Same city
+        if let userCity = user.city, event.venue.city.localizedCaseInsensitiveCompare(userCity) == .orderedSame {
+            score += Weights.sameCity
+            reasons.append("In \(event.venue.city)")
+        }
+
+        // Distance-based scoring if location is available
+        if let userLocation = user.location, user.allowLocationTracking {
+            let eventLocation = UserLocation(
+                city: event.venue.city,
+                country: event.venue.address,
+                coordinate: UserLocation.LocationCoordinate(
+                    latitude: event.venue.coordinate.latitude,
+                    longitude: event.venue.coordinate.longitude
+                ),
+                lastUpdated: Date()
+            )
+
+            let distance = userLocation.distance(to: eventLocation)
+
+            if let maxDistance = user.interests.maxTravelDistance {
+                if distance <= maxDistance {
+                    score += Weights.nearbyEvent
+                    if reasons.count < 3 {
+                        reasons.append("Only \(Int(distance))km away")
+                    }
+                } else {
+                    score += Weights.farEvent
                 }
-                return .inYourCity(city: location.city)
-            }
-
-            if let distance = distanceToEvent(event, from: location),
-               distance <= Config.nearbyRadiusKm {
-                return .nearYou(distance: distance)
+            } else if distance <= 20 { // Default 20km
+                score += Weights.nearbyEvent
             }
         }
 
-        // Check if user purchased similar category
-        if user.purchasedEventIds.count > 0 {
-            // In a real app, you'd fetch the purchased events to check categories
-            // For now, just check if user has favorite categories
-            if user.favoriteEventTypes.contains(event.category.rawValue) {
-                return .matchesInterests(categories: [event.category])
+        return score
+    }
+
+    private func calculateSocialScore(
+        event: Event,
+        user: User,
+        reasons: inout [String]
+    ) -> Double {
+        var score: Double = 0.0
+
+        // Followed organizer
+        if user.followedOrganizerIds.contains(event.organizerId) {
+            score += Weights.followedOrganizer
+            reasons.append("From \(event.organizerName) (organizer you follow)")
+        }
+
+        // Popular event (high ticket sales ratio)
+        let totalTickets = event.ticketTypes.reduce(0) { $0 + $1.quantity }
+        let soldTickets = event.ticketTypes.reduce(0) { $0 + $1.sold }
+
+        if totalTickets > 0 {
+            let salesRatio = Double(soldTickets) / Double(totalTickets)
+            if salesRatio >= 0.7 {
+                score += Weights.popularEvent
+                if reasons.count < 3 {
+                    reasons.append("Popular event (\(Int(salesRatio * 100))% sold)")
+                }
             }
         }
 
-        // Check if user liked similar events
-        if user.likedEventIds.count > 0 {
-            if user.favoriteEventTypes.contains(event.category.rawValue) {
-                return .becauseYouLiked(eventTitle: "similar events", category: event.category)
+        return score
+    }
+
+    private func calculateTemporalScore(
+        event: Event,
+        user: User,
+        reasons: inout [String]
+    ) -> Double {
+        var score: Double = 0.0
+        let now = Date()
+        let calendar = Calendar.current
+
+        // Happening now
+        if event.isHappeningNow {
+            score += Weights.happeningNow
+            reasons.append("Happening right now!")
+        }
+
+        // Coming soon (within 7 days)
+        if let daysUntil = calendar.dateComponents([.day], from: now, to: event.startDate).day,
+           daysUntil >= 0 && daysUntil <= 7 {
+            score += Weights.upcomingSoon
+            if reasons.count < 3 {
+                if daysUntil == 0 {
+                    reasons.append("Today")
+                } else if daysUntil == 1 {
+                    reasons.append("Tomorrow")
+                } else {
+                    reasons.append("In \(daysUntil) days")
+                }
             }
         }
 
-        // Check category match
-        if user.favoriteEventTypes.contains(event.category.rawValue) {
-            return .matchesInterests(categories: [event.category])
+        // This weekend
+        let eventWeekday = calendar.component(.weekday, from: event.startDate)
+        if (eventWeekday == 7 || eventWeekday == 1) { // Saturday or Sunday
+            if let daysUntil = calendar.dateComponents([.day], from: now, to: event.startDate).day,
+               daysUntil >= 0 && daysUntil <= 7 {
+                score += Weights.thisWeekend
+            }
         }
 
-        // Check popularity
-        let popularityScore = event.rating * Double(event.totalRatings) + Double(event.likeCount)
-        if popularityScore > 500 {
-            return .trending
+        return score
+    }
+
+    private func calculatePriceScore(
+        event: Event,
+        user: User,
+        reasons: inout [String]
+    ) -> Double {
+        var score: Double = 0.0
+
+        let minPrice = event.ticketTypes.map { $0.price }.min() ?? 0
+
+        // Free event
+        if minPrice == 0 {
+            if user.interests.prefersFreeEvents {
+                score += Weights.priceMatch
+                reasons.append("Free event")
+            } else {
+                score += Weights.freeEvent
+            }
         }
 
-        if event.rating >= 4.0 && event.totalRatings >= 50 {
-            return .popular
+        // Price preference match
+        if let pricePreference = user.interests.pricePreference {
+            if let range = pricePreference.priceRange {
+                if range.contains(minPrice) {
+                    score += Weights.priceMatch
+                    if reasons.count < 3 && pricePreference != .any {
+                        reasons.append("Matches your price preference")
+                    }
+                }
+            }
         }
 
-        // Default to trending
-        return .trending
+        return score
     }
 
-    // MARK: - Helper Methods
+    private func calculateQualityScore(
+        event: Event,
+        reasons: inout [String]
+    ) -> Double {
+        var score: Double = 0.0
 
-    private func getLikedCategories(user: User, from events: [Event]) -> [EventCategory] {
-        // Get categories from user's favorite event types
-        let categories = user.favoriteEventTypes.compactMap { EventCategory(rawValue: $0) }
-        return Array(Set(categories))
-    }
-
-    private func getLikedCategoryScore(for category: EventCategory, user: User, from events: [Event]) -> Double {
-        // Check if user has this as a favorite category
-        if user.favoriteEventTypes.contains(category.rawValue) {
-            return Config.categoryMatchBonus
+        // High rating
+        if event.rating >= 4.0 {
+            score += Weights.highRating
+            if event.totalRatings >= 20 {
+                score += Weights.wellReviewed
+                if reasons.count < 3 {
+                    reasons.append("Highly rated (\(String(format: "%.1f", event.rating))⭐)")
+                }
+            }
         }
 
-        // In a real app, you'd check how many events in this category the user liked
-        // For simplicity, we return 0 if not in favorites
-        return 0
+        return score
     }
 
-    private func distanceToEvent(_ event: Event, from userLocation: UserLocation) -> Double? {
-        let eventLocation = UserLocation.LocationCoordinate(
-            latitude: event.venue.coordinate.latitude,
-            longitude: event.venue.coordinate.longitude
-        )
-        let eventUserLocation = UserLocation(
-            city: event.venue.city,
-            country: userLocation.country,
-            coordinate: eventLocation,
-            lastUpdated: Date()
-        )
-        return userLocation.distance(to: eventUserLocation)
-    }
-}
+    private func calculateRecencyScore(
+        event: Event,
+        reasons: inout [String]
+    ) -> Double {
+        let now = Date()
+        let daysSinceCreated = Calendar.current.dateComponents([.day], from: event.createdAt, to: now).day ?? 0
 
-// MARK: - User Interaction Tracking
+        if daysSinceCreated <= 7 {
+            return Weights.recentlyAdded
+        }
 
-extension RecommendationService {
-    /// Track that user viewed an event
-    func trackEventView(eventId: UUID, userId: UUID) {
-        // In a real app, this would update the backend and local user model
-        // For now, this is a placeholder
-        print("=Ê Tracked view: Event \(eventId) by User \(userId)")
+        return 0.0
     }
 
-    /// Track that user liked an event
-    func trackEventLike(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked like: Event \(eventId) by User \(userId)")
+    // MARK: - Category-Specific Helpers
+
+    func getInterestBasedEvents(
+        for user: User,
+        from events: [Event],
+        limit: Int
+    ) async -> [Event] {
+        let topCategories = user.interests.getTopCategories(limit: 5)
+
+        // If no behavioral data, use preferred categories
+        let relevantCategories = topCategories.isEmpty ? user.interests.preferredCategories : topCategories
+
+        if relevantCategories.isEmpty {
+            // Cold start: return diverse selection
+            return getColdStartRecommendations(from: events, userLocation: user.city, limit: limit)
+        }
+
+        let categoryEvents = events.filter { relevantCategories.contains($0.category) }
+
+        let scored = categoryEvents.map { event -> ScoredEvent in
+            let (score, reasons) = calculateScore(for: event, user: user)
+            return ScoredEvent(event: event, score: score, reasons: reasons)
+        }
+
+        return scored.sorted { $0.score > $1.score }
+            .prefix(limit)
+            .map { $0.event }
     }
 
-    /// Track that user purchased tickets for an event
-    func trackEventPurchase(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked purchase: Event \(eventId) by User \(userId)")
+    func getNearbyEvents(
+        for user: User,
+        from events: [Event],
+        limit: Int
+    ) async -> [Event] {
+        guard let userLocation = user.location else {
+            // Fallback to same city
+            if let userCity = user.city {
+                return events.filter { $0.venue.city.localizedCaseInsensitiveCompare(userCity) == .orderedSame }
+                    .prefix(limit)
+                    .map { $0 }
+            }
+            return []
+        }
+
+        // Calculate distances and sort
+        let eventsWithDistance = events.map { event -> (event: Event, distance: Double) in
+            let eventLocation = UserLocation(
+                city: event.venue.city,
+                country: event.venue.address,
+                coordinate: UserLocation.LocationCoordinate(
+                    latitude: event.venue.coordinate.latitude,
+                    longitude: event.venue.coordinate.longitude
+                ),
+                lastUpdated: Date()
+            )
+
+            return (event, userLocation.distance(to: eventLocation))
+        }
+
+        return eventsWithDistance
+            .sorted { $0.distance < $1.distance }
+            .prefix(limit)
+            .map { $0.event }
     }
 
-    /// Track that user shared an event
-    func trackEventShare(eventId: UUID, userId: UUID) {
-        print("=Ê Tracked share: Event \(eventId) by User \(userId)")
+    func getPopularEvents(
+        from events: [Event],
+        limit: Int
+    ) -> [Event] {
+        return events.sorted { event1, event2 in
+            let sales1 = Double(event1.ticketTypes.reduce(0) { $0 + $1.sold })
+            let total1 = Double(event1.ticketTypes.reduce(0) { $0 + $1.quantity })
+            let ratio1 = total1 > 0 ? sales1 / total1 : 0
+
+            let sales2 = Double(event2.ticketTypes.reduce(0) { $0 + $1.sold })
+            let total2 = Double(event2.ticketTypes.reduce(0) { $0 + $1.quantity })
+            let ratio2 = total2 > 0 ? sales2 / total2 : 0
+
+            // Secondary sort by like count
+            if ratio1 == ratio2 {
+                return event1.likeCount > event2.likeCount
+            }
+
+            return ratio1 > ratio2
+        }
+        .prefix(limit)
+        .map { $0 }
+    }
+
+    func getHappeningNowEvents(
+        from events: [Event],
+        limit: Int
+    ) -> [Event] {
+        return events.filter { $0.isHappeningNow }
+            .prefix(limit)
+            .map { $0 }
+    }
+
+    func getFreeEvents(
+        from events: [Event],
+        limit: Int
+    ) -> [Event] {
+        return events.filter { event in
+            let minPrice = event.ticketTypes.map { $0.price }.min() ?? 0
+            return minPrice == 0
+        }
+        .prefix(limit)
+        .map { $0 }
+    }
+
+    func getWeekendEvents(
+        from events: [Event],
+        limit: Int
+    ) -> [Event] {
+        let calendar = Calendar.current
+
+        return events.filter { event in
+            let weekday = calendar.component(.weekday, from: event.startDate)
+            return weekday == 7 || weekday == 1 // Saturday or Sunday
+        }
+        .prefix(limit)
+        .map { $0 }
+    }
+
+    // MARK: - Cold Start Handling
+
+    /// Get recommendations for new users with no preference data
+    /// Falls back to popular, recent, and diverse events
+    func getColdStartRecommendations(
+        from events: [Event],
+        userLocation: String?,
+        limit: Int = 20
+    ) -> [Event] {
+        var recommendations: [Event] = []
+
+        // 1. Add some popular events
+        let popular = getPopularEvents(from: events, limit: limit / 3)
+        recommendations.append(contentsOf: popular)
+
+        // 2. Add events happening soon
+        let upcomingSoon = events
+            .filter { event in
+                if let days = Calendar.current.dateComponents([.day], from: Date(), to: event.startDate).day {
+                    return days >= 0 && days <= 3
+                }
+                return false
+            }
+            .prefix(limit / 3)
+
+        recommendations.append(contentsOf: upcomingSoon)
+
+        // 3. Add diverse categories to help learn preferences
+        var categoryCount: [EventCategory: Int] = [:]
+        let remaining = limit - recommendations.count
+
+        for event in events {
+            let count = categoryCount[event.category, default: 0]
+            if count < 2 && !recommendations.contains(where: { $0.id == event.id }) {
+                recommendations.append(event)
+                categoryCount[event.category] = count + 1
+
+                if recommendations.count >= limit {
+                    break
+                }
+            }
+        }
+
+        return Array(recommendations.prefix(limit))
     }
 }

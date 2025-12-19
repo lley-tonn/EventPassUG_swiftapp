@@ -15,10 +15,10 @@ class DiscoveryViewModel: ObservableObject {
     // MARK: - Published Properties
 
     @Published var allEvents: [Event] = []
-    @Published var recommendedEvents: [RecommendedEvent] = []
-    @Published var nearbyEvents: [RecommendedEvent] = []
-    @Published var cityEvents: [RecommendedEvent] = []
-    @Published var trendingEvents: [RecommendedEvent] = []
+    @Published var recommendedEvents: [ScoredEvent] = []
+    @Published var nearbyEvents: [ScoredEvent] = []
+    @Published var cityEvents: [ScoredEvent] = []
+    @Published var trendingEvents: [ScoredEvent] = []
     @Published var categoryEvents: [Event] = []
 
     @Published var selectedCategory: EventCategory?
@@ -88,43 +88,38 @@ class DiscoveryViewModel: ObservableObject {
     func refreshRecommendations() async {
         guard let user = currentUser else { return }
 
-        async let recommended = recommendationService.generateRecommendations(
+        // Get personalized recommendations
+        let recommended = await recommendationService.getRecommendedEvents(
+            for: user,
             from: allEvents,
-            user: user,
             limit: 20
         )
 
-        async let trending = recommendationService.getTrendingEvents(
+        // Get popular events (trending)
+        let trending = recommendationService.getPopularEvents(
             from: allEvents,
-            user: user,
             limit: 10
-        )
+        ).map { ScoredEvent(event: $0, score: 0, reasons: ["Popular event"]) }
 
         // Only fetch location-based recommendations if location is available
         if let location = userLocation {
-            async let nearby = recommendationService.getNearbyRecommendations(
+            let nearby = await recommendationService.getNearbyEvents(
+                for: user,
                 from: allEvents,
-                user: user,
-                userLocation: location,
                 limit: 10
-            )
+            ).map { ScoredEvent(event: $0, score: 0, reasons: ["Near you"]) }
 
-            async let inCity = recommendationService.getEventsInCity(
-                from: allEvents,
-                user: user,
-                userLocation: location,
-                limit: 10
-            )
+            let inCity = allEvents.filter { $0.venue.city == location.city }
+                .prefix(10)
+                .map { ScoredEvent(event: $0, score: 0, reasons: ["In \(location.city)"]) }
 
-            let (rec, trend, near, city) = await (recommended, trending, nearby, inCity)
-            recommendedEvents = rec
-            trendingEvents = trend
-            nearbyEvents = near
-            cityEvents = city
+            recommendedEvents = recommended
+            trendingEvents = trending
+            nearbyEvents = nearby
+            cityEvents = Array(inCity)
         } else {
-            let (rec, trend) = await (recommended, trending)
-            recommendedEvents = rec
-            trendingEvents = trend
+            recommendedEvents = recommended
+            trendingEvents = trending
             nearbyEvents = []
             cityEvents = []
         }
@@ -180,18 +175,21 @@ class DiscoveryViewModel: ObservableObject {
 
     /// Track user interaction with an event
     func trackEventView(event: Event) {
-        guard let user = currentUser else { return }
-        recommendationService.trackEventView(eventId: event.id, userId: user.id)
+        guard var user = currentUser else { return }
+        recommendationService.recordInteraction(user: &user, event: event, type: .view)
+        currentUser = user
     }
 
     func trackEventLike(event: Event) {
-        guard let user = currentUser else { return }
-        recommendationService.trackEventLike(eventId: event.id, userId: user.id)
+        guard var user = currentUser else { return }
+        recommendationService.recordInteraction(user: &user, event: event, type: .like)
+        currentUser = user
     }
 
     func trackEventPurchase(event: Event) {
-        guard let user = currentUser else { return }
-        recommendationService.trackEventPurchase(eventId: event.id, userId: user.id)
+        guard var user = currentUser else { return }
+        recommendationService.recordInteraction(user: &user, event: event, type: .purchase)
+        currentUser = user
     }
 
     // MARK: - Search
