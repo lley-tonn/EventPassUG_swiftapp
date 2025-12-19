@@ -50,6 +50,9 @@ struct Payment: Identifiable, Codable {
     let ticketIds: [UUID]
     let timestamp: Date
 
+    // Mobile Money specific fields
+    let mobileMoneyNumber: String?
+
     init(
         id: UUID = UUID(),
         amount: Double,
@@ -59,7 +62,8 @@ struct Payment: Identifiable, Codable {
         userId: UUID,
         eventId: UUID,
         ticketIds: [UUID],
-        timestamp: Date = Date()
+        timestamp: Date = Date(),
+        mobileMoneyNumber: String? = nil
     ) {
         self.id = id
         self.amount = amount
@@ -70,13 +74,21 @@ struct Payment: Identifiable, Codable {
         self.eventId = eventId
         self.ticketIds = ticketIds
         self.timestamp = timestamp
+        self.mobileMoneyNumber = mobileMoneyNumber
     }
 }
 
 // MARK: - Protocol
 
 protocol PaymentServiceProtocol {
-    func initiatePayment(amount: Double, method: PaymentMethod, userId: UUID, eventId: UUID) async throws -> Payment
+    func initiatePayment(
+        amount: Double,
+        method: PaymentMethod,
+        userId: UUID,
+        eventId: UUID,
+        mobileMoneyNumber: String?
+    ) async throws -> Payment
+
     func processPayment(paymentId: UUID) async throws -> PaymentStatus
     func fetchPaymentHistory(userId: UUID) async throws -> [Payment]
     func requestRefund(paymentId: UUID) async throws -> Bool
@@ -88,7 +100,13 @@ protocol PaymentServiceProtocol {
 class MockPaymentService: PaymentServiceProtocol {
     @Published private var payments: [Payment] = []
 
-    func initiatePayment(amount: Double, method: PaymentMethod, userId: UUID, eventId: UUID) async throws -> Payment {
+    func initiatePayment(
+        amount: Double,
+        method: PaymentMethod,
+        userId: UUID,
+        eventId: UUID,
+        mobileMoneyNumber: String?
+    ) async throws -> Payment {
         // TODO: Replace with real payment gateway integration (e.g., Flutterwave, Paystack)
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
@@ -98,7 +116,8 @@ class MockPaymentService: PaymentServiceProtocol {
             status: .processing,
             userId: userId,
             eventId: eventId,
-            ticketIds: []
+            ticketIds: [],
+            mobileMoneyNumber: mobileMoneyNumber
         )
 
         await MainActor.run {

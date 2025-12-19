@@ -21,6 +21,8 @@ struct TicketPurchaseView: View {
     @State private var purchaseComplete = false
     @State private var purchasedTickets: [Ticket] = []
     @State private var errorMessage: String?
+    @State private var showingPaymentConfirmation = false
+    @State private var confirmedMobileNumber: String?
 
     var totalAmount: Double {
         ticketType.price * Double(quantity)
@@ -234,11 +236,39 @@ struct TicketPurchaseView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingPaymentConfirmation) {
+            PaymentConfirmationView(
+                event: event,
+                ticketType: ticketType,
+                quantity: quantity,
+                totalAmount: totalAmount,
+                paymentMethod: selectedPaymentMethod,
+                userPhoneNumber: authService.currentUser?.phoneNumber,
+                onConfirm: { mobileNumber, saveAsDefault in
+                    executePayment(mobileNumber: mobileNumber, saveAsDefault: saveAsDefault)
+                },
+                onCancel: {
+                    // User cancelled payment confirmation
+                    HapticFeedback.light()
+                }
+            )
+        }
     }
 
     private func processPurchase() {
+        // For mobile money payments, show confirmation modal
+        if selectedPaymentMethod.requiresMobileNumber {
+            showingPaymentConfirmation = true
+        } else {
+            // For card payments, proceed directly
+            executePayment(mobileNumber: nil, saveAsDefault: false)
+        }
+    }
+
+    private func executePayment(mobileNumber: String?, saveAsDefault: Bool) {
         isProcessing = true
         errorMessage = nil
+        confirmedMobileNumber = mobileNumber
 
         Task {
             do {
@@ -255,12 +285,13 @@ struct TicketPurchaseView: View {
                     )
                 }
 
-                // Initiate payment
+                // Initiate payment with confirmed mobile number
                 let payment = try await services.paymentService.initiatePayment(
                     amount: totalAmount,
                     method: selectedPaymentMethod,
                     userId: userId,
-                    eventId: event.id
+                    eventId: event.id,
+                    mobileMoneyNumber: mobileNumber
                 )
 
                 // Process payment
