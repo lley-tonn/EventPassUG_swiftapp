@@ -112,6 +112,17 @@ struct AppDesign {
 
         /// Small button text
         static let buttonSmall = Font.caption.weight(.semibold)
+
+        // MARK: - Compatibility Aliases
+
+        /// Standard system font names for compatibility
+        static let title1 = Font.system(size: 28, weight: .bold, design: .rounded)
+        static let title3 = Font.system(size: 20, weight: .semibold, design: .rounded)
+        static let headline = Font.system(size: 17, weight: .semibold, design: .rounded)
+        static let subheadline = Font.system(size: 15, weight: .regular, design: .default)
+        static let buttonLarge = Font.system(size: 17, weight: .semibold, design: .rounded)
+        static let buttonMedium = Font.system(size: 15, weight: .semibold, design: .rounded)
+        static let buttonSmallLegacy = Font.system(size: 13, weight: .semibold, design: .rounded)
     }
 
     // MARK: - Spacing
@@ -131,6 +142,23 @@ struct AppDesign {
         static let section: CGFloat = 24
         static let item: CGFloat = 12
         static let edge: CGFloat = 16 // Screen edge padding
+
+        // Aliases for compatibility
+        static let sectionSpacing: CGFloat = 24
+        static let itemSpacing: CGFloat = 12
+        static let compactSpacing: CGFloat = 6
+    }
+
+    // MARK: - Border
+
+    struct Border {
+        static let width: CGFloat = 1
+        static let selectedWidth: CGFloat = 2
+        static let thickWidth: CGFloat = 3
+
+        static let color = Colors.border
+        static let lightColor = Colors.borderLight
+        static let darkColor = Colors.borderDark
     }
 
     // MARK: - Corner Radius
@@ -148,6 +176,12 @@ struct AppDesign {
         static let button: CGFloat = 12
         static let input: CGFloat = 10
         static let badge: CGFloat = 6
+
+        // Aliases for compatibility
+        static let small: CGFloat = 8
+        static let medium: CGFloat = 12
+        static let large: CGFloat = 16
+        static let extraLarge: CGFloat = 24
     }
 
     // MARK: - Shadows
@@ -209,6 +243,14 @@ struct AppDesign {
 
         static let paddingHorizontal: CGFloat = 24
         static let paddingVertical: CGFloat = 12
+
+        // Aliases for compatibility
+        static let largeHeight: CGFloat = 56
+        static let mediumHeight: CGFloat = 48
+        static let smallHeight: CGFloat = 36
+        static let iconButtonSize: CGFloat = 44
+        static let compactIconSize: CGFloat = 32
+        static let minimumTouchTarget: CGFloat = 44
     }
 
     // MARK: - Input Field Dimensions
@@ -287,3 +329,15 @@ extension View {
         return self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
     }
 }
+
+// MARK: - Type Aliases for Convenience
+
+typealias AppColors = AppDesign.Colors
+typealias AppTypography = AppDesign.Typography
+typealias AppSpacing = AppDesign.Spacing
+typealias AppBorder = AppDesign.Border
+typealias AppCornerRadius = AppDesign.CornerRadius
+typealias AppShadow = AppDesign.Shadow
+typealias AppButtonDimensions = AppDesign.Button
+typealias AppInputDimensions = AppDesign.Input
+typealias AppAnimation = AppDesign.Animation
