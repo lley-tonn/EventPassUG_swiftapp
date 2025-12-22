@@ -50,6 +50,7 @@ struct ScoredEvent: Identifiable {
 
 // MARK: - Recommendation Service Protocol
 
+@MainActor
 protocol RecommendationServiceProtocol {
     /// Get personalized event recommendations for a user
     func getRecommendedEvents(
@@ -661,7 +662,7 @@ class RecommendationService: ObservableObject, RecommendationServiceProtocol {
 
         // 3. Add diverse categories to help learn preferences
         var categoryCount: [EventCategory: Int] = [:]
-        let remaining = limit - recommendations.count
+        _ = limit - recommendations.count
 
         for event in events {
             let count = categoryCount[event.category, default: 0]

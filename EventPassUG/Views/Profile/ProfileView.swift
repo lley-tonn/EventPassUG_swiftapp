@@ -384,9 +384,9 @@ struct ProfileView: View {
             HStack(spacing: AppDesign.Spacing.md) {
                 Spacer()
 
-                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .white, geometry: geometry)
+                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .black, geometry: geometry)
                 socialMediaImageButton(imageName: "instagram_icon", url: "https://instagram.com/eventpassug", geometry: geometry)
-                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", tintColor: .white, geometry: geometry)
+                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", tintColor: .black, geometry: geometry)
                 socialMediaImageButton(imageName: "facebook_icon", url: "https://facebook.com/eventpassug", geometry: geometry)
                 socialMediaSystemButton(icon: "globe", url: "https://eventpassug.com", geometry: geometry)
 
