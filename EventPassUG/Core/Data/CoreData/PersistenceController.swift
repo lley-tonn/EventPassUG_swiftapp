@@ -12,23 +12,7 @@ struct PersistenceController {
 
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-
-        // Add sample data for previews
-        for i in 0..<5 {
-            let event = EventEntity(context: viewContext)
-            event.id = UUID()
-            event.title = "Sample Event \(i)"
-            event.eventDescription = "This is a sample event description"
-            event.createdAt = Date()
-        }
-
-        do {
-            try viewContext.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
+        // Preview data can be added here when Core Data entities are defined
         return result
     }()
 

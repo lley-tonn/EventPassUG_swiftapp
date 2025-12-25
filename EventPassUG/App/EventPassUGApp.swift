@@ -19,10 +19,10 @@ struct EventPassUGApp: App {
         // Initialize services with mock implementations
         // TODO: Replace with real implementations when backend is ready
         services = ServiceContainer(
-            authService: MockAuthService(),
-            eventService: MockEventService(),
-            ticketService: MockTicketService(),
-            paymentService: MockPaymentService()
+            authService: MockAuthRepository(),
+            eventService: MockEventRepository(),
+            ticketService: MockTicketRepository(),
+            paymentService: MockPaymentRepository()
         )
 
         // Configure app-wide appearance
@@ -34,7 +34,7 @@ struct EventPassUGApp: App {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(services)
-                .environmentObject(services.authService as! MockAuthService)
+                .environmentObject(services.authService as! MockAuthRepository)
         }
     }
 

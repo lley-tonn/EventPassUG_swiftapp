@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var authService: MockAuthService
+    @EnvironmentObject var authService: MockAuthRepository
 
     // CRITICAL FIX: Use @AppStorage directly for persistence
     // This ensures the flag persists across app launches
@@ -83,6 +83,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(MockAuthService())
+        .environmentObject(MockAuthRepository())
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
