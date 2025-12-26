@@ -241,7 +241,6 @@
 		4750C10D2EFDDF840012429D /* OrganizerProfileCompletionStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizerProfileCompletionStep.swift; sourceTree = "<group>"; };
 		4750C10E2EFDDF840012429D /* OrganizerTermsAgreementStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizerTermsAgreementStep.swift; sourceTree = "<group>"; };
 		4750C10F2EFDDF840012429D /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
-		4750C1122EFDDF840012429D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4750C1142EFDDF840012429D /* AnimatedLikeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedLikeButton.swift; sourceTree = "<group>"; };
 		4750C1152EFDDF840012429D /* CategoryTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTile.swift; sourceTree = "<group>"; };
 		4750C1162EFDDF840012429D /* DashboardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardComponents.swift; sourceTree = "<group>"; };
@@ -300,7 +299,6 @@
 		2F72F308404F2B7306E8F85E = {
 			isa = PBXGroup;
 			children = (
-				4750C1132EFDDF840012429D /* Resources */,
 				185E7F565787E6447E2D00F2 /* EventPassUG */,
 				04B77584117B2FE894D09283 /* Products */,
 				4786591B2EF1482D007884FA /* Recovered References */,
@@ -577,14 +575,6 @@
 				4750C1102EFDDF840012429D /* Organizer */,
 			);
 			path = Features;
-			sourceTree = "<group>";
-		};
-		4750C1132EFDDF840012429D /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				4750C1122EFDDF840012429D /* Assets.xcassets */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		4750C1222EFDDF840012429D /* Components */ = {
