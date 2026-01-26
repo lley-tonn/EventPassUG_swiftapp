@@ -44,6 +44,7 @@ struct OrganizerHomeView: View {
         .onAppear {
             loadEvents()
             subscribeToTicketSales()
+            startEventStatusMonitoring()
         }
         .sheet(isPresented: $showingCreateEvent) {
             CreateEventWizard()
@@ -288,6 +289,10 @@ struct OrganizerHomeView: View {
                 guard let organizerId = authService.currentUser?.id else { return }
 
                 let fetchedEvents = try await services.eventService.fetchOrganizerEvents(organizerId: organizerId)
+
+                // Auto-update expired events to completed status
+                await autoUpdateEventStatuses(fetchedEvents)
+
                 await MainActor.run {
                     events = fetchedEvents.sorted { $0.createdAt > $1.createdAt }
                     isLoading = false
@@ -297,6 +302,31 @@ struct OrganizerHomeView: View {
                 await MainActor.run {
                     isLoading = false
                 }
+            }
+        }
+    }
+
+    private func autoUpdateEventStatuses(_ events: [Event]) async {
+        for event in events {
+            if let newStatus = event.shouldAutoUpdateStatus {
+                do {
+                    var updatedEvent = event
+                    updatedEvent.status = newStatus
+                    _ = try await services.eventService.updateEvent(updatedEvent)
+                    print("Auto-updated event '\(event.title)' to status: \(newStatus)")
+                } catch {
+                    print("Error auto-updating event status: \(error)")
+                }
+            }
+        }
+    }
+
+    private func startEventStatusMonitoring() {
+        // Check for status updates every 5 minutes
+        Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+            Task { @MainActor in
+                await autoUpdateEventStatuses(events)
+                loadEvents()
             }
         }
     }

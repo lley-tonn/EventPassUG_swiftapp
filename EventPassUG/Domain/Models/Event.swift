@@ -153,6 +153,31 @@ struct Event: Identifiable, Codable, Equatable {
         return now >= startDate && now <= endDate && status == .published
     }
 
+    var isExpired: Bool {
+        Date() > endDate
+    }
+
+    var shouldAutoUpdateStatus: EventStatus? {
+        let now = Date()
+
+        // Don't auto-update draft or cancelled events
+        guard status == .published || status == .ongoing else {
+            return nil
+        }
+
+        // Check if event has ended
+        if now > endDate {
+            return .completed
+        }
+
+        // Check if event is currently ongoing
+        if now >= startDate && now <= endDate && status == .published {
+            return .ongoing
+        }
+
+        return nil
+    }
+
     var priceRange: String {
         let prices = ticketTypes.map { $0.price }
         guard let min = prices.min(), let max = prices.max() else {
