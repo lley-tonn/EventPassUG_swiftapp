@@ -88,6 +88,7 @@
 		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
 		A9DDEDFD95C15D39462967E2 /* PDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AE2EFDDF840012429D /* PDFGenerator.swift */; };
+		AA477A79CE5F40F62EFC9EBC /* IDCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D293ED25DF9B5F577E27D /* IDCameraView.swift */; };
 		B065402867C2535D8BDD8246 /* PulsingDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11D2EFDDF840012429D /* PulsingDot.swift */; };
 		B35BA38EB6C9B40AE4CC3676 /* AuthChoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596A0169D31BCD5B6CDD224B /* AuthChoiceView.swift */; };
 		B732B5EFF9E256E1D7485A18 /* TicketSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E02EFDDF840012429D /* TicketSuccessView.swift */; };
@@ -266,6 +267,7 @@
 		6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuestPlaceholders.swift; sourceTree = "<group>"; };
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
 		E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthPromptSheet.swift; sourceTree = "<group>"; };
 		ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -552,6 +554,7 @@
 				4750C1002EFDDF840012429D /* TermsOfUseView.swift */,
 				4750C1012EFDDF840012429D /* TroubleshootingView.swift */,
 				6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */,
+				B59D293ED25DF9B5F577E27D /* IDCameraView.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -829,6 +832,7 @@
 				5C329D0C2065823E9EDBD24D /* GuestPlaceholders.swift in Sources */,
 				3FA1320C7983194C302AC45E /* AuthPromptSheet.swift in Sources */,
 				8129C1F3F44FAA26F937D451 /* ManageEventTicketsView.swift in Sources */,
+				AA477A79CE5F40F62EFC9EBC /* IDCameraView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
