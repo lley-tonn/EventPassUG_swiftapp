@@ -15,6 +15,7 @@ protocol EventRepositoryProtocol {
     func fetchEvent(id: UUID) async throws -> Event?
     func createEvent(_ event: Event) async throws -> Event
     func updateEvent(_ event: Event) async throws -> Event
+    func updateEventTickets(eventId: UUID, ticketTypes: [TicketType]) async throws
     func deleteEvent(id: UUID) async throws
     func likeEvent(id: UUID) async throws
     func unlikeEvent(id: UUID) async throws
@@ -73,6 +74,21 @@ class MockEventRepository: EventRepositoryProtocol {
         }
         persistEvents()
         return event
+    }
+
+    func updateEventTickets(eventId: UUID, ticketTypes: [TicketType]) async throws {
+        // TODO: Replace with real API call
+        try await Task.sleep(nanoseconds: 800_000_000)
+
+        await MainActor.run {
+            if let index = events.firstIndex(where: { $0.id == eventId }) {
+                var updatedEvent = events[index]
+                updatedEvent.ticketTypes = ticketTypes
+                updatedEvent.updatedAt = Date()
+                events[index] = updatedEvent
+            }
+        }
+        persistEvents()
     }
 
     func deleteEvent(id: UUID) async throws {
