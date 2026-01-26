@@ -519,16 +519,25 @@ struct AddTicketTypeView: View {
     }
 
     private func addTicket() {
-        guard let priceValue = Double(price),
-              let quantityValue = isUnlimited ? nil : Int(quantity) else {
+        guard let priceValue = Double(price) else {
             return
+        }
+
+        let finalQuantity: Int
+        if isUnlimited {
+            finalQuantity = 1000000 // Large number for unlimited
+        } else {
+            guard let quantityValue = Int(quantity) else {
+                return
+            }
+            finalQuantity = quantityValue
         }
 
         let newTicket = TicketType(
             id: UUID(),
             name: name,
             price: priceValue,
-            quantity: quantityValue ?? 1000000, // Large number for unlimited
+            quantity: finalQuantity,
             sold: 0,
             description: description.isEmpty ? nil : description,
             perks: [],
