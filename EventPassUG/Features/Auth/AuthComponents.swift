@@ -316,19 +316,45 @@ enum SocialLoginProvider {
         }
     }
 
-    var backgroundColor: Color {
+    func backgroundColor(for colorScheme: ColorScheme) -> Color {
         switch self {
-        case .apple: return Color.black
-        case .google: return Color.white
-        case .facebook: return Color(hex: "1877F2")
+        case .apple:
+            // Light mode: black, Dark mode: white
+            return colorScheme == .dark ? .white : .black
+        case .google:
+            // Light mode: white, Dark mode: subtle gray
+            return colorScheme == .dark ? Color(UIColor.secondarySystemGroupedBackground) : .white
+        case .facebook:
+            // Facebook blue - slightly lighter in dark mode for visibility
+            return colorScheme == .dark ? Color(hex: "2D88FF") : Color(hex: "1877F2")
         }
     }
 
-    var foregroundColor: Color {
+    func foregroundColor(for colorScheme: ColorScheme) -> Color {
         switch self {
-        case .apple: return .white
-        case .google: return .black
-        case .facebook: return .white
+        case .apple:
+            // Inverse of background
+            return colorScheme == .dark ? .black : .white
+        case .google:
+            // Dark text in light mode, light text in dark mode
+            return colorScheme == .dark ? .white : .black
+        case .facebook:
+            // Always white for contrast
+            return .white
+        }
+    }
+
+    func borderColor(for colorScheme: ColorScheme) -> Color {
+        switch self {
+        case .apple:
+            // Border in dark mode for visibility
+            return colorScheme == .dark ? Color.white.opacity(0.2) : Color.clear
+        case .google:
+            // Always has border for definition
+            return colorScheme == .dark ? Color.white.opacity(0.15) : AppDesign.Colors.border
+        case .facebook:
+            // No border needed with colored background
+            return Color.clear
         }
     }
 }
@@ -338,6 +364,8 @@ struct SocialLoginButton: View {
     let isLoading: Bool
     let action: () -> Void
 
+    @Environment(\.colorScheme) var colorScheme
+
     var body: some View {
         Button(action: {
             HapticFeedback.light()
@@ -346,7 +374,7 @@ struct SocialLoginButton: View {
             HStack(spacing: AppDesign.Spacing.sm) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: provider.foregroundColor))
+                        .progressViewStyle(CircularProgressViewStyle(tint: provider.foregroundColor(for: colorScheme)))
                         .scaleEffect(0.9)
                 } else {
                     Image(systemName: provider.iconName)
@@ -356,14 +384,14 @@ struct SocialLoginButton: View {
                 Text(provider.title)
                     .font(AppDesign.Typography.buttonSecondary)
             }
-            .foregroundColor(provider.foregroundColor)
+            .foregroundColor(provider.foregroundColor(for: colorScheme))
             .frame(maxWidth: .infinity)
             .frame(height: AppDesign.Button.heightLarge)
-            .background(provider.backgroundColor)
+            .background(provider.backgroundColor(for: colorScheme))
             .cornerRadius(AppDesign.CornerRadius.button)
             .overlay(
                 RoundedRectangle(cornerRadius: AppDesign.CornerRadius.button)
-                    .stroke(AppDesign.Colors.border, lineWidth: provider == .google ? 1 : 0)
+                    .stroke(provider.borderColor(for: colorScheme), lineWidth: 1)
             )
         }
         .disabled(isLoading)

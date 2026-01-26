@@ -11,6 +11,7 @@ import StoreKit
 
 struct ProfileView: View {
     @EnvironmentObject var authService: MockAuthRepository
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var followManager = FollowManager.shared
     @State private var showingRoleSwitch = false
     @State private var showingLogoutConfirmation = false
@@ -388,14 +389,14 @@ struct ProfileView: View {
             .cornerRadius(AppCornerRadius.medium)
             .padding(.horizontal, AppDesign.Spacing.md)
 
-            // Social Media Icons - FULLY RESPONSIVE
+            // Social Media Icons - FULLY RESPONSIVE & DARK MODE ADAPTIVE
             HStack(spacing: AppDesign.Spacing.md) {
                 Spacer()
 
-                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", tintColor: .black, geometry: geometry)
-                socialMediaImageButton(imageName: "instagram_icon", url: "https://instagram.com/eventpassug", geometry: geometry)
-                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", tintColor: .black, geometry: geometry)
-                socialMediaImageButton(imageName: "facebook_icon", url: "https://facebook.com/eventpassug", geometry: geometry)
+                socialMediaImageButton(imageName: "tiktok_icon", url: "https://tiktok.com/@eventpassug", adaptiveColor: true, geometry: geometry)
+                socialMediaImageButton(imageName: "instagram_icon", url: "https://instagram.com/eventpassug", adaptiveColor: true, geometry: geometry)
+                socialMediaImageButton(imageName: "x_icon", url: "https://x.com/eventpassug", adaptiveColor: true, geometry: geometry)
+                socialMediaImageButton(imageName: "facebook_icon", url: "https://facebook.com/eventpassug", adaptiveColor: true, geometry: geometry)
                 socialMediaSystemButton(icon: "globe", url: "https://eventpassug.com", geometry: geometry)
 
                 Spacer()
@@ -471,18 +472,20 @@ struct ProfileView: View {
     }
 
     @ViewBuilder
-    private func socialMediaImageButton(imageName: String, url: String, tintColor: Color? = nil, geometry: GeometryProxy) -> some View {
+    private func socialMediaImageButton(imageName: String, url: String, adaptiveColor: Bool = false, geometry: GeometryProxy) -> some View {
         Button(action: {
             openURL(url)
         }) {
             Group {
-                if let tintColor = tintColor {
+                if adaptiveColor {
+                    // Adaptive icons: Black in light mode, white in dark mode
                     Image(imageName)
                         .resizable()
                         .renderingMode(.template)
                         .scaledToFit()
-                        .foregroundColor(tintColor)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                 } else {
+                    // Icons that keep their original colors
                     Image(imageName)
                         .resizable()
                         .scaledToFit()
@@ -502,7 +505,7 @@ struct ProfileView: View {
         }) {
             Image(systemName: icon)
                 .font(.system(size: socialIconSize(for: geometry) * 0.7))
-                .foregroundColor(.gray)
+                .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : .gray)
                 .frame(width: socialIconContainerSize(for: geometry), height: socialIconContainerSize(for: geometry))
                 .background(Color(UIColor.secondarySystemGroupedBackground))
                 .clipShape(Circle())
