@@ -30,17 +30,19 @@ struct ProfileView: View {
     @State private var showingBecomeOrganizer = false
 
     var body: some View {
-        NavigationView {
-            GeometryReader { geometry in
-                VStack(spacing: 0) {
-                    // Compact Profile Header
-                    CollapsibleHeader(title: authService.currentUser?.fullName ?? "Profile", scrollOffset: scrollOffset) {
-                        CompactProfileHeader(
-                            user: authService.currentUser,
-                            followerCount: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID())
-                        )
-                        .padding(.vertical, AppDesign.Spacing.xs)
-                    }
+        // Safety check: Should not reach here for guests (GuestProfilePlaceholder shown instead)
+        if let user = authService.currentUser {
+            NavigationView {
+                GeometryReader { geometry in
+                    VStack(spacing: 0) {
+                        // Compact Profile Header
+                        CollapsibleHeader(title: user.fullName, scrollOffset: scrollOffset) {
+                            CompactProfileHeader(
+                                user: user,
+                                followerCount: followManager.getFollowerCount(for: user.id)
+                            )
+                            .padding(.vertical, AppDesign.Spacing.xs)
+                        }
 
                     // Settings List
                     ScrollOffsetReader(content: {
@@ -145,6 +147,12 @@ struct ProfileView: View {
         }
         .fullScreenCover(isPresented: $showingBecomeOrganizer) {
             BecomeOrganizerFlow()
+                .environmentObject(authService)
+        }
+        } else {
+            // Fallback: Should not reach here for guests
+            // MainTabView shows GuestProfilePlaceholder instead
+            GuestProfilePlaceholder()
                 .environmentObject(authService)
         }
     }

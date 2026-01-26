@@ -82,6 +82,12 @@ class FollowManager: ObservableObject {
     }
 
     private func sendFollowNotification(to organizerId: UUID, organizerName: String, followerId: UUID?, followerName: String?) {
+        // Guest user - skip notification
+        guard let followerId = followerId else {
+            print("Guest user follow - notification skipped")
+            return
+        }
+
         let notification = NotificationModel(
             type: .newFollower,
             title: "New Follower!",

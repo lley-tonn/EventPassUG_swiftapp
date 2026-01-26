@@ -13,13 +13,14 @@ A complete, production-ready native iOS application for discovering and managing
 1. [Features](#-features)
 2. [Quick Start](#-quick-start)
 3. [Architecture](#-architecture)
-4. [Project Structure](#-project-structure)
-5. [Design System](#-design-system)
-6. [Authentication](#-authentication)
-7. [Backend Integration](#-backend-integration)
-8. [Testing](#-testing)
-9. [Deployment](#-deployment)
-10. [Troubleshooting](#-troubleshooting)
+4. [Architecture Map & User Flows](#-architecture-map--user-flows)
+5. [Project Structure](#-project-structure)
+6. [Design System](#-design-system)
+7. [Authentication](#-authentication)
+8. [Backend Integration](#-backend-integration)
+9. [Testing](#-testing)
+10. [Deployment](#-deployment)
+11. [Troubleshooting](#-troubleshooting)
 
 ---
 
@@ -28,6 +29,7 @@ A complete, production-ready native iOS application for discovering and managing
 ### Dual Role Support
 - **Attendee Mode**: Discover events, purchase tickets, view QR codes
 - **Organizer Mode**: Create events, manage tickets, track analytics
+- **Guest Mode**: Browse events without account (authentication required for purchases)
 - Seamless role switching from profile settings
 
 ### Attendee Features
@@ -40,6 +42,7 @@ A complete, production-ready native iOS application for discovering and managing
 - ✅ Event ratings and reviews
 - ✅ Real-time "Happening now" indicators
 - ✅ **Time-based ticket sales** (automatically stops when event starts)
+- 🔄 **Guest browsing** (explore events without account, auth required for actions)
 
 ### Organizer Features
 - ✅ 3-step event creation wizard with draft saving
@@ -202,6 +205,69 @@ EventPassUG follows a **production-grade, feature-first clean architecture** des
 
 ---
 
+## 🗺️ Architecture Map & User Flows
+
+> **📖 Complete Architecture Map**: See [`ARCHITECTURE_MAP.md`](./ARCHITECTURE_MAP.md) for comprehensive screen maps and user flows
+
+### What's Included
+
+The architecture map provides a complete visual guide to the application:
+
+**Screen Map (70+ Views)**
+- All screens documented with connections
+- Auth & Onboarding flows (8 screens)
+- Main app screens (Home, Tickets, Profile)
+- Organizer dashboard & tools
+- Guest mode placeholders
+- Shared components & modals
+
+**User Interaction Flows**
+- First-time user journey (with guest browsing)
+- Guest browsing with authentication prompts
+- Ticket purchase flow (end-to-end)
+- Event creation flow (organizer)
+- Role switching flows
+
+**Architecture Connections**
+- Layer-by-layer data flow
+- Dependency injection patterns
+- State management strategies
+- Navigation hierarchy
+
+**Quick Navigation Reference**
+
+| Looking for... | Screen Location | File Path |
+|----------------|-----------------|-----------|
+| Login screen | Auth Flow | `Features/Auth/ModernAuthView.swift` |
+| Event browsing | Home Tab | `Features/Attendee/AttendeeHomeView.swift` |
+| Ticket purchase | Home Tab → Event Details | `Features/Attendee/TicketPurchaseView.swift` |
+| My tickets | Tickets Tab | `Features/Attendee/TicketsView.swift` |
+| Profile settings | Profile Tab | `Features/Common/ProfileView.swift` |
+| Create event | Organizer Dashboard | `Features/Organizer/CreateEventWizard.swift` |
+| Scan tickets | Organizer Tools | `Features/Organizer/QRScannerView.swift` |
+| Guest placeholders | Profile/Tickets Tabs | `Features/Common/GuestPlaceholders.swift` |
+
+**User Flow Examples**
+
+```
+Guest User Flow:
+Onboarding → Auth Choice → [Continue as Guest] → Browse Events →
+[Try to Like] → Auth Prompt → Login → Action Completed
+
+Ticket Purchase Flow:
+Browse Events → Event Details → Select Ticket → Choose Payment →
+Confirm → Success → View QR Code
+
+Organizer Flow:
+Login → Switch to Organizer → Create Event → Configure Tickets →
+Upload Poster → Publish → Manage Event
+```
+
+For the complete interactive map with all screens, flows, and connections, see:
+- **[ARCHITECTURE_MAP.md](./ARCHITECTURE_MAP.md)** - Complete visual architecture guide
+
+---
+
 ## 📁 Project Structure
 
 > **📖 Complete Architecture Guide**: See [`EventPassUG/ARCHITECTURE.md`](./EventPassUG/ARCHITECTURE.md) for detailed documentation
@@ -339,8 +405,9 @@ EventPassUG/
 ### Documentation
 
 - 📖 **[ARCHITECTURE.md](./EventPassUG/ARCHITECTURE.md)** - Complete architecture guide
+- 🗺️ **[ARCHITECTURE_MAP.md](./ARCHITECTURE_MAP.md)** - Visual screen map & user flows
 - 📋 **[QUICK_REFERENCE.md](./EventPassUG/QUICK_REFERENCE.md)** - Developer cheat sheet
-- 🗺️ **[MIGRATION_GUIDE.md](./EventPassUG/MIGRATION_GUIDE.md)** - File mappings
+- 🔄 **[MIGRATION_GUIDE.md](./EventPassUG/MIGRATION_GUIDE.md)** - File mappings
 - 📊 **[REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md)** - Migration summary
 
 ---
@@ -882,6 +949,96 @@ Features/              Domain/          Data/              UI/
 3. ✅ Verify all features work
 
 **For detailed instructions**, see [`REFACTORING_SUMMARY.md`](./REFACTORING_SUMMARY.md)
+
+---
+
+## 🚶 Guest Browsing Mode (IN PROGRESS)
+
+**Status:** 🔄 Implementation planned - See [`ARCHITECTURE_MAP.md`](./ARCHITECTURE_MAP.md)
+
+### Overview
+
+EventPass will support guest browsing, allowing users to explore events without creating an account. Authentication is required only for specific actions like purchasing tickets or saving favorites.
+
+### User Flow
+
+After completing the onboarding slides, new users see an **Authentication Choice Screen** with three options:
+
+1. **Login** - For existing users
+2. **Become an Organizer** - Direct path to create events
+3. **Continue as Guest** - Browse without signing in
+
+### Guest Capabilities
+
+**✅ Available Without Authentication:**
+- Browse all events in the home feed
+- View complete event details
+- Search and filter events
+- View organizer profiles
+- See event locations on map
+- Share events with friends
+
+**🔒 Requires Authentication:**
+- Like/favorite events
+- Follow organizers
+- Purchase tickets
+- View purchased tickets
+- Rate events
+- Access profile settings
+
+### Authentication Prompts
+
+When guests attempt restricted actions, they see a contextual prompt explaining why authentication is needed:
+
+```
+Example: Guest taps "Like" on an event
+    ↓
+AuthPromptSheet appears:
+    "Sign in to like events"
+
+    Benefits:
+    • Save your favorites
+    • Sync across devices
+    • Get event notifications
+
+    [Sign In] [Create Account] [Not Now]
+```
+
+After signing in, the app automatically completes the intended action.
+
+### Guest Placeholders
+
+Restricted tabs show informative placeholders:
+
+**Tickets Tab (Guest View)**
+- Empty state with ticket icon
+- "Sign in to view your tickets" message
+- Benefits: QR codes, wallet integration, history
+- Sign-in button
+
+**Profile Tab (Guest View)**
+- Section 1: Account creation CTA
+- Section 2: "Become an Organizer" teaser
+  - Prominent card with benefits
+  - Direct signup flow for organizers
+
+### Technical Implementation
+
+See the complete implementation plan:
+- **[Implementation Plan](/.claude/plans/glimmering-knitting-spindle.md)** - Approved technical approach
+- **[Architecture Map](./ARCHITECTURE_MAP.md)** - Guest user flows
+
+**Key Components (To Be Created):**
+- `AuthChoiceView.swift` - Post-onboarding choice screen
+- `GuestPlaceholders.swift` - Ticket & profile tab placeholders
+- `AuthPromptSheet.swift` - Reusable authentication prompt
+
+**Files To Be Modified:**
+- `ContentView.swift` - Remove root auth gate, add choice screen
+- `MainTabView.swift` - Support optional user (guest mode)
+- `AttendeeHomeView.swift` - Add auth checks to actions
+- `EventDetailsView.swift` - Add auth checks to like/follow/purchase
+- `AuthRepository.swift` - Add `isGuestMode` property
 
 ---
 

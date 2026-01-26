@@ -23,6 +23,12 @@ struct EventDetailsView: View {
     @State private var userRating: Double = 0
     @State private var region: MKCoordinateRegion
 
+    // Auth prompt state (for guest users)
+    @State private var showingAuthPrompt = false
+    @State private var authPromptReason = ""
+    @State private var authPromptIcon = "lock.fill"
+    @State private var pendingAction: (() -> Void)?
+
     init(event: Event) {
         self.event = event
         _region = State(initialValue: MKCoordinateRegion(
@@ -79,6 +85,22 @@ struct EventDetailsView: View {
                                 .minimumScaleFactor(0.85)
 
                             Button(action: {
+                                // Check authentication
+                                guard authService.isAuthenticated else {
+                                    authPromptReason = "to follow organizers"
+                                    authPromptIcon = "person.fill.badge.plus"
+                                    pendingAction = {
+                                        followManager.toggleFollow(
+                                            organizerId: event.organizerId,
+                                            organizerName: event.organizerName,
+                                            followerId: authService.currentUser?.id,
+                                            followerName: authService.currentUser?.fullName
+                                        )
+                                    }
+                                    showingAuthPrompt = true
+                                    HapticFeedback.light()
+                                    return
+                                }
                                 followManager.toggleFollow(
                                     organizerId: event.organizerId,
                                     organizerName: event.organizerName,
@@ -362,6 +384,19 @@ struct EventDetailsView: View {
                         Spacer(minLength: AppSpacing.compactSpacing) // FIXED: Using design system constant
 
                         Button(action: {
+                            // Check authentication
+                            guard authService.isAuthenticated else {
+                                authPromptReason = "to purchase tickets"
+                                authPromptIcon = "ticket.fill"
+                                pendingAction = {
+                                    if let ticket = selectedTicketType, ticket.isPurchasable {
+                                        showingTicketPurchase = true
+                                    }
+                                }
+                                showingAuthPrompt = true
+                                HapticFeedback.medium()
+                                return
+                            }
                             // Double-check that ticket is still purchasable before opening purchase sheet
                             if let ticket = selectedTicketType, ticket.isPurchasable {
                                 showingTicketPurchase = true
@@ -398,6 +433,18 @@ struct EventDetailsView: View {
                     HapticFeedback.success()
                 }
             }
+        }
+        .sheet(isPresented: $showingAuthPrompt) {
+            AuthPromptSheet(
+                reason: authPromptReason,
+                icon: authPromptIcon,
+                onAuthSuccess: {
+                    pendingAction?()
+                    pendingAction = nil
+                },
+                isPresented: $showingAuthPrompt
+            )
+            .environmentObject(authService)
         }
     }
 

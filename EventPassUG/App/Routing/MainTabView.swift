@@ -8,30 +8,50 @@
 import SwiftUI
 
 struct MainTabView: View {
-    let userRole: UserRole
+    let userRole: UserRole?  // Now optional for guest mode
     @State private var selectedTab = 0
+    @EnvironmentObject var authService: MockAuthRepository
+
+    // Effective role: default to attendee for guests
+    private var effectiveRole: UserRole {
+        userRole ?? .attendee
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            if userRole == .attendee {
-                // Attendee tabs
+            if effectiveRole == .attendee {
+                // Attendee tabs (or guest)
                 AttendeeHomeView()
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
                     }
                     .tag(0)
 
-                TicketsView()
-                    .tabItem {
-                        Label("Tickets", systemImage: "ticket.fill")
+                // Tickets tab: Show placeholder for guests
+                Group {
+                    if authService.isAuthenticated {
+                        TicketsView()
+                    } else {
+                        GuestTicketsPlaceholder()
                     }
-                    .tag(1)
+                }
+                .tabItem {
+                    Label("Tickets", systemImage: "ticket.fill")
+                }
+                .tag(1)
 
-                ProfileView()
-                    .tabItem {
-                        Label("Profile", systemImage: "person.fill")
+                // Profile tab: Show placeholder for guests
+                Group {
+                    if authService.isAuthenticated {
+                        ProfileView()
+                    } else {
+                        GuestProfilePlaceholder()
                     }
-                    .tag(2)
+                }
+                .tabItem {
+                    Label("Profile", systemImage: "person.fill")
+                }
+                .tag(2)
             } else {
                 // Organizer tabs
                 OrganizerHomeView()
@@ -53,7 +73,7 @@ struct MainTabView: View {
                     .tag(2)
             }
         }
-        .accentColor(RoleConfig.getPrimaryColor(for: userRole))
+        .accentColor(RoleConfig.getPrimaryColor(for: effectiveRole))
         .onChange(of: selectedTab) { _ in
             HapticFeedback.selection()
         }

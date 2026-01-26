@@ -18,6 +18,10 @@ class EnhancedAuthService: AuthRepositoryProtocol, ObservableObject {
         currentUser != nil
     }
 
+    var isGuestMode: Bool {
+        currentUser == nil
+    }
+
     var currentUserPublisher: AnyPublisher<User?, Never> {
         $currentUser.eraseToAnyPublisher()
     }

@@ -14,6 +14,7 @@ import Combine
 protocol AuthRepositoryProtocol: AnyObject {
     var currentUser: User? { get }
     var isAuthenticated: Bool { get }
+    var isGuestMode: Bool { get }
     var currentUserPublisher: AnyPublisher<User?, Never> { get }
 
     func signIn(email: String, password: String) async throws -> User
@@ -59,6 +60,10 @@ class MockAuthRepository: AuthRepositoryProtocol, ObservableObject {
 
     var isAuthenticated: Bool {
         currentUser != nil
+    }
+
+    var isGuestMode: Bool {
+        currentUser == nil
     }
 
     var currentUserPublisher: AnyPublisher<User?, Never> {

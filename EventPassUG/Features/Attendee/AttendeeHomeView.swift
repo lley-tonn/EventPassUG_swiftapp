@@ -25,6 +25,12 @@ struct AttendeeHomeView: View {
     @State private var showingFavorites = false
     @FocusState private var isSearchFocused: Bool
 
+    // Auth prompt state (for guest users)
+    @State private var showingAuthPrompt = false
+    @State private var authPromptReason = ""
+    @State private var authPromptIcon = "lock.fill"
+    @State private var pendingAction: (() -> Void)?
+
     // Scroll position anchor - critical for preventing auto-scroll
     @State private var scrollViewID = UUID()
 
@@ -91,6 +97,18 @@ struct AttendeeHomeView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingAuthPrompt) {
+            AuthPromptSheet(
+                reason: authPromptReason,
+                icon: authPromptIcon,
+                onAuthSuccess: {
+                    pendingAction?()
+                    pendingAction = nil
+                },
+                isPresented: $showingAuthPrompt
+            )
+            .environmentObject(authService)
+        }
     }
 
     // MARK: - Header View
@@ -145,6 +163,17 @@ struct AttendeeHomeView: View {
                     if !viewModel.isSearchExpanded {
                         // Favorites button
                         Button(action: {
+                            // Check authentication
+                            guard authService.isAuthenticated else {
+                                authPromptReason = "to view your favorites"
+                                authPromptIcon = "heart.fill"
+                                pendingAction = {
+                                    showingFavorites = true
+                                }
+                                showingAuthPrompt = true
+                                HapticFeedback.light()
+                                return
+                            }
                             showingFavorites = true
                             HapticFeedback.light()
                         }) {
