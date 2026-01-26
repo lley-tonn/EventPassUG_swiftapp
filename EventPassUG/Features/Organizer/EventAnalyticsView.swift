@@ -10,6 +10,7 @@ import SwiftUI
 struct EventAnalyticsView: View {
     @StateObject private var viewModel: EventAnalyticsViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showingManageTickets = false
 
     init(event: Event) {
         _viewModel = StateObject(wrappedValue: EventAnalyticsViewModel(event: event))
@@ -30,6 +31,30 @@ struct EventAnalyticsView: View {
         }
         .navigationTitle("Analytics")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingManageTickets = true
+                    HapticFeedback.light()
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "ticket.fill")
+                        Text("Manage")
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(RoleConfig.organizerPrimary)
+                }
+            }
+        }
+        .sheet(isPresented: $showingManageTickets) {
+            ManageEventTicketsView(event: viewModel.event)
+                .environmentObject(ServiceContainer(
+                    authService: MockAuthRepository(),
+                    eventService: MockEventRepository(),
+                    ticketService: MockTicketRepository(),
+                    paymentService: MockPaymentRepository()
+                ))
+        }
         .task {
             await viewModel.loadAnalytics()
         }

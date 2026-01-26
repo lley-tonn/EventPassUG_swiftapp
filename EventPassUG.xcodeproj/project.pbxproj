@@ -74,6 +74,7 @@
 		79FE41E3F3F7CB707E8234A9 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1202EFDDF840012429D /* UIComponents.swift */; };
 		7BDD0B72DE764B7D52F2D13A /* NotificationPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0CB2EFDDF840012429D /* NotificationPreferences.swift */; };
 		7F23060FB4C88AA887EA4731 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C09B2EFDDF840012429D /* AppStorage.swift */; };
+		8129C1F3F44FAA26F937D451 /* ManageEventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */; };
 		856720C7A75558886EB4E0CD /* UserLocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C52EFDDF840012429D /* UserLocationRepository.swift */; };
 		8A256A90C8C41431A80FC4F2 /* TestDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B72EFDDF840012429D /* TestDatabase.swift */; };
 		8B7F7065F39E84DF39DBA030 /* NationalIDVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F42EFDDF840012429D /* NationalIDVerificationView.swift */; };
@@ -136,6 +137,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageEventTicketsView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		4750C0932EFDDF840012429D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4750C0942EFDDF840012429D /* EventPassUGApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUGApp.swift; sourceTree = "<group>"; };
@@ -570,6 +572,7 @@
 				4750C10D2EFDDF840012429D /* OrganizerProfileCompletionStep.swift */,
 				4750C10E2EFDDF840012429D /* OrganizerTermsAgreementStep.swift */,
 				4750C10F2EFDDF840012429D /* QRScannerView.swift */,
+				0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */,
 			);
 			path = Organizer;
 			sourceTree = "<group>";
@@ -825,6 +828,7 @@
 				B35BA38EB6C9B40AE4CC3676 /* AuthChoiceView.swift in Sources */,
 				5C329D0C2065823E9EDBD24D /* GuestPlaceholders.swift in Sources */,
 				3FA1320C7983194C302AC45E /* AuthPromptSheet.swift in Sources */,
+				8129C1F3F44FAA26F937D451 /* ManageEventTicketsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
