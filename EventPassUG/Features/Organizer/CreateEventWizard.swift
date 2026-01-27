@@ -137,7 +137,7 @@ struct CreateEventWizard: View {
                             ProgressView()
                                 .tint(.white)
                         } else {
-                            Text(currentStep == 3 ? "Publish Event" : "Continue")
+                            Text(currentStep == 3 ? (isEditingExistingEvent ? "Save Changes" : "Publish Event") : "Continue")
                                 .font(AppTypography.headline)
                                 .foregroundColor(.white)
                         }
@@ -151,7 +151,7 @@ struct CreateEventWizard: View {
                 }
                 .padding(AppSpacing.md)
             }
-            .navigationTitle("Create Event")
+            .navigationTitle(isEditingExistingEvent ? "Edit Event" : "Create Event")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -168,12 +168,12 @@ struct CreateEventWizard: View {
                 }
             }
         }
-        .alert("Event Published!", isPresented: $showingSuccessAlert) {
+        .alert(isEditingExistingEvent ? "Event Updated!" : "Event Published!", isPresented: $showingSuccessAlert) {
             Button("Done") {
                 dismiss()
             }
         } message: {
-            Text("Your event has been published successfully!")
+            Text(isEditingExistingEvent ? "Your event has been updated successfully!" : "Your event has been published successfully!")
         }
         .sheet(isPresented: $showingVerification) {
             NationalIDVerificationView()
@@ -190,6 +190,10 @@ struct CreateEventWizard: View {
                 loadDraft(draft)
             }
         }
+    }
+
+    private var isEditingExistingEvent: Bool {
+        return existingDraft != nil && existingDraft?.status != .draft
     }
 
     private var canContinue: Bool {
@@ -325,26 +329,48 @@ struct CreateEventWizard: View {
                     return normalized
                 }
 
-                let event = Event(
-                    title: title,
-                    description: description,
-                    organizerId: organizerId,
-                    organizerName: organizerName,
-                    posterURL: posterImageName,
-                    category: selectedCategory,
-                    startDate: startDate,
-                    endDate: endDate,
-                    venue: Venue(
+                if let existingEvent = existingDraft, existingEvent.status != .draft {
+                    // Updating existing event
+                    var updatedEvent = existingEvent
+                    updatedEvent.title = title
+                    updatedEvent.description = description
+                    updatedEvent.category = selectedCategory
+                    updatedEvent.startDate = startDate
+                    updatedEvent.endDate = endDate
+                    updatedEvent.venue = Venue(
                         name: venueName,
                         address: venueAddress,
                         city: venueCity,
                         coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
-                    ),
-                    ticketTypes: normalizedTickets,
-                    status: .published
-                )
+                    )
+                    updatedEvent.ticketTypes = normalizedTickets
+                    updatedEvent.posterURL = posterImageName
+                    updatedEvent.updatedAt = Date()
 
-                _ = try await services.eventService.createEvent(event)
+                    _ = try await services.eventService.updateEvent(updatedEvent)
+                } else {
+                    // Creating new event
+                    let event = Event(
+                        title: title,
+                        description: description,
+                        organizerId: organizerId,
+                        organizerName: organizerName,
+                        posterURL: posterImageName,
+                        category: selectedCategory,
+                        startDate: startDate,
+                        endDate: endDate,
+                        venue: Venue(
+                            name: venueName,
+                            address: venueAddress,
+                            city: venueCity,
+                            coordinate: Venue.Coordinate(latitude: venueLatitude, longitude: venueLongitude)
+                        ),
+                        ticketTypes: normalizedTickets,
+                        status: .published
+                    )
+
+                    _ = try await services.eventService.createEvent(event)
+                }
 
                 await MainActor.run {
                     HapticFeedback.success()
