@@ -10,7 +10,11 @@ import SwiftUI
 struct EventAnalyticsView: View {
     @StateObject private var viewModel: EventAnalyticsViewModel
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authService: MockAuthRepository
+    @EnvironmentObject var services: ServiceContainer
     @State private var showingManageTickets = false
+    @State private var showingEditEvent = false
+    @State private var showDeleteConfirmation = false
 
     init(event: Event) {
         _viewModel = StateObject(wrappedValue: EventAnalyticsViewModel(event: event))
@@ -33,16 +37,35 @@ struct EventAnalyticsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    showingManageTickets = true
-                    HapticFeedback.light()
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "ticket.fill")
-                        Text("Manage")
+                Menu {
+                    Button(action: {
+                        showingEditEvent = true
+                        HapticFeedback.light()
+                    }) {
+                        Label("Edit Event", systemImage: "pencil")
                     }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(RoleConfig.organizerPrimary)
+
+                    Button(action: {
+                        showingManageTickets = true
+                        HapticFeedback.light()
+                    }) {
+                        Label("Manage Tickets", systemImage: "ticket")
+                    }
+
+                    if viewModel.event.status != .ongoing {
+                        Divider()
+
+                        Button(role: .destructive, action: {
+                            showDeleteConfirmation = true
+                            HapticFeedback.light()
+                        }) {
+                            Label("Delete Event", systemImage: "trash")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.system(size: 18))
+                        .foregroundColor(RoleConfig.organizerPrimary)
                 }
             }
         }
@@ -54,6 +77,24 @@ struct EventAnalyticsView: View {
                     ticketService: MockTicketRepository(),
                     paymentService: MockPaymentRepository()
                 ))
+        }
+        .sheet(isPresented: $showingEditEvent) {
+            CreateEventWizard(existingDraft: viewModel.event)
+                .environmentObject(authService)
+                .environmentObject(services)
+        }
+        .alert("Delete Event?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteEvent()
+            }
+        } message: {
+            let ticketsSold = viewModel.totalTicketsSold
+            if ticketsSold > 0 {
+                Text("This will permanently delete '\(viewModel.event.title)' and affect \(ticketsSold) attendee\(ticketsSold == 1 ? "" : "s") with active tickets.")
+            } else {
+                Text("This will permanently delete '\(viewModel.event.title)'.")
+            }
         }
         .task {
             await viewModel.loadAnalytics()
@@ -348,6 +389,26 @@ struct EventAnalyticsView: View {
             Text(value)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.primary)
+        }
+    }
+
+    // MARK: - Actions
+
+    private func deleteEvent() {
+        Task {
+            do {
+                try await services.eventService.deleteEvent(id: viewModel.event.id)
+
+                await MainActor.run {
+                    HapticFeedback.success()
+                    dismiss()
+                }
+            } catch {
+                print("Error deleting event: \(error)")
+                await MainActor.run {
+                    HapticFeedback.error()
+                }
+            }
         }
     }
 }

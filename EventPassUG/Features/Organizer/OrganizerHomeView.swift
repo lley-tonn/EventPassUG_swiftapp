@@ -23,6 +23,9 @@ struct OrganizerHomeView: View {
     @State private var searchText = ""
     @State private var cancellables = Set<AnyCancellable>()
     @State private var editingDraft: Event?
+    @State private var editingPublishedEvent: Event?
+    @State private var showDeleteConfirmation = false
+    @State private var eventToDelete: Event?
 
     var body: some View {
         NavigationView {
@@ -59,6 +62,33 @@ struct OrganizerHomeView: View {
                 CreateEventWizard(existingDraft: draft)
                     .environmentObject(authService)
                     .environmentObject(services)
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { editingPublishedEvent != nil },
+            set: { if !$0 { editingPublishedEvent = nil } }
+        )) {
+            if let event = editingPublishedEvent {
+                CreateEventWizard(existingDraft: event)
+                    .environmentObject(authService)
+                    .environmentObject(services)
+            }
+        }
+        .alert("Delete Event?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let event = eventToDelete {
+                    deleteEvent(event)
+                }
+            }
+        } message: {
+            if let event = eventToDelete {
+                let ticketsSold = event.ticketTypes.reduce(0) { $0 + $1.sold }
+                if ticketsSold > 0 {
+                    Text("This will permanently delete '\(event.title)' and affect \(ticketsSold) attendee\(ticketsSold == 1 ? "" : "s") with active tickets.")
+                } else {
+                    Text("This will permanently delete '\(event.title)'.")
+                }
             }
         }
     }
@@ -212,9 +242,43 @@ struct OrganizerHomeView: View {
                                     }) {
                                         OrganizerEventCard(event: event)
                                     }
+                                    .contextMenu {
+                                        Button(action: {
+                                            editingDraft = event
+                                            HapticFeedback.light()
+                                        }) {
+                                            Label("Edit Event", systemImage: "pencil")
+                                        }
+
+                                        Button(role: .destructive, action: {
+                                            eventToDelete = event
+                                            showDeleteConfirmation = true
+                                            HapticFeedback.light()
+                                        }) {
+                                            Label("Delete Event", systemImage: "trash")
+                                        }
+                                    }
                                 } else {
                                     NavigationLink(destination: EventAnalyticsView(event: event)) {
                                         OrganizerEventCard(event: event)
+                                    }
+                                    .contextMenu {
+                                        Button(action: {
+                                            editingPublishedEvent = event
+                                            HapticFeedback.light()
+                                        }) {
+                                            Label("Edit Event", systemImage: "pencil")
+                                        }
+
+                                        if event.status != .ongoing {
+                                            Button(role: .destructive, action: {
+                                                eventToDelete = event
+                                                showDeleteConfirmation = true
+                                                HapticFeedback.light()
+                                            }) {
+                                                Label("Delete Event", systemImage: "trash")
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -327,6 +391,26 @@ struct OrganizerHomeView: View {
             Task { @MainActor in
                 await autoUpdateEventStatuses(events)
                 loadEvents()
+            }
+        }
+    }
+
+    private func deleteEvent(_ event: Event) {
+        Task {
+            do {
+                try await services.eventService.deleteEvent(id: event.id)
+
+                await MainActor.run {
+                    // Remove from local events array
+                    events.removeAll { $0.id == event.id }
+                    eventToDelete = nil
+                    HapticFeedback.success()
+                }
+            } catch {
+                print("Error deleting event: \(error)")
+                await MainActor.run {
+                    HapticFeedback.error()
+                }
             }
         }
     }
