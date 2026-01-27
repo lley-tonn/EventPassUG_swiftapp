@@ -18,9 +18,10 @@ A complete, production-ready native iOS application for discovering and managing
 6. [Design System](#-design-system)
 7. [Authentication](#-authentication)
 8. [Backend Integration](#-backend-integration)
-9. [Testing](#-testing)
-10. [Deployment](#-deployment)
-11. [Troubleshooting](#-troubleshooting)
+9. [Push Notification Strategy](#-push-notification-strategy)
+10. [Testing](#-testing)
+11. [Deployment](#-deployment)
+12. [Troubleshooting](#-troubleshooting)
 
 ---
 
@@ -641,6 +642,368 @@ Payment methods supported:
 - **MTN Mobile Money** (Yellow branding)
 - **Airtel Money** (Red branding)
 - **Card** (Visa/Mastercard)
+
+---
+
+## 📬 Push Notification Strategy
+
+A comprehensive push notification frequency strategy designed to maximize user value and engagement while preventing notification fatigue. This strategy is optimized for the Ugandan and East African market.
+
+### Core Principles
+
+1. **Event-triggered > Scheduled**: 80% of notifications should be direct responses to user actions
+2. **Critical = Immediate, Informational = Batched**: Time-sensitive gets priority
+3. **Respect silence**: Quiet hours are sacred except for truly critical events
+4. **When in doubt, don't send**: Better to under-notify than over-notify
+5. **Measure opt-out rates**: If >5% opt out of a category, reduce frequency
+6. **Context is king**: Same notification at wrong time is spam, at right time is valuable
+7. **User control > Algorithmic decisions**: Let users customize, provide smart defaults
+
+---
+
+### 1. Notification Category Framework
+
+#### A. CRITICAL NOTIFICATIONS ⚡
+
+**Priority**: Immediate delivery, no frequency caps
+**User Control**: Cannot be disabled (only channel selection)
+
+**Examples**:
+- Ticket purchase confirmation
+- Payment success/failure
+- Event cancellation
+- Ticket scanned/entry confirmation
+- Refund processed
+
+**Frequency Guideline**: **Event-triggered only**
+- Send immediately upon transaction
+- Maximum: Unlimited (each is a unique transaction)
+- No batching or delays
+
+---
+
+#### B. TRANSACTIONAL NOTIFICATIONS 📋
+
+**Priority**: High, time-sensitive
+**User Control**: Limited (can choose channels: push/email/SMS)
+
+**Examples**:
+- Event venue change
+- Event time change
+- Ticket expiring soon (48 hours before)
+- Payment pending reminder
+- Event approval status (organizers)
+
+**Frequency Guideline**: **Event-triggered + time-based**
+- Send immediately when event detail changes
+- Ticket expiry: 1 reminder at 48 hours before expiration
+- Payment pending: 1 reminder after 1 hour, 1 final at 23 hours
+- Maximum per event: 3 updates per 24 hours (prevents spam if organizer keeps changing details)
+
+---
+
+#### C. ENGAGEMENT NOTIFICATIONS 🔔
+
+**Priority**: Medium, value-driven
+**User Control**: Full opt-in/opt-out control
+
+**Examples**:
+- Event reminder (24 hours before)
+- Event reminder (2 hours before)
+- Tickets running low for favorited event
+- New event from followed organizer
+- Friend attending same event
+
+**Frequency Guideline**: **Event-triggered + scheduled**
+- Event reminders: Maximum 2 per event (24h + 2h before)
+- New events from followed organizers: Maximum 1 per day (batched digest at 10:00 AM EAT)
+- Tickets running low: 1 alert per event only
+- **Daily cap**: Maximum 3 engagement notifications per user per day
+- **Weekly cap**: Maximum 12 engagement notifications per user per week
+
+---
+
+#### D. ORGANIZER BUSINESS NOTIFICATIONS 💼
+
+**Priority**: High for organizers
+**User Control**: Can adjust frequency and channels
+
+**Examples**:
+- New ticket sale
+- Low ticket inventory (10 tickets remaining)
+- Milestone reached (50 tickets sold, 100 tickets sold)
+- Daily sales summary
+
+**Frequency Guideline**: **Event-triggered + digest options**
+- Ticket sales: Choose between "Real-time", "Hourly digest", or "Daily digest"
+  - Real-time: Every sale (max 1 per minute to prevent spam)
+  - Hourly digest: Summary every hour if sales occurred
+  - Daily digest: Summary at 8:00 AM EAT
+- Low inventory: 1 alert per event when threshold reached
+- Milestones: 1 notification per milestone
+- **Daily cap for real-time**: Maximum 20 sales notifications per day (then auto-switch to digest)
+
+---
+
+#### E. INFORMATIONAL NOTIFICATIONS ℹ️
+
+**Priority**: Low
+**User Control**: Full opt-in/opt-out
+
+**Examples**:
+- New features announcement
+- Event recommendations
+- Popular events in your area
+- Tickets going on sale tomorrow
+
+**Frequency Guideline**: **Scheduled only**
+- New features: Maximum 1 per month
+- Recommendations: Maximum 2 per week (Sunday 6:00 PM, Wednesday 6:00 PM EAT)
+- Popular events: Maximum 1 per week (Friday 5:00 PM EAT - weekend planning)
+- **Weekly cap**: Maximum 3 informational notifications per user per week
+
+---
+
+#### F. MARKETING NOTIFICATIONS 🎯
+
+**Priority**: Lowest
+**User Control**: **Opt-in only** (disabled by default)
+
+**Examples**:
+- Promotional events
+- Discount codes
+- Special offers
+- Partner promotions
+
+**Frequency Guideline**: **Highly restricted**
+- Default: **OFF** (user must explicitly enable)
+- Maximum: **1 per week** when enabled
+- Timing: Thursday 6:00 PM EAT (payday context - many Ugandans get paid end of month)
+- Blackout: No marketing notifications within 12 hours of critical/transactional notifications
+
+---
+
+### 2. Global Frequency Limits
+
+#### Safe Default Caps
+
+```
+Per User Per Day:
+├─ Critical: Unlimited
+├─ Transactional: Unlimited (but naturally limited by events)
+├─ Engagement: 3 maximum
+├─ Organizer (if applicable): 20 maximum
+├─ Informational: 1 maximum
+├─ Marketing: 1 maximum
+└─ TOTAL DAILY CAP: 8 notifications (excluding critical/transactional)
+
+Per User Per Week:
+├─ Engagement: 12 maximum
+├─ Informational: 3 maximum
+├─ Marketing: 1 maximum
+└─ TOTAL WEEKLY CAP: 20 notifications (excluding critical/transactional)
+```
+
+#### Quiet Hours - East African Context
+
+**Default Quiet Hours**: 10:00 PM - 7:00 AM EAT (UTC+3)
+
+**Exceptions to Quiet Hours**:
+- ✅ Critical notifications (purchase confirmations, cancellations)
+- ✅ Event reminders within 2 hours of event start
+- ✅ Payment failures requiring action
+- ❌ Marketing notifications
+- ❌ Informational notifications
+- ❌ Recommendations
+
+**Cultural Considerations**:
+- Respect Sunday mornings (many attend church): Delay non-critical notifications until after 1:00 PM on Sundays
+- Ramadan awareness: Reduce marketing notifications, avoid meal times during fasting
+
+---
+
+### 3. Notification Decision Framework
+
+Before sending ANY notification, evaluate using this checklist:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  NOTIFICATION EVALUATION CHECKLIST                  │
+└─────────────────────────────────────────────────────┘
+
+1. VALUE TEST
+   ☐ Does this require user action OR provide time-sensitive value?
+   ☐ Would the user feel they MISSED OUT if they didn't receive this?
+
+2. RELEVANCE TEST
+   ☐ Is this directly related to the user's activity or explicit preferences?
+   ☐ Is this something the user asked for (bought ticket, favorited event, followed organizer)?
+
+3. TIMING TEST
+   ☐ Is this the optimal time to send? (not in quiet hours, not too early/late)
+   ☐ Is this still relevant? (event not passed, offer not expired)
+
+4. FREQUENCY TEST
+   ☐ Have we already sent similar notifications today?
+   ☐ Are we within daily/weekly caps for this category?
+   ☐ Have we sent ANY notification in the last 30 minutes? (minimum spacing)
+
+5. CHANNEL TEST
+   ☐ Is push the right channel or would email/SMS be better?
+   ☐ Has the user opted in for this notification type?
+
+6. ALTERNATIVE TEST
+   ☐ Could this wait for an in-app badge/feed instead?
+   ☐ Could this be batched with other notifications?
+```
+
+**Decision Matrix**:
+- ✅ **SEND** if ALL tests pass
+- ⏸️ **DELAY** if timing test fails but others pass → queue for appropriate time
+- 📧 **EMAIL INSTEAD** if value is high but not urgent
+- 🚫 **DON'T SEND** if value or relevance test fails
+
+---
+
+### 4. Examples: When to Send & When NOT to Send
+
+#### ✅ GOOD: Send These Notifications
+
+| Scenario | Category | Why Send | Timing |
+|----------|----------|----------|--------|
+| User buys ticket | Critical | User expects confirmation | Immediate |
+| Event in 24 hours | Engagement | Helps user prepare | 24h before, 10:00 AM |
+| Event venue changed | Transactional | Critical info change | Immediate |
+| Payment failed | Critical | Requires action | Immediate |
+| Organizer sells 100th ticket | Organizer | Business milestone | Immediate or digest |
+| Followed organizer creates event | Engagement | User expressed interest | Batched daily, 10:00 AM |
+| Ticket expiring in 48h | Transactional | Prevents loss | 48h before, 9:00 AM |
+
+#### ❌ BAD: Don't Send These Notifications
+
+| Scenario | Category | Why NOT Send | Better Alternative |
+|----------|----------|--------------|-------------------|
+| Event happened 3 months ago | Engagement | Not relevant anymore | Don't send |
+| "Check out events!" (no context) | Marketing | No value, spammy | In-app banner |
+| Event reminder for event user didn't favorite/buy | Engagement | Not opted-in | Don't send |
+| "Rate our app" | Marketing | Interrupts user flow | In-app after positive action |
+| New event 500km away (user never travels) | Informational | Not relevant to behavior | Don't send |
+| Third venue change today | Transactional | Exceeds daily cap | Batch into single update |
+| Marketing at 11:00 PM | Marketing | Quiet hours violation | Delay to 9:00 AM |
+
+---
+
+### 5. User Control Requirements
+
+#### Minimum User Controls ✅ (Already Implemented)
+- ✅ Per-category on/off toggles
+- ✅ Per-channel selection (Push/Email/SMS)
+- ✅ Reset to defaults
+
+#### Recommended Additions
+- **Quiet hours customization**: Let users set their own quiet hours
+- **Digest preferences for organizers**: Real-time vs hourly vs daily for sales
+- **Event reminder timing**: Choose 24h + 2h, or 1 week + 24h + 2h
+- **Snooze option**: In-app ability to snooze notification type for 1 week
+- **Notification preview**: Show example notifications before enabling
+
+#### Transparency
+- Show notification count by category in settings (e.g., "You received 12 notifications this week")
+- Explain WHY each notification was sent (in-app notification feed)
+- Easy unsubscribe from notification itself
+
+---
+
+### 6. Segment-Specific Strategies
+
+#### Attendees (General Public)
+
+**Default Notification Profile**:
+- Event reminders: **ON**
+- Purchase confirmations: **ON**
+- Event updates: **ON**
+- Recommendations: **ON** (2/week max)
+- Marketing: **OFF**
+
+**Behavioral Adjustments**:
+- Frequent buyers (5+ tickets/month): Reduce recommendations, they're already engaged
+- Inactive users (no activity 30 days): Send 1 re-engagement notification, then silence unless they return
+- New users (first 7 days): Maximum 1 informational notification about app features
+
+#### Organizers
+
+**Default Notification Profile**:
+- Ticket sales: **Real-time** (with auto-digest after 20/day)
+- Event status: **ON**
+- Low inventory: **ON**
+- Payment received: **ON**
+- Recommendations/Marketing: **OFF**
+
+**Business Context**:
+- Sales notifications during event hours should be real-time (organizers actively monitoring)
+- Off-hours sales can be digested
+- Priority: Business-critical > Engagement > Marketing
+
+---
+
+### 7. East African Market Considerations
+
+#### Mobile Money Integration
+- Payment pending notifications are CRITICAL (MTN MoMo, Airtel Money require user approval)
+- Send reminder if payment pending >15 minutes (mobile money sessions timeout)
+- Include clear instructions in notification text
+
+#### Data Costs
+- Rich notifications (images) should be opt-in
+- Keep notification payload small
+- Provide "lite mode" option that disables images
+
+#### Language & Tone
+- Use clear, simple English
+- Avoid slang or idioms that don't translate
+- Time references: Use "today at 6:00 PM" not relative times
+
+#### Connectivity
+- Assume intermittent connectivity
+- Don't send time-sensitive notifications if event is <30 minutes away (may arrive late)
+- Always include critical info in notification body, not "Tap to see more"
+
+---
+
+### 8. Implementation Checklist
+
+Before launching push notifications:
+
+- [ ] Implement frequency caps per category
+- [ ] Build quiet hours logic (10 PM - 7 AM EAT default)
+- [ ] Add minimum 30-minute spacing between notifications
+- [ ] Create user preference management (already done ✅)
+- [ ] Set up notification analytics dashboard
+- [ ] Implement delivery timing optimization per category
+- [ ] Add cultural calendar awareness (Ramadan, major holidays)
+- [ ] Build digest batching for organizer sales
+- [ ] Create notification testing framework
+- [ ] Set up A/B testing for timing and content
+- [ ] Monitor opt-out rates per category
+- [ ] Implement progressive permission requests (don't ask for all at once)
+
+---
+
+### 9. Success Metrics
+
+**Target Metrics**:
+- Notification opt-out rate: <5% per category
+- Critical notification open rate: >80%
+- Engagement notification open rate: >40%
+- Marketing notification open rate: >15% (if enabled)
+- User complaints about "too many notifications": <1% of active users
+
+**Monitor Weekly**:
+- Total notifications sent per user (average)
+- Opt-out rates by category
+- Open rates by category and time of day
+- Conversion rates (notification → app open → action completed)
+- User feedback and support tickets related to notifications
 
 ---
 
@@ -3608,7 +3971,7 @@ The comprehensive personalization, notifications, and permission system has been
 - [x] **NOTIFICATION_PREFERENCES_GUIDE.md** - Explains two notification systems
 - [x] **IMPLEMENTATION_COMPLETE.md** - This file
 
-## <� Key Features Implemented
+## <� Key Features Implemented
 
 ### User Personalization
  Date of birth capture (computes age dynamically, privacy-safe)
@@ -3670,7 +4033,7 @@ The comprehensive personalization, notifications, and permission system has been
  Settings deep links
  Privacy-first messaging
 
-## =� Required Setup
+## =� Required Setup
 
 ### 1. Add Info.plist Keys
 All required permission keys are documented in `PERMISSIONS_INFO_PLIST.md`. You must add these to your Info.plist:
@@ -3761,11 +4124,11 @@ Use `NotificationSettingsViewModel` in settings:
 )
 ```
 
-## >� Testing Checklist
+## >� Testing Checklist
 
 ### Location Services
 - [ ] Test location permission request flow
-- [ ] Test permission denial � Settings link
+- [ ] Test permission denial � Settings link
 - [ ] Test manual location override
 - [ ] Verify approximate location (not precise)
 - [ ] Test nearby events filtering
@@ -3773,7 +4136,7 @@ Use `NotificationSettingsViewModel` in settings:
 ### Notifications
 - [ ] Test all notification types (24h, 2h, 15min reminders)
 - [ ] Test quiet hours (no notifications during set hours)
-- [ ] Test notification tap � deep link to event
+- [ ] Test notification tap � deep link to event
 - [ ] Test notification preferences (enable/disable each type)
 - [ ] Test notification actions (View Event, Get Directions, etc.)
 
@@ -3803,7 +4166,7 @@ Use `NotificationSettingsViewModel` in settings:
 - [ ] Test access denial messages are clear
 - [ ] Test age computation from DOB
 
-## <� UI Integration Examples
+## <� UI Integration Examples
 
 ### Discovery Feed
 ```swift
@@ -3869,7 +4232,7 @@ Button("Purchase Tickets") {
 }
 ```
 
-## =� Architecture Decisions
+## =� Architecture Decisions
 
 ### 1. Privacy-First Approach
 - Store date of birth (not age) - age is computed dynamically
@@ -3900,7 +4263,7 @@ Button("Purchase Tickets") {
 - Services for data/API layer
 - Combine for reactive updates
 
-## =� Next Steps
+## =� Next Steps
 
 ### Immediate (Required for App Store)
 1. Add all Info.plist keys from `PERMISSIONS_INFO_PLIST.md`
@@ -3923,7 +4286,7 @@ Button("Purchase Tickets") {
 4. Personalized event creation suggestions
 5. Smart scheduling (avoid user's busy times)
 
-## =� Support & Documentation
+## =� Support & Documentation
 
 ### Key Documentation Files
 - `PERSONALIZATION_SYSTEM.md` - Full system architecture and implementation details
