@@ -184,45 +184,76 @@ struct OrganizerDashboardView: View {
 
     @ViewBuilder
     private func quickStatsGrid(isLandscape: Bool) -> some View {
-        let columns = isLandscape ? 4 : layoutConfig.metricsPerRow
+        // Always show 2 columns on portrait, 4 on landscape/iPad
+        let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
         let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
 
         LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-            MetricCard(
-                title: "Revenue",
-                value: formatCurrency(totalRevenue),
-                icon: "banknote",
-                trend: TrendData(value: 0.12, isPositive: true),
-                color: .green,
-                size: layoutConfig.metricCardSize
-            )
-
-            MetricCard(
-                title: "Tickets Sold",
-                value: "\(totalTicketsSold)",
-                icon: "ticket",
-                subtitle: capacityText,
-                color: RoleConfig.organizerPrimary,
-                size: layoutConfig.metricCardSize
-            )
-
-            MetricCard(
-                title: "Active Events",
-                value: "\(activeEvents)",
-                icon: "calendar",
-                color: .blue,
-                size: layoutConfig.metricCardSize
-            )
-
-            if columns >= 4 {
+            // 1. Revenue Card - Tappable
+            NavigationLink(destination: RevenueAnalyticsDetailView(
+                totalRevenue: totalRevenue,
+                events: events,
+                dailyData: generateSalesDataPoints()
+            )) {
                 MetricCard(
-                    title: "Followers",
-                    value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
-                    icon: "person.2",
+                    title: "Revenue",
+                    value: formatCurrency(totalRevenue),
+                    icon: "banknote",
+                    trend: TrendData(value: 0.12, isPositive: true),
+                    color: .green,
+                    size: layoutConfig.metricCardSize
+                )
+            }
+            .buttonStyle(.plain)
+
+            // 2. Tickets Sold Card - Tappable
+            NavigationLink(destination: TicketAnalyticsDetailView(
+                totalSold: totalTicketsSold,
+                totalCapacity: totalCapacity,
+                events: events,
+                salesData: generateSalesDataPoints()
+            )) {
+                MetricCard(
+                    title: "Tickets Sold",
+                    value: "\(totalTicketsSold)",
+                    icon: "ticket",
+                    subtitle: capacityText,
+                    color: RoleConfig.organizerPrimary,
+                    size: layoutConfig.metricCardSize
+                )
+            }
+            .buttonStyle(.plain)
+
+            // 3. Active Events Card - Tappable
+            NavigationLink(destination: OrganizerHomeView()) {
+                MetricCard(
+                    title: "Active Events",
+                    value: "\(activeEvents)",
+                    icon: "calendar",
+                    subtitle: events.count > activeEvents ? "\(events.count) total" : nil,
+                    color: .blue,
+                    size: layoutConfig.metricCardSize
+                )
+            }
+            .buttonStyle(.plain)
+
+            // 4. Attendee Insights Card - Tappable
+            NavigationLink(destination: AudienceAnalyticsDetailView(
+                totalAttendees: totalTicketsSold,
+                repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
+                followers: 0, // Followers shown in profile only
+                events: events
+            )) {
+                MetricCard(
+                    title: "Attendees",
+                    value: "\(totalTicketsSold)",
+                    icon: "person.2.fill",
+                    subtitle: "View insights",
                     color: .purple,
                     size: layoutConfig.metricCardSize
                 )
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -466,37 +497,53 @@ struct OrganizerDashboardView: View {
     @ViewBuilder
     private func salesPerformanceContent(isLandscape: Bool) -> some View {
         VStack(spacing: layoutConfig.itemSpacing) {
-            // Sales by tier chart
+            // Sales by tier chart - Tappable to see ticket analytics
             if !events.isEmpty {
-                ChartCard(title: "Sales by Ticket Type") {
-                    let tierData = aggregateTierSales()
+                NavigationLink(destination: TicketAnalyticsDetailView(
+                    totalSold: totalTicketsSold,
+                    totalCapacity: totalCapacity,
+                    events: events,
+                    salesData: generateSalesDataPoints()
+                )) {
+                    ChartCard(title: "Sales by Ticket Type", showChevron: true) {
+                        let tierData = aggregateTierSales()
 
-                    if tierData.isEmpty {
-                        Text("No sales data yet")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, minHeight: 100)
-                    } else {
-                        BarChartView(
-                            bars: tierData.map { tier in
-                                BarChartData(
-                                    label: tier.name,
-                                    value: Double(tier.sold),
-                                    color: Color(hex: tier.color)
-                                )
-                            },
-                            height: layoutConfig.chartHeight
-                        )
+                        if tierData.isEmpty {
+                            Text("No sales data yet")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, minHeight: 100)
+                        } else {
+                            BarChartView(
+                                bars: tierData.map { tier in
+                                    BarChartData(
+                                        label: tier.name,
+                                        value: Double(tier.sold),
+                                        color: Color(hex: tier.color)
+                                    )
+                                },
+                                height: layoutConfig.chartHeight
+                            )
+                        }
                     }
                 }
+                .buttonStyle(.plain)
             }
 
-            // Stats row
-            StatsRow(stats: [
-                StatItem(label: "Total Sold", value: "\(totalTicketsSold)"),
-                StatItem(label: "Avg Price", value: formatCurrency(averageTicketPrice)),
-                StatItem(label: "Capacity", value: "\(capacityPercentage)%")
-            ])
+            // Stats row - Tappable
+            NavigationLink(destination: TicketAnalyticsDetailView(
+                totalSold: totalTicketsSold,
+                totalCapacity: totalCapacity,
+                events: events,
+                salesData: generateSalesDataPoints()
+            )) {
+                StatsRow(stats: [
+                    StatItem(label: "Total Sold", value: "\(totalTicketsSold)"),
+                    StatItem(label: "Avg Price", value: formatCurrency(averageTicketPrice)),
+                    StatItem(label: "Capacity", value: "\(capacityPercentage)%")
+                ])
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -506,37 +553,66 @@ struct OrganizerDashboardView: View {
     private var audienceContent: some View {
         VStack(spacing: layoutConfig.itemSpacing) {
             let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: 2)
+            let repeatAttendees = Int(Double(totalTicketsSold) * 0.26)
 
             LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-                MetricCard(
-                    title: "Attendees",
-                    value: "\(totalTicketsSold)",
-                    icon: "person.fill",
-                    color: .blue,
-                    size: .compact
-                )
+                NavigationLink(destination: AudienceAnalyticsDetailView(
+                    totalAttendees: totalTicketsSold,
+                    repeatAttendees: repeatAttendees,
+                    followers: 0,
+                    events: events
+                )) {
+                    MetricCard(
+                        title: "Total Attendees",
+                        value: "\(totalTicketsSold)",
+                        icon: "person.fill",
+                        color: .blue,
+                        size: .compact
+                    )
+                }
+                .buttonStyle(.plain)
 
-                MetricCard(
-                    title: "Followers",
-                    value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
-                    icon: "heart.fill",
-                    color: .pink,
-                    size: .compact
-                )
+                NavigationLink(destination: AudienceAnalyticsDetailView(
+                    totalAttendees: totalTicketsSold,
+                    repeatAttendees: repeatAttendees,
+                    followers: 0,
+                    events: events
+                )) {
+                    MetricCard(
+                        title: "Returning",
+                        value: "\(repeatAttendees)",
+                        icon: "arrow.counterclockwise",
+                        subtitle: totalTicketsSold > 0 ? "\(Int(Double(repeatAttendees) / Double(totalTicketsSold) * 100))%" : "0%",
+                        color: .purple,
+                        size: .compact
+                    )
+                }
+                .buttonStyle(.plain)
             }
 
-            // Placeholder for more audience insights
-            HStack {
-                Image(systemName: "chart.pie")
-                    .foregroundColor(.secondary)
-                Text("Detailed audience insights coming soon")
-                    .font(AppTypography.caption)
-                    .foregroundColor(.secondary)
+            // Tap to see more audience insights
+            NavigationLink(destination: AudienceAnalyticsDetailView(
+                totalAttendees: totalTicketsSold,
+                repeatAttendees: repeatAttendees,
+                followers: 0,
+                events: events
+            )) {
+                HStack {
+                    Image(systemName: "chart.pie")
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                    Text("View detailed audience analytics")
+                        .font(AppTypography.caption)
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(AppSpacing.lg)
+                .background(Color(UIColor.tertiarySystemBackground))
+                .cornerRadius(AppCornerRadius.md)
             }
-            .frame(maxWidth: .infinity)
-            .padding(AppSpacing.lg)
-            .background(Color(UIColor.tertiarySystemBackground))
-            .cornerRadius(AppCornerRadius.md)
         }
     }
 
@@ -551,21 +627,37 @@ struct OrganizerDashboardView: View {
             let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: 2)
 
             LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-                MetricCard(
-                    title: "Est. Views",
-                    value: formatNumber(totalViews),
-                    icon: "eye",
-                    color: .blue,
-                    size: .compact
-                )
+                NavigationLink(destination: AudienceAnalyticsDetailView(
+                    totalAttendees: totalTicketsSold,
+                    repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
+                    followers: 0,
+                    events: events
+                )) {
+                    MetricCard(
+                        title: "Est. Views",
+                        value: formatNumber(totalViews),
+                        icon: "eye",
+                        color: .blue,
+                        size: .compact
+                    )
+                }
+                .buttonStyle(.plain)
 
-                MetricCard(
-                    title: "Likes",
-                    value: "\(totalLikes)",
-                    icon: "heart",
-                    color: .pink,
-                    size: .compact
-                )
+                NavigationLink(destination: AudienceAnalyticsDetailView(
+                    totalAttendees: totalTicketsSold,
+                    repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
+                    followers: 0,
+                    events: events
+                )) {
+                    MetricCard(
+                        title: "Likes",
+                        value: "\(totalLikes)",
+                        icon: "heart",
+                        color: .pink,
+                        size: .compact
+                    )
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -575,42 +667,54 @@ struct OrganizerDashboardView: View {
     @ViewBuilder
     private var earningsContent: some View {
         VStack(spacing: AppSpacing.md) {
-            // Balance display
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Available Balance")
-                        .font(AppTypography.caption)
+            // Balance display - Tappable to see revenue details
+            NavigationLink(destination: RevenueAnalyticsDetailView(
+                totalRevenue: totalRevenue,
+                events: events,
+                dailyData: generateSalesDataPoints()
+            )) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Available Balance")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+
+                        Text(formatCurrency(totalRevenue))
+                            .font(AppTypography.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(RoleConfig.organizerPrimary)
+                    }
+
+                    Spacer()
+
+                    // Earnings breakdown
+                    VStack(alignment: .trailing, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Text("Net:")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                            Text(formatCurrency(totalRevenue * 0.95))
+                                .font(AppTypography.captionEmphasized)
+                                .foregroundColor(.green)
+                        }
+
+                        HStack(spacing: 4) {
+                            Text("Fees:")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                            Text(formatCurrency(totalRevenue * 0.05))
+                                .font(AppTypography.captionEmphasized)
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
                         .foregroundColor(.secondary)
-
-                    Text(formatCurrency(totalRevenue))
-                        .font(AppTypography.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(RoleConfig.organizerPrimary)
-                }
-
-                Spacer()
-
-                // Earnings breakdown
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("Net:")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
-                        Text(formatCurrency(totalRevenue * 0.95))
-                            .font(AppTypography.captionEmphasized)
-                            .foregroundColor(.green)
-                    }
-
-                    HStack(spacing: 4) {
-                        Text("Fees:")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
-                        Text(formatCurrency(totalRevenue * 0.05))
-                            .font(AppTypography.captionEmphasized)
-                            .foregroundColor(.orange)
-                    }
+                        .padding(.leading, AppSpacing.sm)
                 }
             }
+            .buttonStyle(.plain)
 
             // Withdraw button
             Button(action: {}) {
@@ -904,6 +1008,29 @@ struct OrganizerDashboardView: View {
     private var averageTicketPrice: Double {
         guard totalTicketsSold > 0 else { return 0 }
         return totalRevenue / Double(totalTicketsSold)
+    }
+
+    private func generateSalesDataPoints() -> [SalesDataPoint] {
+        // Generate mock sales data for the last 30 days
+        let calendar = Calendar.current
+        var dataPoints: [SalesDataPoint] = []
+
+        for dayOffset in (0..<30).reversed() {
+            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) {
+                let baseSales = totalTicketsSold > 0 ? max(1, totalTicketsSold / 30) : 0
+                let variance = Int.random(in: -2...5)
+                let sales = max(0, baseSales + variance)
+                let revenue = Double(sales) * averageTicketPrice
+
+                dataPoints.append(SalesDataPoint(
+                    date: date,
+                    sales: sales,
+                    revenue: revenue
+                ))
+            }
+        }
+
+        return dataPoints
     }
 }
 
