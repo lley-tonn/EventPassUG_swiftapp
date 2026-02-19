@@ -184,11 +184,12 @@ struct OrganizerDashboardView: View {
 
     @ViewBuilder
     private func quickStatsGrid(isLandscape: Bool) -> some View {
-        let columns = isLandscape ? 4 : layoutConfig.metricsPerRow
+        // Always show 2 columns on portrait, 4 on landscape/iPad
+        let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
         let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
 
         LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-            // Revenue Card - Tappable
+            // 1. Revenue Card - Tappable
             NavigationLink(destination: RevenueAnalyticsDetailView(
                 totalRevenue: totalRevenue,
                 events: events,
@@ -205,7 +206,7 @@ struct OrganizerDashboardView: View {
             }
             .buttonStyle(.plain)
 
-            // Tickets Card - Tappable
+            // 2. Tickets Sold Card - Tappable
             NavigationLink(destination: TicketAnalyticsDetailView(
                 totalSold: totalTicketsSold,
                 totalCapacity: totalCapacity,
@@ -223,32 +224,36 @@ struct OrganizerDashboardView: View {
             }
             .buttonStyle(.plain)
 
-            MetricCard(
-                title: "Active Events",
-                value: "\(activeEvents)",
-                icon: "calendar",
-                color: .blue,
-                size: layoutConfig.metricCardSize
-            )
-
-            if columns >= 4 {
-                // Followers Card - Tappable
-                NavigationLink(destination: AudienceAnalyticsDetailView(
-                    totalAttendees: totalTicketsSold,
-                    repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                    followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
-                    events: events
-                )) {
-                    MetricCard(
-                        title: "Followers",
-                        value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
-                        icon: "person.2",
-                        color: .purple,
-                        size: layoutConfig.metricCardSize
-                    )
-                }
-                .buttonStyle(.plain)
+            // 3. Active Events Card - Tappable
+            NavigationLink(destination: OrganizerHomeView()) {
+                MetricCard(
+                    title: "Active Events",
+                    value: "\(activeEvents)",
+                    icon: "calendar",
+                    subtitle: events.count > activeEvents ? "\(events.count) total" : nil,
+                    color: .blue,
+                    size: layoutConfig.metricCardSize
+                )
             }
+            .buttonStyle(.plain)
+
+            // 4. Attendee Insights Card - Tappable
+            NavigationLink(destination: AudienceAnalyticsDetailView(
+                totalAttendees: totalTicketsSold,
+                repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
+                followers: 0, // Followers shown in profile only
+                events: events
+            )) {
+                MetricCard(
+                    title: "Attendees",
+                    value: "\(totalTicketsSold)",
+                    icon: "person.2.fill",
+                    subtitle: "View insights",
+                    color: .purple,
+                    size: layoutConfig.metricCardSize
+                )
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -548,16 +553,17 @@ struct OrganizerDashboardView: View {
     private var audienceContent: some View {
         VStack(spacing: layoutConfig.itemSpacing) {
             let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: 2)
+            let repeatAttendees = Int(Double(totalTicketsSold) * 0.26)
 
             LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
                 NavigationLink(destination: AudienceAnalyticsDetailView(
                     totalAttendees: totalTicketsSold,
-                    repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                    followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
+                    repeatAttendees: repeatAttendees,
+                    followers: 0,
                     events: events
                 )) {
                     MetricCard(
-                        title: "Attendees",
+                        title: "Total Attendees",
                         value: "\(totalTicketsSold)",
                         icon: "person.fill",
                         color: .blue,
@@ -568,15 +574,16 @@ struct OrganizerDashboardView: View {
 
                 NavigationLink(destination: AudienceAnalyticsDetailView(
                     totalAttendees: totalTicketsSold,
-                    repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                    followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
+                    repeatAttendees: repeatAttendees,
+                    followers: 0,
                     events: events
                 )) {
                     MetricCard(
-                        title: "Followers",
-                        value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
-                        icon: "heart.fill",
-                        color: .pink,
+                        title: "Returning",
+                        value: "\(repeatAttendees)",
+                        icon: "arrow.counterclockwise",
+                        subtitle: totalTicketsSold > 0 ? "\(Int(Double(repeatAttendees) / Double(totalTicketsSold) * 100))%" : "0%",
+                        color: .purple,
                         size: .compact
                     )
                 }
@@ -586,8 +593,8 @@ struct OrganizerDashboardView: View {
             // Tap to see more audience insights
             NavigationLink(destination: AudienceAnalyticsDetailView(
                 totalAttendees: totalTicketsSold,
-                repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
+                repeatAttendees: repeatAttendees,
+                followers: 0,
                 events: events
             )) {
                 HStack {
@@ -623,7 +630,7 @@ struct OrganizerDashboardView: View {
                 NavigationLink(destination: AudienceAnalyticsDetailView(
                     totalAttendees: totalTicketsSold,
                     repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                    followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
+                    followers: 0,
                     events: events
                 )) {
                     MetricCard(
@@ -639,7 +646,7 @@ struct OrganizerDashboardView: View {
                 NavigationLink(destination: AudienceAnalyticsDetailView(
                     totalAttendees: totalTicketsSold,
                     repeatAttendees: Int(Double(totalTicketsSold) * 0.26),
-                    followers: followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()),
+                    followers: 0,
                     events: events
                 )) {
                     MetricCard(

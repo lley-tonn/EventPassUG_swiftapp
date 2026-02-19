@@ -379,7 +379,7 @@ struct RevenueAnalyticsDetailView: View {
                         DonutSegment(
                             label: tier.name,
                             value: tier.revenue,
-                            percentage: tier.revenue / totalRevenue,
+                            percentage: totalRevenue > 0 ? tier.revenue / totalRevenue : 0,
                             color: tier.color
                         )
                     },

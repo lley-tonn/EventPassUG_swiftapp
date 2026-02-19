@@ -565,6 +565,12 @@ struct ProgressRingView: View {
 
     @State private var animatedProgress: Double = 0
 
+    // Safe progress value that handles NaN and infinity
+    private var safeProgress: Double {
+        guard progress.isFinite else { return 0 }
+        return min(1.0, max(0.0, progress))
+    }
+
     var body: some View {
         ZStack {
             // Background ring
@@ -587,7 +593,7 @@ struct ProgressRingView: View {
         .frame(width: size, height: size)
         .onAppear {
             withAnimation(.easeOut(duration: 1.0)) {
-                animatedProgress = min(1.0, max(0.0, progress))
+                animatedProgress = safeProgress
             }
         }
     }
