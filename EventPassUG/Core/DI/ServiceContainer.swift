@@ -14,6 +14,7 @@ class ServiceContainer: ObservableObject {
     let paymentService: PaymentRepositoryProtocol
     let notificationService: NotificationRepositoryProtocol
     let userPreferencesService: UserPreferencesRepositoryProtocol
+    let refundService: RefundRepositoryProtocol
 
     init(
         authService: AuthRepositoryProtocol,
@@ -21,7 +22,8 @@ class ServiceContainer: ObservableObject {
         ticketService: TicketRepositoryProtocol,
         paymentService: PaymentRepositoryProtocol,
         notificationService: NotificationRepositoryProtocol = MockNotificationRepository(),
-        userPreferencesService: UserPreferencesRepositoryProtocol = MockUserPreferencesRepository()
+        userPreferencesService: UserPreferencesRepositoryProtocol = MockUserPreferencesRepository(),
+        refundService: RefundRepositoryProtocol = MockRefundRepository()
     ) {
         self.authService = authService
         self.eventService = eventService
@@ -29,5 +31,6 @@ class ServiceContainer: ObservableObject {
         self.paymentService = paymentService
         self.notificationService = notificationService
         self.userPreferencesService = userPreferencesService
+        self.refundService = refundService
     }
 }
