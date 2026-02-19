@@ -73,6 +73,7 @@
 		744C4A813BE69DE4A3A25D95 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C92EFDDF840012429D /* Event.swift */; };
 		74DB7466515D00F7F030C16A /* OrganizerProfileCompletionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10D2EFDDF840012429D /* OrganizerProfileCompletionStep.swift */; };
 		78413EF98A5A5BFB8CF60665 /* NotificationSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F62EFDDF840012429D /* NotificationSettingsViewModel.swift */; };
+		785D8B551C662EE51C9C32B0 /* TicketAnalyticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56CA5B3454663E5A74C85D9 /* TicketAnalyticsDetailView.swift */; };
 		797AAF314F2A359C952A779A /* OrganizerDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1082EFDDF840012429D /* OrganizerDashboardView.swift */; };
 		79F382B860DD3A0459E572E2 /* TicketRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C42EFDDF840012429D /* TicketRepository.swift */; };
 		79FE41E3F3F7CB707E8234A9 /* UIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1202EFDDF840012429D /* UIComponents.swift */; };
@@ -80,6 +81,7 @@
 		7F23060FB4C88AA887EA4731 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C09B2EFDDF840012429D /* AppStorage.swift */; };
 		8129C1F3F44FAA26F937D451 /* ManageEventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */; };
 		856720C7A75558886EB4E0CD /* UserLocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C52EFDDF840012429D /* UserLocationRepository.swift */; };
+		88E731798E2C887F89B499D8 /* RevenueAnalyticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */; };
 		8A256A90C8C41431A80FC4F2 /* TestDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B72EFDDF840012429D /* TestDatabase.swift */; };
 		8B7F7065F39E84DF39DBA030 /* NationalIDVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F42EFDDF840012429D /* NationalIDVerificationView.swift */; };
 		8CD394B7E1F94C7799E64398 /* NotificationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11A2EFDDF840012429D /* NotificationBadge.swift */; };
@@ -134,6 +136,7 @@
 		EE2A65475F40124033F9C55D /* AttendeeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0D62EFDDF840012429D /* AttendeeHomeView.swift */; };
 		EE9D7C7E358862F2CEFB1396 /* ScrollHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B22EFDDF840012429D /* ScrollHelpers.swift */; };
 		F19CD61A242EFEA4BDF8945B /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E92EFDDF840012429D /* PermissionsView.swift */; };
+		F26DB6AEC1F28EA1BB40F95D /* AudienceAnalyticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */; };
 		F4061B83B1E78348696121B4 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E82EFDDF840012429D /* OnboardingFlowView.swift */; };
 		F6B58CF3F5A3D7CC2E6A0B89 /* RoleConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0962EFDDF840012429D /* RoleConfig.swift */; };
 		F8C5EC2A331F6C80753027D2 /* AppStorageKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C09C2EFDDF840012429D /* AppStorageKeys.swift */; };
@@ -271,12 +274,15 @@
 		6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuestPlaceholders.swift; sourceTree = "<group>"; };
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudienceAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalytics.swift; sourceTree = "<group>"; };
 		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
 		DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalyticsDashboardViewModel.swift; sourceTree = "<group>"; };
+		E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RevenueAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthPromptSheet.swift; sourceTree = "<group>"; };
 		EBA1D9804E77FAE965F5F032 /* AnalyticsDashboardComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardComponents.swift; sourceTree = "<group>"; };
 		ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F56CA5B3454663E5A74C85D9 /* TicketAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TicketAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		F619E77C7370842FDB348532 /* AnalyticsCharts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsCharts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -297,6 +303,17 @@
 				83D32D584282FCF601A3ADB6 /* EventPassUG.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		058D15D85F386BB9FA88F669 /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */,
+				F56CA5B3454663E5A74C85D9 /* TicketAnalyticsDetailView.swift */,
+				920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */,
+			);
+			name = Analytics;
+			path = Analytics;
 			sourceTree = "<group>";
 		};
 		185E7F565787E6447E2D00F2 /* EventPassUG */ = {
@@ -586,6 +603,7 @@
 				4750C10F2EFDDF840012429D /* QRScannerView.swift */,
 				0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */,
 				DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */,
+				058D15D85F386BB9FA88F669 /* Analytics */,
 			);
 			path = Organizer;
 			sourceTree = "<group>";
@@ -849,6 +867,9 @@
 				0D8954403AB3374B4DBCE35A /* AnalyticsCharts.swift in Sources */,
 				0516D43D9E2D6B7B4DB835A3 /* AnalyticsDashboardComponents.swift in Sources */,
 				59BC49C2F042A4ED7D06C813 /* OrganizerAnalyticsDashboardViewModel.swift in Sources */,
+				88E731798E2C887F89B499D8 /* RevenueAnalyticsDetailView.swift in Sources */,
+				785D8B551C662EE51C9C32B0 /* TicketAnalyticsDetailView.swift in Sources */,
+				F26DB6AEC1F28EA1BB40F95D /* AudienceAnalyticsDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

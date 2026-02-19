@@ -139,6 +139,7 @@ struct ChartCard<Content: View>: View {
     var subtitle: String?
     var actionTitle: String?
     var action: (() -> Void)?
+    var showChevron: Bool = false
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -165,6 +166,12 @@ struct ChartCard<Content: View>: View {
                             .font(AppTypography.captionEmphasized)
                             .foregroundColor(AppColors.primary)
                     }
+                }
+
+                if showChevron {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
 
