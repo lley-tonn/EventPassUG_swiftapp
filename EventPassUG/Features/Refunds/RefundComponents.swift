@@ -490,7 +490,7 @@ struct RefundRequestCard: View {
                             .font(AppTypography.caption)
                             .foregroundColor(.secondary)
 
-                        if let onTap = onTap {
+                        if onTap != nil {
                             Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .foregroundColor(.secondary)

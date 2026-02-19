@@ -254,7 +254,7 @@ struct OrganizerRefundRequestCard: View {
                         .foregroundColor(.secondary)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(request.userName ?? "Unknown User")
+                        Text(request.userName)
                             .font(AppTypography.captionEmphasized)
                             .foregroundColor(.primary)
 
@@ -454,7 +454,7 @@ struct RefundDecisionSheet: View {
                     .foregroundColor(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(request.userName ?? "Unknown User")
+                    Text(request.userName)
                         .font(AppTypography.calloutEmphasized)
 
                     Text(request.userEmail ?? "No email")
