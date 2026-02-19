@@ -47,39 +47,63 @@ struct OrganizerDashboardView: View {
 
     var body: some View {
         NavigationStack {
-            mainContent
-                .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
-                .overlay {
-                    // Verification overlay
-                    if authService.currentUser?.needsVerificationForOrganizerActions == true {
-                        VerificationRequiredOverlay(showingVerificationSheet: $showingVerificationSheet)
+            ScrollView {
+                LazyVStack(spacing: layoutConfig.sectionSpacing) {
+                    // Health Score & Quick Stats
+                    headerSection(isLandscape: isLandscape)
+
+                    // Section picker for small screens
+                    if layoutConfig.isSmallDevice {
+                        sectionPicker
+                            .padding(.horizontal, layoutConfig.horizontalPadding)
+                    }
+
+                    // Alerts
+                    alertsSection
+                        .padding(.horizontal, layoutConfig.horizontalPadding)
+
+                    // Content based on device size
+                    if layoutConfig.isSmallDevice {
+                        sectionContent(for: selectedSection, isLandscape: isLandscape)
+                            .padding(.horizontal, layoutConfig.horizontalPadding)
+                    } else {
+                        allSectionsContent(isLandscape: isLandscape)
                     }
                 }
-                .overlay {
-                    // Loading overlay
-                    if isLoading {
-                        loadingOverlay
-                    }
+                .padding(.vertical, AppSpacing.md)
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+            .refreshable {
+                await refreshData()
+            }
+            .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
+            .overlay {
+                if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                    VerificationRequiredOverlay(showingVerificationSheet: $showingVerificationSheet)
                 }
-                .navigationTitle("Dashboard")
-                .navigationBarTitleDisplayMode(.large)
-                .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
-                .toolbarBackground(.visible, for: .navigationBar)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button(action: { Task { await refreshData() } }) {
-                                Label("Refresh", systemImage: "arrow.clockwise")
-                            }
-                            Button(action: {}) {
-                                Label("Export Report", systemImage: "square.and.arrow.up")
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .foregroundColor(RoleConfig.organizerPrimary)
+            }
+            .overlay {
+                if isLoading {
+                    loadingOverlay
+                }
+            }
+            .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button(action: { Task { await refreshData() } }) {
+                            Label("Refresh", systemImage: "arrow.clockwise")
                         }
+                        Button(action: {}) {
+                            Label("Export Report", systemImage: "square.and.arrow.up")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundColor(RoleConfig.organizerPrimary)
                     }
                 }
+            }
         }
         .onAppear {
             loadAnalytics()
@@ -88,44 +112,6 @@ struct OrganizerDashboardView: View {
         .sheet(isPresented: $showingVerificationSheet) {
             NationalIDVerificationView()
                 .environmentObject(authService)
-        }
-    }
-
-    // MARK: - Main Content
-
-    @ViewBuilder
-    private var mainContent: some View {
-        ScrollView {
-            LazyVStack(spacing: layoutConfig.sectionSpacing) {
-                // Health Score & Quick Stats
-                headerSection(isLandscape: isLandscape)
-
-                // Section picker for small screens
-                if layoutConfig.isSmallDevice {
-                    sectionPicker
-                        .padding(.horizontal, layoutConfig.horizontalPadding)
-                }
-
-                // Alerts
-                alertsSection
-                    .padding(.horizontal, layoutConfig.horizontalPadding)
-
-                // Content based on device size
-                if layoutConfig.isSmallDevice {
-                    // Show selected section only on small devices
-                    sectionContent(for: selectedSection, isLandscape: isLandscape)
-                        .padding(.horizontal, layoutConfig.horizontalPadding)
-                } else {
-                    // Show all sections on larger devices
-                    allSectionsContent(isLandscape: isLandscape)
-                }
-            }
-            .padding(.vertical, AppSpacing.md)
-        }
-        .scrollContentBackground(.hidden)
-        .background(Color(UIColor.systemGroupedBackground))
-        .refreshable {
-            await refreshData()
         }
     }
 
