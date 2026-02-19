@@ -143,8 +143,17 @@ struct OrganizerDashboardView: View {
             .cornerRadius(AppCornerRadius.md)
             .cardShadow()
 
-            // Overview Stats Grid (4 cards)
-            quickStatsGrid(isLandscape: isLandscape)
+            // Overview Section with header
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                Text("Overview")
+                    .font(AppTypography.cardTitle)
+                    .foregroundColor(.primary)
+
+                quickStatsGrid(isLandscape: isLandscape)
+            }
+            .padding(AppSpacing.md)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(AppCornerRadius.md)
 
             // Marketing & Engagement Insights
             marketingEngagementSection(isLandscape: isLandscape)
