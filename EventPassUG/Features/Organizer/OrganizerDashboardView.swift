@@ -275,73 +275,85 @@ struct OrganizerDashboardView: View {
         let shareCount = Int(Double(totalTicketsSold) * 0.15)
         let conversionRate = totalViews > 0 ? Double(totalTicketsSold) / Double(totalViews) * 100 : 0
 
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            // Section Header
-            HStack {
-                Image(systemName: "megaphone.fill")
-                    .foregroundColor(.orange)
-                Text("Marketing & Engagement")
-                    .font(AppTypography.cardTitle)
-                Spacer()
+        NavigationLink(destination: MarketingInsightsDetailView(
+            totalViews: totalViews,
+            totalLikes: totalLikes,
+            totalShares: shareCount,
+            totalTicketsSold: totalTicketsSold,
+            events: events
+        )) {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                // Section Header
+                HStack {
+                    Image(systemName: "megaphone.fill")
+                        .foregroundColor(.orange)
+                    Text("Marketing & Engagement")
+                        .font(AppTypography.cardTitle)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
+                let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
+
+                LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
+                    MetricCard(
+                        title: "Impressions",
+                        value: formatNumber(totalViews),
+                        icon: "eye.fill",
+                        color: .blue,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Likes",
+                        value: "\(totalLikes)",
+                        icon: "heart.fill",
+                        color: .pink,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Shares",
+                        value: "\(shareCount)",
+                        icon: "square.and.arrow.up.fill",
+                        color: .green,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Conversion",
+                        value: String(format: "%.1f%%", conversionRate),
+                        icon: "arrow.right.circle.fill",
+                        color: .purple,
+                        size: .compact
+                    )
+                }
+
+                // Engagement insights row
+                HStack(spacing: AppSpacing.md) {
+                    engagementInsightPill(
+                        icon: "chart.line.uptrend.xyaxis",
+                        label: "Engagement Rate",
+                        value: String(format: "%.1f%%", Double(totalLikes + shareCount) / max(1, Double(totalViews)) * 100),
+                        color: .blue
+                    )
+
+                    engagementInsightPill(
+                        icon: "person.badge.plus",
+                        label: "Avg. per Event",
+                        value: events.count > 0 ? "\(totalTicketsSold / max(1, events.count))" : "0",
+                        color: .green
+                    )
+                }
             }
-
-            let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
-            let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
-
-            LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-                MetricCard(
-                    title: "Impressions",
-                    value: formatNumber(totalViews),
-                    icon: "eye.fill",
-                    color: .blue,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Likes",
-                    value: "\(totalLikes)",
-                    icon: "heart.fill",
-                    color: .pink,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Shares",
-                    value: "\(shareCount)",
-                    icon: "square.and.arrow.up.fill",
-                    color: .green,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Conversion",
-                    value: String(format: "%.1f%%", conversionRate),
-                    icon: "arrow.right.circle.fill",
-                    color: .purple,
-                    size: .compact
-                )
-            }
-
-            // Engagement insights row
-            HStack(spacing: AppSpacing.md) {
-                engagementInsightPill(
-                    icon: "chart.line.uptrend.xyaxis",
-                    label: "Engagement Rate",
-                    value: String(format: "%.1f%%", Double(totalLikes + shareCount) / max(1, Double(totalViews)) * 100),
-                    color: .blue
-                )
-
-                engagementInsightPill(
-                    icon: "person.badge.plus",
-                    label: "Avg. per Event",
-                    value: events.count > 0 ? "\(totalTicketsSold / max(1, events.count))" : "0",
-                    color: .green
-                )
-            }
+            .padding(AppSpacing.md)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(AppCornerRadius.md)
         }
-        .padding(AppSpacing.md)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(AppCornerRadius.md)
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -375,66 +387,76 @@ struct OrganizerDashboardView: View {
         let avgResponseTime = 2.4 // hours
         let satisfactionScore = 4.2
 
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            // Section Header
-            HStack {
-                Image(systemName: "gearshape.fill")
-                    .foregroundColor(.gray)
-                Text("Event Operations")
-                    .font(AppTypography.cardTitle)
-                Spacer()
+        NavigationLink(destination: OperationsDetailView(
+            totalTicketsSold: totalTicketsSold,
+            totalCapacity: totalCapacity,
+            events: events
+        )) {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                // Section Header
+                HStack {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundColor(.gray)
+                    Text("Event Operations")
+                        .font(AppTypography.cardTitle)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
+                let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
+
+                LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
+                    MetricCard(
+                        title: "Check-ins",
+                        value: "\(checkedInCount)",
+                        icon: "checkmark.circle.fill",
+                        subtitle: String(format: "%.0f%% rate", checkinRate),
+                        color: .green,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Pending",
+                        value: "\(totalTicketsSold - checkedInCount)",
+                        icon: "clock.fill",
+                        color: .orange,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Response Time",
+                        value: String(format: "%.1fh", avgResponseTime),
+                        icon: "bubble.left.fill",
+                        subtitle: "avg",
+                        color: .blue,
+                        size: .compact
+                    )
+
+                    MetricCard(
+                        title: "Satisfaction",
+                        value: String(format: "%.1f", satisfactionScore),
+                        icon: "star.fill",
+                        subtitle: "out of 5",
+                        color: .yellow,
+                        size: .compact
+                    )
+                }
+
+                // Operations status bar
+                HStack(spacing: AppSpacing.sm) {
+                    operationStatusBadge(label: "Scanner", status: .active)
+                    operationStatusBadge(label: "Support", status: .active)
+                    operationStatusBadge(label: "Payments", status: .active)
+                }
             }
-
-            let columns = isLandscape || horizontalSizeClass == .regular ? 4 : 2
-            let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
-
-            LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
-                MetricCard(
-                    title: "Check-ins",
-                    value: "\(checkedInCount)",
-                    icon: "checkmark.circle.fill",
-                    subtitle: String(format: "%.0f%% rate", checkinRate),
-                    color: .green,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Pending",
-                    value: "\(totalTicketsSold - checkedInCount)",
-                    icon: "clock.fill",
-                    color: .orange,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Response Time",
-                    value: String(format: "%.1fh", avgResponseTime),
-                    icon: "bubble.left.fill",
-                    subtitle: "avg",
-                    color: .blue,
-                    size: .compact
-                )
-
-                MetricCard(
-                    title: "Satisfaction",
-                    value: String(format: "%.1f", satisfactionScore),
-                    icon: "star.fill",
-                    subtitle: "out of 5",
-                    color: .yellow,
-                    size: .compact
-                )
-            }
-
-            // Operations status bar
-            HStack(spacing: AppSpacing.sm) {
-                operationStatusBadge(label: "Scanner", status: .active)
-                operationStatusBadge(label: "Support", status: .active)
-                operationStatusBadge(label: "Payments", status: .active)
-            }
+            .padding(AppSpacing.md)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(AppCornerRadius.md)
         }
-        .padding(AppSpacing.md)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(AppCornerRadius.md)
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -464,102 +486,114 @@ struct OrganizerDashboardView: View {
             : nil
         let growthRate = 12.5
 
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            // Section Header
-            HStack {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .foregroundColor(.purple)
-                Text("Insights & Predictions")
-                    .font(AppTypography.cardTitle)
-                Spacer()
+        NavigationLink(destination: PredictiveAnalysisDetailView(
+            totalRevenue: totalRevenue,
+            totalTicketsSold: totalTicketsSold,
+            totalCapacity: totalCapacity,
+            events: events
+        )) {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                // Section Header
+                HStack {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .foregroundColor(.purple)
+                    Text("Insights & Predictions")
+                        .font(AppTypography.cardTitle)
+                    Spacer()
 
-                Text("Next 30 days")
-                    .font(AppTypography.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, AppSpacing.sm)
-                    .padding(.vertical, AppSpacing.xs)
-                    .background(Color.purple.opacity(0.1))
-                    .cornerRadius(AppCornerRadius.pill)
-            }
+                    Text("Next 30 days")
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, AppSpacing.sm)
+                        .padding(.vertical, AppSpacing.xs)
+                        .background(Color.purple.opacity(0.1))
+                        .cornerRadius(AppCornerRadius.pill)
 
-            // Projections
-            HStack(spacing: AppSpacing.md) {
-                // Projected Revenue
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 12))
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                // Projections
+                HStack(spacing: AppSpacing.md) {
+                    // Projected Revenue
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 12))
+                                .foregroundColor(.green)
+                            Text("Projected Revenue")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text(formatCurrency(projectedRevenue))
+                            .font(AppTypography.title3)
+                            .fontWeight(.bold)
                             .foregroundColor(.green)
-                        Text("Projected Revenue")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
                     }
-                    Text(formatCurrency(projectedRevenue))
-                        .font(AppTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.green)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(AppSpacing.md)
-                .background(Color.green.opacity(0.1))
-                .cornerRadius(AppCornerRadius.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(AppSpacing.md)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(AppCornerRadius.md)
 
-                // Projected Sales
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "ticket.fill")
-                            .font(.system(size: 12))
+                    // Projected Sales
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "ticket.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.blue)
+                            Text("Projected Sales")
+                                .font(AppTypography.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Text("\(projectedTickets)")
+                            .font(AppTypography.title3)
+                            .fontWeight(.bold)
                             .foregroundColor(.blue)
-                        Text("Projected Sales")
-                            .font(AppTypography.caption)
-                            .foregroundColor(.secondary)
                     }
-                    Text("\(projectedTickets)")
-                        .font(AppTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(AppSpacing.md)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(AppCornerRadius.md)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(AppSpacing.md)
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(AppCornerRadius.md)
-            }
 
-            // Comparative insights
-            VStack(spacing: AppSpacing.sm) {
-                comparativeInsightRow(
-                    icon: "chart.bar.fill",
-                    title: "Growth Rate",
-                    value: String(format: "+%.1f%%", growthRate),
-                    comparison: "vs last month",
-                    isPositive: true
-                )
-
-                if let days = daysToSellOut {
+                // Comparative insights
+                VStack(spacing: AppSpacing.sm) {
                     comparativeInsightRow(
-                        icon: "calendar.badge.clock",
-                        title: "Est. Sell-out",
-                        value: "\(days) days",
-                        comparison: "at current pace",
+                        icon: "chart.bar.fill",
+                        title: "Growth Rate",
+                        value: String(format: "+%.1f%%", growthRate),
+                        comparison: "vs last month",
+                        isPositive: true
+                    )
+
+                    if let days = daysToSellOut {
+                        comparativeInsightRow(
+                            icon: "calendar.badge.clock",
+                            title: "Est. Sell-out",
+                            value: "\(days) days",
+                            comparison: "at current pace",
+                            isPositive: true
+                        )
+                    }
+
+                    comparativeInsightRow(
+                        icon: "person.2.fill",
+                        title: "Audience Growth",
+                        value: "+\(Int(Double(totalTicketsSold) * 0.08))",
+                        comparison: "new attendees this month",
                         isPositive: true
                     )
                 }
-
-                comparativeInsightRow(
-                    icon: "person.2.fill",
-                    title: "Audience Growth",
-                    value: "+\(Int(Double(totalTicketsSold) * 0.08))",
-                    comparison: "new attendees this month",
-                    isPositive: true
-                )
+                .padding(AppSpacing.sm)
+                .background(Color(UIColor.tertiarySystemBackground))
+                .cornerRadius(AppCornerRadius.md)
             }
-            .padding(AppSpacing.sm)
-            .background(Color(UIColor.tertiarySystemBackground))
+            .padding(AppSpacing.md)
+            .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(AppCornerRadius.md)
         }
-        .padding(AppSpacing.md)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(AppCornerRadius.md)
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder

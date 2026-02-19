@@ -84,12 +84,14 @@
 		88E731798E2C887F89B499D8 /* RevenueAnalyticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */; };
 		8A256A90C8C41431A80FC4F2 /* TestDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B72EFDDF840012429D /* TestDatabase.swift */; };
 		8B7F7065F39E84DF39DBA030 /* NationalIDVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F42EFDDF840012429D /* NationalIDVerificationView.swift */; };
+		8BBB2C9F8D1E92B46E8E3976 /* PredictiveAnalysisDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */; };
 		8CD394B7E1F94C7799E64398 /* NotificationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11A2EFDDF840012429D /* NotificationBadge.swift */; };
 		8D02175022A850BD57FDDA67 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0D12EFDDF840012429D /* User.swift */; };
 		8D07FB9029E260DBE131CBFC /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B02EFDDF840012429D /* QRCodeGenerator.swift */; };
 		8D4B98819A819AB889E30C68 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11C2EFDDF840012429D /* ProfileHeaderView.swift */; };
 		8F7058AB434DDE7732A4F6EB /* DashboardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1162EFDDF840012429D /* DashboardComponents.swift */; };
 		90F6BF82F9624B507D844932 /* OnboardingDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AD2EFDDF840012429D /* OnboardingDebugView.swift */; };
+		967816A4A8C0750666616F42 /* OperationsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */; };
 		9C993DAF154D5915A7784BDF /* EnhancedAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BC2EFDDF840012429D /* EnhancedAuthRepository.swift */; };
 		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
@@ -130,6 +132,7 @@
 		E7BCF7703F7DD57595B0E253 /* NotificationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0CA2EFDDF840012429D /* NotificationModel.swift */; };
 		E7E05A43CC5CBF0F68476433 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11E2EFDDF840012429D /* QRCodeView.swift */; };
 		E92D6CB5BCF960DC3039EA01 /* TicketType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0D02EFDDF840012429D /* TicketType.swift */; };
+		E97AAC10705EE4AE05885BCE /* MarketingInsightsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */; };
 		EA58C3B1A25E8ADDF055DE62 /* FavoriteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A52EFDDF840012429D /* FavoriteManager.swift */; };
 		EAF8156B2C1EC1D060346364 /* UserPreferencesRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C62EFDDF840012429D /* UserPreferencesRepository.swift */; };
 		EDF0E4B8D1B66AE2BD0714D6 /* TicketDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0DE2EFDDF840012429D /* TicketDetailView.swift */; };
@@ -146,6 +149,8 @@
 
 /* Begin PBXFileReference section */
 		0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageEventTicketsView.swift; sourceTree = "<group>"; };
+		30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictiveAnalysisDetailView.swift; sourceTree = "<group>"; };
+		461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarketingInsightsDetailView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		4750C0932EFDDF840012429D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4750C0942EFDDF840012429D /* EventPassUGApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPassUGApp.swift; sourceTree = "<group>"; };
@@ -277,6 +282,7 @@
 		920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudienceAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalytics.swift; sourceTree = "<group>"; };
 		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
+		C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OperationsDetailView.swift; sourceTree = "<group>"; };
 		DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalyticsDashboardViewModel.swift; sourceTree = "<group>"; };
 		E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RevenueAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthPromptSheet.swift; sourceTree = "<group>"; };
@@ -311,6 +317,9 @@
 				E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */,
 				F56CA5B3454663E5A74C85D9 /* TicketAnalyticsDetailView.swift */,
 				920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */,
+				461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */,
+				C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */,
+				30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */,
 			);
 			name = Analytics;
 			path = Analytics;
@@ -870,6 +879,9 @@
 				88E731798E2C887F89B499D8 /* RevenueAnalyticsDetailView.swift in Sources */,
 				785D8B551C662EE51C9C32B0 /* TicketAnalyticsDetailView.swift in Sources */,
 				F26DB6AEC1F28EA1BB40F95D /* AudienceAnalyticsDetailView.swift in Sources */,
+				E97AAC10705EE4AE05885BCE /* MarketingInsightsDetailView.swift in Sources */,
+				967816A4A8C0750666616F42 /* OperationsDetailView.swift in Sources */,
+				8BBB2C9F8D1E92B46E8E3976 /* PredictiveAnalysisDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
