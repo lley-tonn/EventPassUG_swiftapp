@@ -28,6 +28,7 @@ struct OrganizerDashboardView: View {
     @State private var dismissedAlerts: Set<UUID> = []
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     // MARK: - Layout Configuration
 
@@ -35,44 +36,51 @@ struct OrganizerDashboardView: View {
         DashboardLayoutConfig(horizontalSizeClass: horizontalSizeClass)
     }
 
+    /// Detect landscape orientation using size classes
+    /// On iPhone: landscape = compact vertical size class
+    /// On iPad: always consider as "landscape-capable" due to larger screen
+    private var isLandscape: Bool {
+        verticalSizeClass == .compact || horizontalSizeClass == .regular
+    }
+
     // MARK: - Body
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Main content
-                mainContent
-                    .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
-
-                // Verification overlay
-                if authService.currentUser?.needsVerificationForOrganizerActions == true {
-                    VerificationRequiredOverlay(showingVerificationSheet: $showingVerificationSheet)
-                }
-
-                // Loading overlay
-                if isLoading {
-                    loadingOverlay
-                }
-            }
-            .navigationTitle("Dashboard")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button(action: { Task { await refreshData() } }) {
-                            Label("Refresh", systemImage: "arrow.clockwise")
-                        }
-                        Button(action: {}) {
-                            Label("Export Report", systemImage: "square.and.arrow.up")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundColor(RoleConfig.organizerPrimary)
+        NavigationStack {
+            mainContent
+                .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
+                .overlay {
+                    // Verification overlay
+                    if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                        VerificationRequiredOverlay(showingVerificationSheet: $showingVerificationSheet)
                     }
                 }
-            }
+                .overlay {
+                    // Loading overlay
+                    if isLoading {
+                        loadingOverlay
+                    }
+                }
+                .navigationTitle("Dashboard")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbarBackground(Color(UIColor.systemBackground), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button(action: { Task { await refreshData() } }) {
+                                Label("Refresh", systemImage: "arrow.clockwise")
+                            }
+                            Button(action: {}) {
+                                Label("Export Report", systemImage: "square.and.arrow.up")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .foregroundColor(RoleConfig.organizerPrimary)
+                        }
+                    }
+                }
         }
-        .navigationViewStyle(.stack)
         .onAppear {
             loadAnalytics()
             subscribeToTicketSales()
@@ -87,40 +95,37 @@ struct OrganizerDashboardView: View {
 
     @ViewBuilder
     private var mainContent: some View {
-        GeometryReader { geometry in
-            let isLandscape = geometry.size.width > geometry.size.height
+        ScrollView {
+            LazyVStack(spacing: layoutConfig.sectionSpacing) {
+                // Health Score & Quick Stats
+                headerSection(isLandscape: isLandscape)
 
-            ScrollView {
-                LazyVStack(spacing: layoutConfig.sectionSpacing) {
-                    // Health Score & Quick Stats
-                    headerSection(isLandscape: isLandscape)
-
-                    // Section picker for small screens
-                    if layoutConfig.isSmallDevice {
-                        sectionPicker
-                            .padding(.horizontal, layoutConfig.horizontalPadding)
-                    }
-
-                    // Alerts
-                    alertsSection
+                // Section picker for small screens
+                if layoutConfig.isSmallDevice {
+                    sectionPicker
                         .padding(.horizontal, layoutConfig.horizontalPadding)
-
-                    // Content based on device size
-                    if layoutConfig.isSmallDevice {
-                        // Show selected section only on small devices
-                        sectionContent(for: selectedSection, isLandscape: isLandscape)
-                            .padding(.horizontal, layoutConfig.horizontalPadding)
-                    } else {
-                        // Show all sections on larger devices
-                        allSectionsContent(isLandscape: isLandscape)
-                    }
                 }
-                .padding(.vertical, AppSpacing.md)
+
+                // Alerts
+                alertsSection
+                    .padding(.horizontal, layoutConfig.horizontalPadding)
+
+                // Content based on device size
+                if layoutConfig.isSmallDevice {
+                    // Show selected section only on small devices
+                    sectionContent(for: selectedSection, isLandscape: isLandscape)
+                        .padding(.horizontal, layoutConfig.horizontalPadding)
+                } else {
+                    // Show all sections on larger devices
+                    allSectionsContent(isLandscape: isLandscape)
+                }
             }
-            .background(Color(UIColor.systemGroupedBackground))
-            .refreshable {
-                await refreshData()
-            }
+            .padding(.vertical, AppSpacing.md)
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color(UIColor.systemGroupedBackground))
+        .refreshable {
+            await refreshData()
         }
     }
 
