@@ -36,7 +36,7 @@ struct ContentView: View {
 
             if !hasSeenOnboarding && !isOnboardingComplete {
                 // FIRST TIME USER: Show onboarding slides
-                AppIntroSlidesView(isComplete: $isOnboardingComplete)
+                OnboardingView(isComplete: $isOnboardingComplete)
                     .onChange(of: isOnboardingComplete) { completed in
                         if completed {
                             // CRITICAL: Save to persistent storage

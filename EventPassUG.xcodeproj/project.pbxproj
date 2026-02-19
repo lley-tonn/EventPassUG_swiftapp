@@ -18,7 +18,6 @@
 		0D8954403AB3374B4DBCE35A /* AnalyticsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619E77C7370842FDB348532 /* AnalyticsCharts.swift */; };
 		0DFC45AEC8724C292CE36C22 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1192EFDDF840012429D /* LoadingView.swift */; };
 		0EF927718025CAEEA9E85289 /* FAQSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F02EFDDF840012429D /* FAQSectionView.swift */; };
-		14576D1F6EBD1042DB88496B /* AppIntroSlidesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E42EFDDF840012429D /* AppIntroSlidesView.swift */; };
 		15FEC2AAA48ACB2A17964C2F /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B42EFDDF840012429D /* Validation.swift */; };
 		172C482B577713073B0D5D5B /* NotificationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C12EFDDF840012429D /* NotificationRepository.swift */; };
 		178254A3948EF204FAA0F340 /* AppGuidesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0EC2EFDDF840012429D /* AppGuidesView.swift */; };
@@ -67,7 +66,9 @@
 		618F7B62A6967C772A079077 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0EF2EFDDF840012429D /* EditProfileView.swift */; };
 		63592336CFD5712B53617075 /* PosterUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AF2EFDDF840012429D /* PosterUploadManager.swift */; };
 		6441503AA41A1A47F9CD1B4B /* HeaderBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1182EFDDF840012429D /* HeaderBar.swift */; };
+		64EBEFACB448460749113B98 /* OnboardingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE9C0F021924E77DEA5A04EB /* OnboardingComponents.swift */; };
 		65BE5AD38195323EAF1FC135 /* LocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BF2EFDDF840012429D /* LocationRepository.swift */; };
+		6B6F38859FBD3C8302E3E9F1 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3030E765F3FF80B86A376D48 /* OnboardingModels.swift */; };
 		6F41EAE0E9CCA7B729D7C768 /* OrganizerNotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10B2EFDDF840012429D /* OrganizerNotificationCenterView.swift */; };
 		6F46273018D40915E7AD2799 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0992EFDDF840012429D /* PersistenceController.swift */; };
 		7093EB065629CB7D266EFC9C /* ImageCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A92EFDDF840012429D /* ImageCompressor.swift */; };
@@ -92,12 +93,14 @@
 		8D02175022A850BD57FDDA67 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0D12EFDDF840012429D /* User.swift */; };
 		8D07FB9029E260DBE131CBFC /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B02EFDDF840012429D /* QRCodeGenerator.swift */; };
 		8D4B98819A819AB889E30C68 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11C2EFDDF840012429D /* ProfileHeaderView.swift */; };
+		8D67F8062A599BE459B0D17D /* OnboardingSlides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDF3632CD5B334F8AED8A0E /* OnboardingSlides.swift */; };
 		8F7058AB434DDE7732A4F6EB /* DashboardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1162EFDDF840012429D /* DashboardComponents.swift */; };
 		90F6BF82F9624B507D844932 /* OnboardingDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AD2EFDDF840012429D /* OnboardingDebugView.swift */; };
 		9221C614E86F5F12500A0B33 /* CancellationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3CE0414AC75CAE92131920 /* CancellationModels.swift */; };
 		967816A4A8C0750666616F42 /* OperationsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */; };
 		9C993DAF154D5915A7784BDF /* EnhancedAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BC2EFDDF840012429D /* EnhancedAuthRepository.swift */; };
 		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
+		9EEF1AC77ADF3902B63E7E0C /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0250375032A5E3E46BD061 /* OnboardingViewModel.swift */; };
 		A369BFC0658958DE09DC6308 /* CancellationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A05FCEFCCE228812A41176 /* CancellationComponents.swift */; };
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
 		A9DDEDFD95C15D39462967E2 /* PDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AE2EFDDF840012429D /* PDFGenerator.swift */; };
@@ -147,6 +150,7 @@
 		EDF0E4B8D1B66AE2BD0714D6 /* TicketDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0DE2EFDDF840012429D /* TicketDetailView.swift */; };
 		EE2A65475F40124033F9C55D /* AttendeeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0D62EFDDF840012429D /* AttendeeHomeView.swift */; };
 		EE9D7C7E358862F2CEFB1396 /* ScrollHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B22EFDDF840012429D /* ScrollHelpers.swift */; };
+		EF5D3EBF7AA18996D7D11FDE /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56FA2EE77A530E1B46E3BF4 /* OnboardingView.swift */; };
 		F19CD61A242EFEA4BDF8945B /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E92EFDDF840012429D /* PermissionsView.swift */; };
 		F26DB6AEC1F28EA1BB40F95D /* AudienceAnalyticsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */; };
 		F4061B83B1E78348696121B4 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E82EFDDF840012429D /* OnboardingFlowView.swift */; };
@@ -160,6 +164,8 @@
 		0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageEventTicketsView.swift; sourceTree = "<group>"; };
 		1278B3A2D1FE7991C1E87570 /* RefundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundRepository.swift; path = EventPassUG/Data/Repositories/RefundRepository.swift; sourceTree = "<group>"; };
 		2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventCancellationFlowView.swift; path = EventPassUG/Features/Cancellation/EventCancellationFlowView.swift; sourceTree = "<group>"; };
+		2EDF3632CD5B334F8AED8A0E /* OnboardingSlides.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingSlides.swift; path = Onboarding/OnboardingSlides.swift; sourceTree = "<group>"; };
+		3030E765F3FF80B86A376D48 /* OnboardingModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingModels.swift; path = Onboarding/OnboardingModels.swift; sourceTree = "<group>"; };
 		30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictiveAnalysisDetailView.swift; sourceTree = "<group>"; };
 		461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarketingInsightsDetailView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -228,7 +234,6 @@
 		4750C0E02EFDDF840012429D /* TicketSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketSuccessView.swift; sourceTree = "<group>"; };
 		4750C0E12EFDDF840012429D /* TicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketsView.swift; sourceTree = "<group>"; };
 		4750C0E32EFDDF840012429D /* AddContactMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMethodView.swift; sourceTree = "<group>"; };
-		4750C0E42EFDDF840012429D /* AppIntroSlidesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntroSlidesView.swift; sourceTree = "<group>"; };
 		4750C0E52EFDDF840012429D /* AuthComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthComponents.swift; sourceTree = "<group>"; };
 		4750C0E62EFDDF840012429D /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		4750C0E72EFDDF840012429D /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
@@ -297,9 +302,12 @@
 		A14BF7498113ECDED046873A /* RefundModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundModels.swift; path = EventPassUG/Domain/Models/RefundModels.swift; sourceTree = "<group>"; };
 		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
 		C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OperationsDetailView.swift; sourceTree = "<group>"; };
+		C56FA2EE77A530E1B46E3BF4 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingView.swift; path = Onboarding/OnboardingView.swift; sourceTree = "<group>"; };
 		D90757CED431937D49D2E720 /* RefundRequestView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundRequestView.swift; path = EventPassUG/Features/Refunds/RefundRequestView.swift; sourceTree = "<group>"; };
+		DD0250375032A5E3E46BD061 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingViewModel.swift; path = Onboarding/OnboardingViewModel.swift; sourceTree = "<group>"; };
 		DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalyticsDashboardViewModel.swift; sourceTree = "<group>"; };
 		DE1E5AB988366AF5C7CE1870 /* RefundComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundComponents.swift; path = EventPassUG/Features/Refunds/RefundComponents.swift; sourceTree = "<group>"; };
+		DE9C0F021924E77DEA5A04EB /* OnboardingComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingComponents.swift; path = Onboarding/OnboardingComponents.swift; sourceTree = "<group>"; };
 		E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RevenueAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthPromptSheet.swift; sourceTree = "<group>"; };
 		E7BC7F4592DEBC7221594F64 /* CancellationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationRepository.swift; path = EventPassUG/Data/Repositories/CancellationRepository.swift; sourceTree = "<group>"; };
@@ -579,7 +587,6 @@
 			isa = PBXGroup;
 			children = (
 				4750C0E32EFDDF840012429D /* AddContactMethodView.swift */,
-				4750C0E42EFDDF840012429D /* AppIntroSlidesView.swift */,
 				4750C0E52EFDDF840012429D /* AuthComponents.swift */,
 				4750C0E62EFDDF840012429D /* AuthView.swift */,
 				4750C0E72EFDDF840012429D /* AuthViewModel.swift */,
@@ -652,6 +659,7 @@
 				4750C0EB2EFDDF840012429D /* Auth */,
 				4750C1022EFDDF840012429D /* Common */,
 				4750C1102EFDDF840012429D /* Organizer */,
+				8DC2821DA102C51FCC79E8E9 /* Onboarding */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -729,6 +737,18 @@
 				2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */,
 			);
 			name = Cancellation;
+			sourceTree = "<group>";
+		};
+		8DC2821DA102C51FCC79E8E9 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				3030E765F3FF80B86A376D48 /* OnboardingModels.swift */,
+				DD0250375032A5E3E46BD061 /* OnboardingViewModel.swift */,
+				DE9C0F021924E77DEA5A04EB /* OnboardingComponents.swift */,
+				2EDF3632CD5B334F8AED8A0E /* OnboardingSlides.swift */,
+				C56FA2EE77A530E1B46E3BF4 /* OnboardingView.swift */,
+			);
+			name = Onboarding;
 			sourceTree = "<group>";
 		};
 		94E1C8E79CB37CC547C728D0 /* Refunds */ = {
@@ -902,7 +922,6 @@
 				B732B5EFF9E256E1D7485A18 /* TicketSuccessView.swift in Sources */,
 				37A514C69D0BEAD855322673 /* TicketsView.swift in Sources */,
 				38C44637D5C9029441B8D9BE /* AddContactMethodView.swift in Sources */,
-				14576D1F6EBD1042DB88496B /* AppIntroSlidesView.swift in Sources */,
 				E05E586C61ED14110BAA8352 /* AuthComponents.swift in Sources */,
 				468D7066C9492D116B60E843 /* AuthView.swift in Sources */,
 				C901DED0703498BAC83441E6 /* AuthViewModel.swift in Sources */,
@@ -982,6 +1001,11 @@
 				4C8C0E267DAAB09B66B6FD63 /* CancellationRepository.swift in Sources */,
 				A369BFC0658958DE09DC6308 /* CancellationComponents.swift in Sources */,
 				BEC5C9FB6BD70D7694D707F0 /* EventCancellationFlowView.swift in Sources */,
+				6B6F38859FBD3C8302E3E9F1 /* OnboardingModels.swift in Sources */,
+				9EEF1AC77ADF3902B63E7E0C /* OnboardingViewModel.swift in Sources */,
+				64EBEFACB448460749113B98 /* OnboardingComponents.swift in Sources */,
+				8D67F8062A599BE459B0D17D /* OnboardingSlides.swift in Sources */,
+				EF5D3EBF7AA18996D7D11FDE /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
