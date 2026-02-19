@@ -2,7 +2,8 @@
 //  OrganizerDashboardView.swift
 //  EventPassUG
 //
-//  Organizer dashboard with analytics and QR scanner
+//  Modern responsive analytics dashboard for organizers
+//  Adapts layout based on device size: compact on small phones, rich on large devices
 //
 
 import SwiftUI
@@ -13,285 +14,731 @@ struct OrganizerDashboardView: View {
     @EnvironmentObject var services: ServiceContainer
     @StateObject private var followManager = FollowManager.shared
 
+    // MARK: - State
+
     @State private var totalRevenue: Double = 0
     @State private var totalTicketsSold: Int = 0
     @State private var activeEvents: Int = 0
+    @State private var totalCapacity: Int = 0
     @State private var isLoading = true
-    @State private var showingQRScanner = false
     @State private var events: [Event] = []
-    @State private var showingVerification = false
     @State private var showingVerificationSheet = false
     @State private var cancellables = Set<AnyCancellable>()
-    @State private var scrollOffset: CGFloat = 0
+    @State private var selectedSection: DashboardSection = .overview
+    @State private var dismissedAlerts: Set<UUID> = []
+
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    // MARK: - Layout Configuration
+
+    private var layoutConfig: DashboardLayoutConfig {
+        DashboardLayoutConfig(horizontalSizeClass: horizontalSizeClass)
+    }
+
+    // MARK: - Body
 
     var body: some View {
         NavigationView {
             ZStack {
-                VStack(spacing: 0) {
-                    // Collapsible header
-                    CollapsibleHeader(title: "Dashboard", scrollOffset: scrollOffset) {
-                        VStack(spacing: AppDesign.Spacing.md) {
-                            Text("Dashboard")
-                                .font(AppDesign.Typography.largeTitle)
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                // Main content
+                mainContent
+                    .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
 
-                            Text("Track your events and earnings")
-                                .font(AppDesign.Typography.body)
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                // Verification overlay
+                if authService.currentUser?.needsVerificationForOrganizerActions == true {
+                    VerificationRequiredOverlay(showingVerificationSheet: $showingVerificationSheet)
+                }
+
+                // Loading overlay
+                if isLoading {
+                    loadingOverlay
+                }
+            }
+            .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button(action: { Task { await refreshData() } }) {
+                            Label("Refresh", systemImage: "arrow.clockwise")
                         }
+                        Button(action: {}) {
+                            Label("Export Report", systemImage: "square.and.arrow.up")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundColor(RoleConfig.organizerPrimary)
+                    }
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+        .onAppear {
+            loadAnalytics()
+            subscribeToTicketSales()
+        }
+        .sheet(isPresented: $showingVerificationSheet) {
+            NationalIDVerificationView()
+                .environmentObject(authService)
+        }
+    }
+
+    // MARK: - Main Content
+
+    @ViewBuilder
+    private var mainContent: some View {
+        GeometryReader { geometry in
+            let isLandscape = geometry.size.width > geometry.size.height
+
+            ScrollView {
+                LazyVStack(spacing: layoutConfig.sectionSpacing) {
+                    // Health Score & Quick Stats
+                    headerSection(isLandscape: isLandscape)
+
+                    // Section picker for small screens
+                    if layoutConfig.isSmallDevice {
+                        sectionPicker
+                            .padding(.horizontal, layoutConfig.horizontalPadding)
                     }
 
-                    // Content with scroll tracking
-                    GeometryReader { geometry in
-                        let isLandscape = geometry.size.width > geometry.size.height
-                        let columns = Array(repeating: GridItem(.flexible(), spacing: AppDesign.Spacing.sm), count: isLandscape ? 4 : 2)
+                    // Alerts
+                    alertsSection
+                        .padding(.horizontal, layoutConfig.horizontalPadding)
 
-                        ScrollOffsetReader(content: {
-                            VStack(alignment: .leading, spacing: AppDesign.Spacing.lg) {
-                        // Analytics cards - compact 2-column grid
-                        LazyVGrid(columns: columns, spacing: AppDesign.Spacing.sm) {
-                            CompactMetricCard(
-                                title: "Total Revenue",
-                                value: "UGX \(formatCompactCurrency(totalRevenue))",
-                                icon: "dollarsign.circle.fill",
-                                color: Color.green
-                            )
+                    // Content based on device size
+                    if layoutConfig.isSmallDevice {
+                        // Show selected section only on small devices
+                        sectionContent(for: selectedSection, isLandscape: isLandscape)
+                            .padding(.horizontal, layoutConfig.horizontalPadding)
+                    } else {
+                        // Show all sections on larger devices
+                        allSectionsContent(isLandscape: isLandscape)
+                    }
+                }
+                .padding(.vertical, AppSpacing.md)
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+            .refreshable {
+                await refreshData()
+            }
+        }
+    }
 
-                            CompactMetricCard(
-                                title: "Tickets Sold",
-                                value: "\(totalTicketsSold)",
-                                icon: "ticket.fill",
-                                color: RoleConfig.organizerPrimary
-                            )
+    // MARK: - Header Section
 
-                            CompactMetricCard(
-                                title: "Active Events",
-                                value: "\(activeEvents)",
-                                icon: "calendar",
-                                color: .blue
-                            )
+    @ViewBuilder
+    private func headerSection(isLandscape: Bool) -> some View {
+        VStack(spacing: layoutConfig.itemSpacing) {
+            // Health Score
+            HStack(spacing: AppSpacing.md) {
+                healthScoreView
 
-                            CompactMetricCard(
-                                title: "Total Events",
-                                value: "\(events.count)",
-                                icon: "chart.bar.fill",
-                                color: .purple
-                            )
+                Spacer()
 
-                            CompactMetricCard(
-                                title: "Followers",
-                                value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
-                                icon: "person.2.fill",
-                                color: .orange
-                            )
-                        }
-
-                    // Manage Scanner Devices button
-                    NavigationLink(destination: Text("Scanner Device Management - Coming Soon").navigationTitle("Scanner Devices")) {
-                        HStack {
-                            Image(systemName: "iphone.and.arrow.forward")
-                                .font(.system(size: 24))
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Manage Scanner Devices")
-                                    .font(AppDesign.Typography.cardTitle)
-
-                                Text("Authorize devices for ticket scanning")
-                                    .font(AppDesign.Typography.caption)
-                                    .foregroundColor(.secondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                        }
+                // Quick summary
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(formatCurrency(totalRevenue))
+                        .font(AppTypography.title2)
+                        .fontWeight(.bold)
                         .foregroundColor(.primary)
-                        .padding(AppDesign.Spacing.md)
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(AppDesign.CornerRadius.md)
-                        .shadow(color: Color.black.opacity(0.05), radius: 4)
-                    }
 
-                    Divider()
+                    Text("Total Revenue")
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(AppSpacing.md)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(AppCornerRadius.md)
+            .cardShadow()
 
-                    // Recent events with progress indicators
-                    VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
-                        Text("Your Events")
-                            .font(AppDesign.Typography.section)
-                            .fontWeight(.semibold)
-                            .padding(.bottom, AppDesign.Spacing.xs)
+            // Quick Stats Grid
+            quickStatsGrid(isLandscape: isLandscape)
+        }
+        .padding(.horizontal, layoutConfig.horizontalPadding)
+    }
 
-                        ForEach(events.prefix(5)) { event in
-                            NavigationLink(destination: EventAnalyticsView(event: event)) {
-                                EventDashboardCard(event: event)
-                            }
-                            .buttonStyle(.plain)
+    @ViewBuilder
+    private var healthScoreView: some View {
+        let score = calculateHealthScore()
+
+        HStack(spacing: AppSpacing.sm) {
+            ProgressRingView(
+                progress: Double(score) / 100.0,
+                size: 50,
+                lineWidth: 6,
+                color: healthScoreColor(score)
+            )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Health Score")
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+
+                Text(healthScoreLabel(score))
+                    .font(AppTypography.calloutEmphasized)
+                    .foregroundColor(healthScoreColor(score))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func quickStatsGrid(isLandscape: Bool) -> some View {
+        let columns = isLandscape ? 4 : layoutConfig.metricsPerRow
+        let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: columns)
+
+        LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
+            MetricCard(
+                title: "Revenue",
+                value: formatCurrency(totalRevenue),
+                icon: "banknote",
+                trend: TrendData(value: 0.12, isPositive: true),
+                color: .green,
+                size: layoutConfig.metricCardSize
+            )
+
+            MetricCard(
+                title: "Tickets Sold",
+                value: "\(totalTicketsSold)",
+                icon: "ticket",
+                subtitle: capacityText,
+                color: RoleConfig.organizerPrimary,
+                size: layoutConfig.metricCardSize
+            )
+
+            MetricCard(
+                title: "Active Events",
+                value: "\(activeEvents)",
+                icon: "calendar",
+                color: .blue,
+                size: layoutConfig.metricCardSize
+            )
+
+            if columns >= 4 {
+                MetricCard(
+                    title: "Followers",
+                    value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
+                    icon: "person.2",
+                    color: .purple,
+                    size: layoutConfig.metricCardSize
+                )
+            }
+        }
+    }
+
+    // MARK: - Section Picker
+
+    @ViewBuilder
+    private var sectionPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: AppSpacing.sm) {
+                ForEach(DashboardSection.allCases, id: \.self) { section in
+                    Button(action: {
+                        withAnimation(AppAnimation.standard) {
+                            selectedSection = section
                         }
-
-                        if events.count > 5 {
-                            Button(action: {}) {
-                                HStack {
-                                    Text("View All Events")
-                                        .font(AppDesign.Typography.callout)
-                                        .foregroundColor(RoleConfig.organizerPrimary)
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
-                                        .foregroundColor(RoleConfig.organizerPrimary)
-                                }
-                                .padding(.vertical, AppDesign.Spacing.sm)
-                            }
+                        HapticFeedback.selection()
+                    }) {
+                        HStack(spacing: AppSpacing.xs) {
+                            Image(systemName: section.icon)
+                                .font(.system(size: 12))
+                            Text(section.title)
+                                .font(AppTypography.captionEmphasized)
                         }
-                    }
-
-                    // Withdraw earnings section
-                    VStack(alignment: .leading, spacing: AppDesign.Spacing.md) {
-                        Text("Earnings")
-                            .font(AppDesign.Typography.section)
-                            .fontWeight(.semibold)
-
-                        VStack(alignment: .leading, spacing: AppDesign.Spacing.sm) {
-                            HStack {
-                                Text("Available Balance")
-                                    .font(AppDesign.Typography.callout)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                Text("UGX \(Int(totalRevenue).formatted())")
-                                    .font(AppDesign.Typography.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(RoleConfig.organizerPrimary)
-                            }
-
-                            Button(action: {}) {
-                                HStack {
-                                    Image(systemName: "arrow.down.circle.fill")
-                                    Text("Withdraw Funds")
-                                }
-                                .font(AppDesign.Typography.cardTitle)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(RoleConfig.organizerPrimary)
-                                .cornerRadius(AppDesign.CornerRadius.md)
-                            }
-                            .disabled(totalRevenue <= 0)
-                            .opacity(totalRevenue > 0 ? 1.0 : 0.5)
-                        }
-                        .padding(AppDesign.Spacing.md)
-                        .background(Color(UIColor.secondarySystemGroupedBackground))
-                        .cornerRadius(AppDesign.CornerRadius.md)
+                        .padding(.horizontal, AppSpacing.sm)
+                        .padding(.vertical, AppSpacing.xs)
+                        .background(selectedSection == section ? RoleConfig.organizerPrimary : Color.gray.opacity(0.15))
+                        .foregroundColor(selectedSection == section ? .white : .primary)
+                        .cornerRadius(AppCornerRadius.pill)
                     }
                 }
-                .padding(.horizontal, AppDesign.Spacing.md)
-                .padding(.vertical, AppDesign.Spacing.sm)
-                        }, onOffsetChange: { offset in
-                            scrollOffset = offset
-                        })
-                    }
-                    .background(Color(UIColor.systemGroupedBackground))
-                }
-                .navigationBarHidden(true)
-                .blur(radius: authService.currentUser?.needsVerificationForOrganizerActions == true ? 10 : 0)
+            }
+        }
+    }
 
-                // Verification Required Overlay
-                if authService.currentUser?.needsVerificationForOrganizerActions == true {
-                    VStack(spacing: AppDesign.Spacing.lg) {
-                        Spacer()
+    // MARK: - Alerts Section
 
-                        VStack(spacing: AppDesign.Spacing.md) {
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(.orange)
+    @ViewBuilder
+    private var alertsSection: some View {
+        let alerts = generateAlerts()
+        let visibleAlerts = alerts.filter { !dismissedAlerts.contains($0.id) }
 
-                            Text("Verification Required")
-                                .font(AppDesign.Typography.title2)
-                                .fontWeight(.bold)
-
-                            Text("You must verify your National ID before accessing organizer features.")
-                                .font(AppDesign.Typography.body)
-                                .foregroundColor(.secondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, AppDesign.Spacing.xl)
-
-                            Button(action: {
-                                showingVerification = true
-                            }) {
-                                HStack {
-                                    Image(systemName: "checkmark.shield")
-                                    Text("Verify Now")
-                                        .fontWeight(.semibold)
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(RoleConfig.organizerPrimary)
-                                .cornerRadius(AppDesign.CornerRadius.md)
+        if !visibleAlerts.isEmpty {
+            VStack(spacing: AppSpacing.sm) {
+                ForEach(visibleAlerts.prefix(layoutConfig.isSmallDevice ? 2 : 3)) { alert in
+                    InsightAlertCard(
+                        alert: alert,
+                        onAction: nil,
+                        onDismiss: {
+                            withAnimation {
+                                _ = dismissedAlerts.insert(alert.id)
                             }
-                            .padding(.horizontal, AppDesign.Spacing.xl)
                         }
-                        .padding(AppDesign.Spacing.xl)
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(AppDesign.CornerRadius.lg)
-                        .shadow(radius: 10)
-                        .padding(AppDesign.Spacing.md)
-
-                        Spacer()
-                    }
-                    .background(Color.black.opacity(0.3))
-                }
-
-                // Verification Required Overlay
-                if authService.currentUser?.needsVerificationForOrganizerActions == true {
-                    VerificationRequiredOverlay(
-                        showingVerificationSheet: $showingVerificationSheet
                     )
                 }
             }
-            }
-            .onAppear {
-                loadAnalytics()
-                subscribeToTicketSales()
-            }
-            .sheet(isPresented: $showingQRScanner) {
-                QRScannerView()
-            }
-            .sheet(isPresented: $showingVerification) {
-                NationalIDVerificationView()
-                    .environmentObject(authService)
-            }
-            .sheet(isPresented: $showingVerificationSheet) {
-                NationalIDVerificationView()
-                    .environmentObject(authService)
-            }
-    }
-
-    private func formatCompactCurrency(_ value: Double) -> String {
-        if value >= 1_000_000 {
-            return String(format: "%.1fM", value / 1_000_000)
-        } else if value >= 1_000 {
-            return String(format: "%.0fK", value / 1_000)
-        } else {
-            return "\(Int(value))"
         }
     }
+
+    // MARK: - All Sections Content
+
+    @ViewBuilder
+    private func allSectionsContent(isLandscape: Bool) -> some View {
+        // Events Section
+        SectionContainer(title: "Your Events", icon: "calendar", iconColor: .blue) {
+            eventsContent
+        }
+        .padding(.horizontal, layoutConfig.horizontalPadding)
+
+        // Sales Performance
+        SectionContainer(title: "Sales Performance", icon: "chart.line.uptrend.xyaxis", iconColor: .green) {
+            salesPerformanceContent(isLandscape: isLandscape)
+        }
+        .padding(.horizontal, layoutConfig.horizontalPadding)
+
+        // Earnings
+        SectionContainer(title: "Earnings", icon: "dollarsign.circle", iconColor: RoleConfig.organizerPrimary) {
+            earningsContent
+        }
+        .padding(.horizontal, layoutConfig.horizontalPadding)
+
+        // Quick Actions
+        SectionContainer(title: "Quick Actions", icon: "bolt", iconColor: .purple) {
+            quickActionsContent
+        }
+        .padding(.horizontal, layoutConfig.horizontalPadding)
+    }
+
+    // MARK: - Section Content Router
+
+    @ViewBuilder
+    private func sectionContent(for section: DashboardSection, isLandscape: Bool) -> some View {
+        switch section {
+        case .overview:
+            VStack(spacing: layoutConfig.itemSpacing) {
+                eventsContent
+                earningsContent
+            }
+        case .sales:
+            SectionContainer(title: "Sales Performance", icon: "chart.line.uptrend.xyaxis", iconColor: .green, isCollapsible: false) {
+                salesPerformanceContent(isLandscape: isLandscape)
+            }
+        case .audience:
+            SectionContainer(title: "Audience", icon: "person.2", iconColor: .purple, isCollapsible: false) {
+                audienceContent
+            }
+        case .marketing:
+            SectionContainer(title: "Engagement", icon: "megaphone", iconColor: .orange, isCollapsible: false) {
+                marketingContent
+            }
+        case .financial:
+            SectionContainer(title: "Earnings", icon: "dollarsign.circle", iconColor: .green, isCollapsible: false) {
+                earningsContent
+            }
+        case .operations:
+            SectionContainer(title: "Quick Actions", icon: "bolt", iconColor: .purple, isCollapsible: false) {
+                quickActionsContent
+            }
+        }
+    }
+
+    // MARK: - Events Content
+
+    @ViewBuilder
+    private var eventsContent: some View {
+        VStack(spacing: AppSpacing.sm) {
+            if events.isEmpty {
+                emptyEventsView
+            } else {
+                ForEach(events.prefix(5)) { event in
+                    NavigationLink(destination: EventAnalyticsView(event: event)) {
+                        eventCard(event: event)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if events.count > 5 {
+                    NavigationLink(destination: OrganizerHomeView()) {
+                        HStack {
+                            Text("View All \(events.count) Events")
+                                .font(AppTypography.callout)
+                                .foregroundColor(RoleConfig.organizerPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(RoleConfig.organizerPrimary)
+                        }
+                        .padding(.vertical, AppSpacing.sm)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func eventCard(event: Event) -> some View {
+        VStack(spacing: AppSpacing.sm) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(event.title)
+                        .font(AppTypography.calloutEmphasized)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+
+                    Text(event.startDate.formatted(date: .abbreviated, time: .shortened))
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                statusBadge(for: event.status)
+            }
+
+            // Ticket sales progress
+            let ticketsSold = event.ticketTypes.reduce(0) { $0 + $1.sold }
+            let totalCapacity = event.ticketTypes.reduce(0) { $0 + $1.quantity }
+            let progress = totalCapacity > 0 ? Double(ticketsSold) / Double(totalCapacity) : 0
+
+            VStack(spacing: 4) {
+                HStack {
+                    Text("Tickets")
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(ticketsSold)/\(totalCapacity)")
+                        .font(AppTypography.captionEmphasized)
+                        .foregroundColor(.primary)
+                }
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.gray.opacity(0.2))
+
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(progressColor(progress))
+                            .frame(width: geometry.size.width * progress)
+                    }
+                }
+                .frame(height: 6)
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.tertiarySystemBackground))
+        .cornerRadius(AppCornerRadius.md)
+    }
+
+    @ViewBuilder
+    private var emptyEventsView: some View {
+        VStack(spacing: AppSpacing.md) {
+            Image(systemName: "calendar.badge.plus")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary)
+
+            Text("No Events Yet")
+                .font(AppTypography.cardTitle)
+                .foregroundColor(.primary)
+
+            Text("Create your first event to start selling tickets")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            NavigationLink(destination: CreateEventWizard()) {
+                Text("Create Event")
+                    .font(AppTypography.buttonSecondary)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(RoleConfig.organizerPrimary)
+                    .cornerRadius(AppCornerRadius.md)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppSpacing.xl)
+        .background(Color(UIColor.tertiarySystemBackground))
+        .cornerRadius(AppCornerRadius.md)
+    }
+
+    // MARK: - Sales Performance Content
+
+    @ViewBuilder
+    private func salesPerformanceContent(isLandscape: Bool) -> some View {
+        VStack(spacing: layoutConfig.itemSpacing) {
+            // Sales by tier chart
+            if !events.isEmpty {
+                ChartCard(title: "Sales by Ticket Type") {
+                    let tierData = aggregateTierSales()
+
+                    if tierData.isEmpty {
+                        Text("No sales data yet")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, minHeight: 100)
+                    } else {
+                        BarChartView(
+                            bars: tierData.map { tier in
+                                BarChartData(
+                                    label: tier.name,
+                                    value: Double(tier.sold),
+                                    color: Color(hex: tier.color)
+                                )
+                            },
+                            height: layoutConfig.chartHeight
+                        )
+                    }
+                }
+            }
+
+            // Stats row
+            StatsRow(stats: [
+                StatItem(label: "Total Sold", value: "\(totalTicketsSold)"),
+                StatItem(label: "Avg Price", value: formatCurrency(averageTicketPrice)),
+                StatItem(label: "Capacity", value: "\(capacityPercentage)%")
+            ])
+        }
+    }
+
+    // MARK: - Audience Content
+
+    @ViewBuilder
+    private var audienceContent: some View {
+        VStack(spacing: layoutConfig.itemSpacing) {
+            let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: 2)
+
+            LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
+                MetricCard(
+                    title: "Attendees",
+                    value: "\(totalTicketsSold)",
+                    icon: "person.fill",
+                    color: .blue,
+                    size: .compact
+                )
+
+                MetricCard(
+                    title: "Followers",
+                    value: "\(followManager.getFollowerCount(for: authService.currentUser?.id ?? UUID()))",
+                    icon: "heart.fill",
+                    color: .pink,
+                    size: .compact
+                )
+            }
+
+            // Placeholder for more audience insights
+            HStack {
+                Image(systemName: "chart.pie")
+                    .foregroundColor(.secondary)
+                Text("Detailed audience insights coming soon")
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(AppSpacing.lg)
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(AppCornerRadius.md)
+        }
+    }
+
+    // MARK: - Marketing Content
+
+    @ViewBuilder
+    private var marketingContent: some View {
+        VStack(spacing: layoutConfig.itemSpacing) {
+            let totalLikes = events.reduce(0) { $0 + $1.likeCount }
+            let totalViews = totalLikes * 5 // Estimated views
+
+            let gridItems = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.sm), count: 2)
+
+            LazyVGrid(columns: gridItems, spacing: AppSpacing.sm) {
+                MetricCard(
+                    title: "Est. Views",
+                    value: formatNumber(totalViews),
+                    icon: "eye",
+                    color: .blue,
+                    size: .compact
+                )
+
+                MetricCard(
+                    title: "Likes",
+                    value: "\(totalLikes)",
+                    icon: "heart",
+                    color: .pink,
+                    size: .compact
+                )
+            }
+        }
+    }
+
+    // MARK: - Earnings Content
+
+    @ViewBuilder
+    private var earningsContent: some View {
+        VStack(spacing: AppSpacing.md) {
+            // Balance display
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Available Balance")
+                        .font(AppTypography.caption)
+                        .foregroundColor(.secondary)
+
+                    Text(formatCurrency(totalRevenue))
+                        .font(AppTypography.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(RoleConfig.organizerPrimary)
+                }
+
+                Spacer()
+
+                // Earnings breakdown
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Text("Net:")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                        Text(formatCurrency(totalRevenue * 0.95))
+                            .font(AppTypography.captionEmphasized)
+                            .foregroundColor(.green)
+                    }
+
+                    HStack(spacing: 4) {
+                        Text("Fees:")
+                            .font(AppTypography.caption)
+                            .foregroundColor(.secondary)
+                        Text(formatCurrency(totalRevenue * 0.05))
+                            .font(AppTypography.captionEmphasized)
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            // Withdraw button
+            Button(action: {}) {
+                HStack {
+                    Image(systemName: "arrow.down.circle.fill")
+                    Text("Withdraw Funds")
+                }
+                .font(AppTypography.buttonSecondary)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(AppSpacing.md)
+                .background(totalRevenue > 0 ? RoleConfig.organizerPrimary : Color.gray)
+                .cornerRadius(AppCornerRadius.md)
+            }
+            .disabled(totalRevenue <= 0)
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.tertiarySystemBackground))
+        .cornerRadius(AppCornerRadius.md)
+    }
+
+    // MARK: - Quick Actions Content
+
+    @ViewBuilder
+    private var quickActionsContent: some View {
+        VStack(spacing: AppSpacing.sm) {
+            NavigationLink(destination: CreateEventWizard()) {
+                quickActionRow(icon: "plus.circle.fill", title: "Create Event", subtitle: "Launch a new event", color: .green)
+            }
+
+            NavigationLink(destination: QRScannerView()) {
+                quickActionRow(icon: "qrcode.viewfinder", title: "Scan Tickets", subtitle: "Validate attendee tickets", color: .blue)
+            }
+
+            NavigationLink(destination: Text("Scanner Device Management - Coming Soon").navigationTitle("Scanner Devices")) {
+                quickActionRow(icon: "iphone.and.arrow.forward", title: "Manage Scanners", subtitle: "Authorize scanning devices", color: .purple)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func quickActionRow(icon: String, title: String, subtitle: String, color: Color) -> some View {
+        HStack(spacing: AppSpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+                .frame(width: 44, height: 44)
+                .background(color.opacity(0.15))
+                .cornerRadius(AppCornerRadius.sm)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(AppTypography.calloutEmphasized)
+                    .foregroundColor(.primary)
+
+                Text(subtitle)
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.tertiarySystemBackground))
+        .cornerRadius(AppCornerRadius.md)
+    }
+
+    // MARK: - Loading Overlay
+
+    @ViewBuilder
+    private var loadingOverlay: some View {
+        ZStack {
+            Color(UIColor.systemBackground).opacity(0.8)
+
+            VStack(spacing: AppSpacing.md) {
+                ProgressView()
+                    .scaleEffect(1.2)
+
+                Text("Loading dashboard...")
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Helper Views
+
+    @ViewBuilder
+    private func statusBadge(for status: EventStatus) -> some View {
+        let (text, color): (String, Color) = {
+            switch status {
+            case .draft: return ("Draft", .gray)
+            case .published: return ("Live", .green)
+            case .ongoing: return ("Ongoing", .blue)
+            case .completed: return ("Ended", .secondary)
+            case .cancelled: return ("Cancelled", .red)
+            }
+        }()
+
+        Text(text)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(color)
+            .cornerRadius(AppCornerRadius.xs)
+    }
+
+    // MARK: - Helper Functions
 
     private func loadAnalytics() {
         Task {
             do {
                 guard let organizerId = authService.currentUser?.id else { return }
 
-                // Fetch organizer events
                 let fetchedEvents = try await services.eventService.fetchOrganizerEvents(organizerId: organizerId)
-
-                // Calculate revenue
                 let revenue = try await services.paymentService.calculateRevenue(organizerId: organizerId)
 
-                // Calculate statistics
                 let ticketsSold = fetchedEvents.reduce(0) { total, event in
                     total + event.ticketTypes.reduce(0) { $0 + $1.sold }
+                }
+
+                let capacity = fetchedEvents.reduce(0) { total, event in
+                    total + event.ticketTypes.reduce(0) { $0 + $1.quantity }
                 }
 
                 let active = fetchedEvents.filter { $0.status == .published || $0.status == .ongoing }.count
@@ -300,6 +747,7 @@ struct OrganizerDashboardView: View {
                     self.events = fetchedEvents
                     self.totalRevenue = revenue
                     self.totalTicketsSold = ticketsSold
+                    self.totalCapacity = capacity
                     self.activeEvents = active
                     self.isLoading = false
                 }
@@ -312,11 +760,15 @@ struct OrganizerDashboardView: View {
         }
     }
 
+    private func refreshData() async {
+        isLoading = true
+        loadAnalytics()
+    }
+
     private func subscribeToTicketSales() {
         services.ticketService.ticketSalesPublisher
             .receive(on: DispatchQueue.main)
             .sink { saleEvent in
-                // Update event sold count
                 if let index = events.firstIndex(where: { $0.id == saleEvent.eventId }) {
                     for (typeIndex, ticketType) in events[index].ticketTypes.enumerated() {
                         if ticketType.name == saleEvent.ticketType {
@@ -325,7 +777,6 @@ struct OrganizerDashboardView: View {
                     }
                 }
 
-                // Update total stats
                 totalTicketsSold += saleEvent.quantity
                 totalRevenue += saleEvent.totalAmount
 
@@ -333,10 +784,225 @@ struct OrganizerDashboardView: View {
             }
             .store(in: &cancellables)
     }
+
+    private func generateAlerts() -> [AnalyticsAlert] {
+        var alerts: [AnalyticsAlert] = []
+
+        // Low sales alert
+        if activeEvents > 0 && totalTicketsSold < 10 {
+            alerts.append(AnalyticsAlert(
+                type: .lowSales,
+                title: "Boost Your Sales",
+                message: "Consider sharing your events on social media to increase visibility.",
+                severity: .info
+            ))
+        }
+
+        // Near capacity alert
+        if totalCapacity > 0 && Double(totalTicketsSold) / Double(totalCapacity) > 0.8 {
+            alerts.append(AnalyticsAlert(
+                type: .nearSellOut,
+                title: "Almost Sold Out!",
+                message: "Your events are nearly at capacity. Great job!",
+                severity: .success
+            ))
+        }
+
+        return alerts
+    }
+
+    private func aggregateTierSales() -> [(name: String, sold: Int, color: String)] {
+        var tierMap: [String: (sold: Int, color: String)] = [:]
+        let colors = ["34C759", "FF7A00", "FFD700", "AF52DE", "007AFF"]
+
+        for event in events {
+            for (index, tier) in event.ticketTypes.enumerated() {
+                let colorIndex = index % colors.count
+                if let existing = tierMap[tier.name] {
+                    tierMap[tier.name] = (existing.sold + tier.sold, existing.color)
+                } else {
+                    tierMap[tier.name] = (tier.sold, colors[colorIndex])
+                }
+            }
+        }
+
+        return tierMap.map { (name: $0.key, sold: $0.value.sold, color: $0.value.color) }
+            .sorted { $0.sold > $1.sold }
+    }
+
+    private func calculateHealthScore() -> Int {
+        var score = 50 // Base score
+
+        // Active events bonus
+        if activeEvents > 0 { score += 15 }
+        if activeEvents > 3 { score += 10 }
+
+        // Sales performance
+        if totalCapacity > 0 {
+            let salesRate = Double(totalTicketsSold) / Double(totalCapacity)
+            score += Int(salesRate * 25)
+        }
+
+        return min(100, max(0, score))
+    }
+
+    private func healthScoreColor(_ score: Int) -> Color {
+        switch score {
+        case 80...: return .green
+        case 60..<80: return .orange
+        default: return .red
+        }
+    }
+
+    private func healthScoreLabel(_ score: Int) -> String {
+        switch score {
+        case 80...: return "Excellent"
+        case 60..<80: return "Good"
+        case 40..<60: return "Fair"
+        default: return "Needs Work"
+        }
+    }
+
+    private func progressColor(_ progress: Double) -> Color {
+        switch progress {
+        case 0.8...: return .green
+        case 0.5..<0.8: return RoleConfig.organizerPrimary
+        default: return .blue
+        }
+    }
+
+    private func formatCurrency(_ amount: Double) -> String {
+        if amount >= 1_000_000 {
+            return String(format: "UGX %.1fM", amount / 1_000_000)
+        } else if amount >= 1_000 {
+            return String(format: "UGX %.0fK", amount / 1_000)
+        } else {
+            return String(format: "UGX %.0f", amount)
+        }
+    }
+
+    private func formatNumber(_ number: Int) -> String {
+        if number >= 1_000_000 {
+            return String(format: "%.1fM", Double(number) / 1_000_000)
+        } else if number >= 1_000 {
+            return String(format: "%.1fK", Double(number) / 1_000)
+        } else {
+            return "\(number)"
+        }
+    }
+
+    private var capacityText: String {
+        guard totalCapacity > 0 else { return "" }
+        return "\(Int(Double(totalTicketsSold) / Double(totalCapacity) * 100))% capacity"
+    }
+
+    private var capacityPercentage: Int {
+        guard totalCapacity > 0 else { return 0 }
+        return Int(Double(totalTicketsSold) / Double(totalCapacity) * 100)
+    }
+
+    private var averageTicketPrice: Double {
+        guard totalTicketsSold > 0 else { return 0 }
+        return totalRevenue / Double(totalTicketsSold)
+    }
 }
 
-// Old components removed - replaced with CompactMetricCard and EventDashboardCard
-// See DashboardComponents.swift for the new implementations
+// MARK: - Dashboard Sections
+
+enum DashboardSection: String, CaseIterable {
+    case overview
+    case sales
+    case audience
+    case marketing
+    case financial
+    case operations
+
+    var title: String {
+        switch self {
+        case .overview: return "Overview"
+        case .sales: return "Sales"
+        case .audience: return "Audience"
+        case .marketing: return "Engagement"
+        case .financial: return "Earnings"
+        case .operations: return "Actions"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .overview: return "chart.pie"
+        case .sales: return "chart.line.uptrend.xyaxis"
+        case .audience: return "person.2"
+        case .marketing: return "megaphone"
+        case .financial: return "dollarsign.circle"
+        case .operations: return "bolt"
+        }
+    }
+}
+
+// MARK: - Layout Configuration
+
+struct DashboardLayoutConfig {
+    let horizontalSizeClass: UserInterfaceSizeClass?
+
+    var isSmallDevice: Bool {
+        ScreenSize.isSmallDevice
+    }
+
+    var horizontalPadding: CGFloat {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return AppSpacing.sm
+        case .regular: return AppSpacing.md
+        case .large, .iPad: return AppSpacing.lg
+        }
+    }
+
+    var sectionSpacing: CGFloat {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return AppSpacing.md
+        case .regular: return AppSpacing.lg
+        case .large, .iPad: return AppSpacing.xl
+        }
+    }
+
+    var itemSpacing: CGFloat {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return AppSpacing.sm
+        case .regular: return AppSpacing.md
+        case .large, .iPad: return AppSpacing.md
+        }
+    }
+
+    var metricsPerRow: Int {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return 2
+        case .regular: return 2
+        case .large: return 3
+        case .iPad: return 4
+        }
+    }
+
+    var chartHeight: CGFloat {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return 120
+        case .regular: return 150
+        case .large, .iPad: return 180
+        }
+    }
+
+    var metricCardSize: MetricCardSize {
+        switch ScreenSize.DeviceSize.current {
+        case .small: return .compact
+        case .regular: return .regular
+        case .large, .iPad: return .regular
+        }
+    }
+}
+
+// Type alias for convenience
+typealias MetricCardSize = MetricCard.MetricCardSize
+
+// MARK: - Preview
 
 #Preview {
     OrganizerDashboardView()
@@ -348,4 +1014,3 @@ struct OrganizerDashboardView: View {
             paymentService: MockPaymentRepository()
         ))
 }
-
