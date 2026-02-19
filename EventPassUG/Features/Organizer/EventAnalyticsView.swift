@@ -219,39 +219,33 @@ struct EventAnalyticsView: View {
                 spacing: AppSpacing.md
             ) {
                 MetricCard(
-                    icon: "eye.fill",
                     title: "Impressions",
                     value: "\(viewModel.impressions)",
+                    icon: "eye.fill",
                     subtitle: "\(viewModel.uniqueViews) unique",
-                    color: .blue,
-                    trend: nil
+                    color: .blue
                 )
 
                 MetricCard(
-                    icon: "heart.fill",
                     title: "Likes",
                     value: "\(viewModel.event.likeCount)",
-                    subtitle: nil,
-                    color: .pink,
-                    trend: nil
+                    icon: "heart.fill",
+                    color: .pink
                 )
 
                 MetricCard(
-                    icon: "ticket.fill",
                     title: "Tickets Sold",
                     value: "\(viewModel.totalTicketsSold)",
+                    icon: "ticket.fill",
                     subtitle: "\(Int(viewModel.overallSalesPercentage * 100))% of capacity",
-                    color: RoleConfig.organizerPrimary,
-                    trend: nil
+                    color: RoleConfig.organizerPrimary
                 )
 
                 MetricCard(
-                    icon: "square.and.arrow.up.fill",
                     title: "Shares",
                     value: "\(viewModel.shareCount)",
-                    subtitle: nil,
-                    color: .green,
-                    trend: nil
+                    icon: "square.and.arrow.up.fill",
+                    color: .green
                 )
             }
         }
@@ -414,55 +408,7 @@ struct EventAnalyticsView: View {
 }
 
 // MARK: - Supporting Views
-
-struct MetricCard: View {
-    let icon: String
-    let title: String
-    let value: String
-    let subtitle: String?
-    let color: Color
-    let trend: String?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(color)
-
-                Spacer()
-
-                if let trend = trend {
-                    Text(trend)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.green)
-                }
-            }
-
-            Text(value)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-
-                if let subtitle = subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(AppSpacing.md)
-        .background(Color(UIColor.secondarySystemGroupedBackground))
-        .cornerRadius(AppCornerRadius.medium)
-    }
-}
+// Note: MetricCard is now defined in AnalyticsDashboardComponents.swift
 
 struct TicketSalesCard: View {
     let ticketType: TicketType
