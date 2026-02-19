@@ -72,8 +72,8 @@ struct WelcomeSlide: View {
         let opacity = 0.4 - Double(index) * 0.1
         return LinearGradient(
             colors: [
-                Color("AccentColor", bundle: nil).opacity(opacity),
-                Color("AccentColorDark", bundle: nil).opacity(opacity * 0.8)
+                AppColors.primary.opacity(opacity),
+                AppColors.primaryDark.opacity(opacity * 0.8)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -81,7 +81,7 @@ struct WelcomeSlide: View {
     }
 
     private var gradientColors: [Color] {
-        [Color("AccentColor", bundle: nil), Color("AccentColorDark", bundle: nil)]
+        [AppColors.primary, AppColors.primaryDark]
     }
 
     private var secondaryTextColor: Color {
@@ -303,7 +303,7 @@ struct PersonalizationSlide: View {
             HStack {
                 Text(selectionCountText)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color("AccentColor", bundle: nil))
+                    .foregroundColor(AppColors.primary)
 
                 Spacer()
             }
@@ -585,7 +585,7 @@ struct OnboardingSummaryRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16))
-                .foregroundColor(Color("AccentColor", bundle: nil))
+                .foregroundColor(AppColors.primary)
                 .frame(width: 24)
 
             Text(title)

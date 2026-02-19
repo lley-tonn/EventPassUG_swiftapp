@@ -54,11 +54,11 @@ struct OnboardingProgressIndicator: View {
     }
 
     private var accentColor: Color {
-        colorScheme == .dark ? .white : Color("AccentColor", bundle: nil)
+        AppColors.primary
     }
 
     private var inactiveColor: Color {
-        colorScheme == .dark ? Color.white.opacity(0.3) : Color.gray.opacity(0.3)
+        colorScheme == .dark ? Color.white.opacity(0.3) : AppColors.borderLight
     }
 }
 
@@ -90,7 +90,7 @@ struct OnboardingPrimaryButton: View {
 
     private var buttonGradient: LinearGradient {
         LinearGradient(
-            colors: [Color("AccentColor", bundle: nil), Color("AccentColorDark", bundle: nil)],
+            colors: [AppColors.primary, AppColors.primaryDark],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -98,14 +98,14 @@ struct OnboardingPrimaryButton: View {
 
     private var disabledGradient: LinearGradient {
         LinearGradient(
-            colors: [Color.gray.opacity(0.5), Color.gray.opacity(0.4)],
+            colors: [AppColors.interactiveDisabled, AppColors.interactiveDisabled.opacity(0.8)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
     }
 
     private var shadowColor: Color {
-        Color("AccentColor", bundle: nil).opacity(0.4)
+        AppColors.primary.opacity(0.4)
     }
 }
 
@@ -129,7 +129,7 @@ struct OnboardingBackButton: View {
     }
 
     private var textColor: Color {
-        colorScheme == .dark ? .white : Color("AccentColor", bundle: nil)
+        colorScheme == .dark ? .white : AppColors.primary
     }
 }
 
@@ -235,7 +235,7 @@ struct RoleCard: View {
 
                     if isSelected {
                         Circle()
-                            .fill(Color("AccentColor", bundle: nil))
+                            .fill(AppColors.primary)
                             .frame(width: 24, height: 24)
 
                         Image(systemName: "checkmark")
@@ -252,7 +252,7 @@ struct RoleCard: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: OnboardingTheme.cardCornerRadius)
-                    .stroke(isSelected ? Color("AccentColor", bundle: nil) : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? AppColors.primary : Color.clear, lineWidth: 2)
             )
             .shadow(color: shadowColor, radius: isSelected ? 16 : 8, x: 0, y: isSelected ? 8 : 4)
         }
@@ -267,13 +267,13 @@ struct RoleCard: View {
 
     private var iconBackground: Color {
         isSelected
-            ? Color("AccentColor", bundle: nil).opacity(0.15)
+            ? AppColors.primary.opacity(0.15)
             : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.gray.opacity(0.1))
     }
 
     private var iconColor: Color {
         isSelected
-            ? Color("AccentColor", bundle: nil)
+            ? AppColors.primary
             : (colorScheme == .dark ? .white : Color(UIColor.label))
     }
 
@@ -458,7 +458,7 @@ struct OnboardingInfoRow: View {
 
                 Image(systemName: icon)
                     .font(.system(size: 18))
-                    .foregroundColor(Color("AccentColor", bundle: nil))
+                    .foregroundColor(AppColors.primary)
             }
 
             // Text
@@ -492,7 +492,7 @@ struct OnboardingInfoRow: View {
     }
 
     private var iconBackground: Color {
-        Color("AccentColor", bundle: nil).opacity(colorScheme == .dark ? 0.2 : 0.1)
+        AppColors.primary.opacity(colorScheme == .dark ? 0.2 : 0.1)
     }
 
     private var primaryTextColor: Color {
@@ -572,11 +572,11 @@ struct OnboardingPermissionCard: View {
     }
 
     private var iconBackground: Color {
-        Color("AccentColor", bundle: nil).opacity(colorScheme == .dark ? 0.2 : 0.1)
+        AppColors.primary.opacity(colorScheme == .dark ? 0.2 : 0.1)
     }
 
     private var iconColor: Color {
-        Color("AccentColor", bundle: nil)
+        AppColors.primary
     }
 
     private var primaryTextColor: Color {
@@ -590,7 +590,7 @@ struct OnboardingPermissionCard: View {
     private var buttonBackground: Color {
         isEnabled
             ? (colorScheme == .dark ? Color.green.opacity(0.2) : Color.green.opacity(0.1))
-            : Color("AccentColor", bundle: nil)
+            : AppColors.primary
     }
 
     private var shadowColor: Color {
@@ -635,7 +635,7 @@ struct OnboardingIllustration: View {
 
     private func circleColor(for index: Int) -> Color {
         let opacity = 0.3 - Double(index) * 0.08
-        return Color("AccentColor", bundle: nil).opacity(opacity)
+        return AppColors.primary.opacity(opacity)
     }
 }
 

@@ -53,18 +53,7 @@ struct OnboardingView: View {
     // MARK: - Background
 
     private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                colorScheme == .dark
-                    ? Color(red: 0.08, green: 0.08, blue: 0.12)
-                    : Color(red: 0.96, green: 0.96, blue: 0.98),
-                colorScheme == .dark
-                    ? Color(red: 0.05, green: 0.05, blue: 0.08)
-                    : Color.white
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        AppColors.backgroundPrimary
     }
 
     // MARK: - Slide Content
@@ -123,14 +112,12 @@ struct OnboardingView: View {
                         Text("Back")
                             .font(.system(size: 17, weight: .semibold))
                     }
-                    .foregroundColor(colorScheme == .dark ? .white : .primary)
-                    .frame(height: 56)
+                    .foregroundColor(AppColors.textPrimary)
+                    .frame(height: AppButtonDimensions.heightLarge)
                     .frame(maxWidth: .infinity)
                     .background(
-                        RoundedRectangle(cornerRadius: OnboardingTheme.buttonCornerRadius)
-                            .fill(colorScheme == .dark
-                                  ? Color.white.opacity(0.1)
-                                  : Color.black.opacity(0.05))
+                        RoundedRectangle(cornerRadius: AppCornerRadius.button)
+                            .fill(AppColors.backgroundSecondary)
                     )
                 }
                 .disabled(viewModel.isAnimating)
@@ -201,19 +188,8 @@ private struct OnboardingPreviewWrapper: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    colorScheme == .dark
-                        ? Color(red: 0.08, green: 0.08, blue: 0.12)
-                        : Color(red: 0.96, green: 0.96, blue: 0.98),
-                    colorScheme == .dark
-                        ? Color(red: 0.05, green: 0.05, blue: 0.08)
-                        : Color.white
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            AppColors.backgroundPrimary
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 OnboardingProgressIndicator(

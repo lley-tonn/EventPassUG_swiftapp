@@ -32,9 +32,9 @@ extension UserRole: Identifiable {
     var gradientColors: [Color] {
         switch self {
         case .attendee:
-            return [Color("AttendeeGradientStart", bundle: nil), Color("AttendeeGradientEnd", bundle: nil)]
+            return [AppColors.primary, AppColors.primaryDark]
         case .organizer:
-            return [Color("OrganizerGradientStart", bundle: nil), Color("OrganizerGradientEnd", bundle: nil)]
+            return [AppColors.primary, AppColors.primaryDark]
         }
     }
 }
@@ -285,62 +285,51 @@ enum SlideDirection {
 }
 
 // MARK: - Onboarding Theme
+// Uses AppDesign tokens for consistency across the app
 
 struct OnboardingTheme {
-    // Adaptive colors for light/dark mode
-    static var primaryBackground: Color {
-        Color("OnboardingBackground", bundle: nil)
-    }
+    // Colors - Using AppDesign system
+    static var primary: Color { AppColors.primary }
+    static var primaryDark: Color { AppColors.primaryDark }
+    static var primaryLight: Color { AppColors.primaryLight }
 
-    static var cardBackground: Color {
-        Color("OnboardingCardBackground", bundle: nil)
-    }
+    // Backgrounds
+    static var backgroundPrimary: Color { AppColors.backgroundPrimary }
+    static var backgroundSecondary: Color { AppColors.backgroundSecondary }
+    static var backgroundTertiary: Color { AppColors.backgroundTertiary }
 
-    static var primaryText: Color {
-        Color("OnboardingPrimaryText", bundle: nil)
-    }
+    // Text
+    static var textPrimary: Color { AppColors.textPrimary }
+    static var textSecondary: Color { AppColors.textSecondary }
+    static var textTertiary: Color { AppColors.textTertiary }
+    static var textInverse: Color { AppColors.textInverse }
 
-    static var secondaryText: Color {
-        Color("OnboardingSecondaryText", bundle: nil)
-    }
+    // Borders
+    static var border: Color { AppColors.border }
+    static var borderLight: Color { AppColors.borderLight }
 
-    static var accentColor: Color {
-        Color("OnboardingAccent", bundle: nil)
-    }
+    // Semantic
+    static var success: Color { AppColors.success }
+    static var warning: Color { AppColors.warning }
+    static var error: Color { AppColors.error }
 
-    static var divider: Color {
-        Color("OnboardingDivider", bundle: nil)
-    }
-
-    // Fallback colors if assets not available
-    static var backgroundAdaptive: Color {
-        Color(UIColor.systemBackground)
-    }
-
-    static var cardBackgroundAdaptive: Color {
-        Color(UIColor.secondarySystemBackground)
-    }
-
-    static var primaryTextAdaptive: Color {
-        Color(UIColor.label)
-    }
-
-    static var secondaryTextAdaptive: Color {
-        Color(UIColor.secondaryLabel)
-    }
-
-    static var tertiaryTextAdaptive: Color {
-        Color(UIColor.tertiaryLabel)
-    }
-
-    // Spacing
-    static let horizontalPadding: CGFloat = 24
-    static let verticalSpacing: CGFloat = 24
-    static let cardCornerRadius: CGFloat = 20
-    static let buttonCornerRadius: CGFloat = 16
-    static let smallCornerRadius: CGFloat = 12
+    // Spacing - Using AppDesign spacing
+    static let horizontalPadding: CGFloat = AppSpacing.lg
+    static let verticalSpacing: CGFloat = AppSpacing.lg
+    static let cardCornerRadius: CGFloat = AppCornerRadius.lg
+    static let buttonCornerRadius: CGFloat = AppCornerRadius.button
+    static let smallCornerRadius: CGFloat = AppCornerRadius.md
 
     // Animation
     static let transitionDuration: Double = 0.4
     static let transitionAnimation: Animation = .easeInOut(duration: transitionDuration)
+
+    // Button gradient using primary colors
+    static var buttonGradient: LinearGradient {
+        LinearGradient(
+            colors: [AppColors.primary, AppColors.primaryDark],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
 }
