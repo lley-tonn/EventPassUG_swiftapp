@@ -182,9 +182,9 @@ class MockRefundRepository: RefundRepositoryProtocol {
         }
 
         // Check if ticket already refunded
-        if let existingRequest = refundRequests.first(where: {
+        if refundRequests.first(where: {
             $0.ticketId == ticket.id && !$0.status.isFinal
-        }) {
+        }) != nil {
             return .notEligible(reason: "A refund request is already pending for this ticket")
         }
 
@@ -531,7 +531,7 @@ class MockRefundRepository: RefundRepositoryProtocol {
         let refundAmount = request.approvedAmount ?? request.requestedAmount
 
         // Create transaction
-        var transaction = RefundTransaction(
+        let transaction = RefundTransaction(
             refundRequestId: request.id,
             ticketId: request.ticketId,
             eventId: request.eventId,
@@ -575,12 +575,14 @@ class MockRefundRepository: RefundRepositoryProtocol {
             }
 
             // Update transaction as completed
-            transaction.status = .completed
-            transaction.processedAt = Date()
-            transaction.completedAt = Date()
+            var completedTransaction = transaction
+            completedTransaction.status = .completed
+            completedTransaction.processedAt = Date()
+            completedTransaction.completedAt = Date()
+            let finalCompletedTransaction = completedTransaction
 
             await MainActor.run {
-                refundTransactions.append(transaction)
+                refundTransactions.append(finalCompletedTransaction)
 
                 // Update request
                 var updated = refundRequests[index]
@@ -599,16 +601,18 @@ class MockRefundRepository: RefundRepositoryProtocol {
             let finalRequest = refundRequests[index]
             refundStatusPublisher.send(finalRequest)
 
-            return transaction
+            return finalCompletedTransaction
 
         } catch {
             // Handle failure
-            transaction.status = .failed
-            transaction.failedAt = Date()
-            transaction.failureReason = error.localizedDescription
+            var failedTransaction = transaction
+            failedTransaction.status = .failed
+            failedTransaction.failedAt = Date()
+            failedTransaction.failureReason = error.localizedDescription
+            let finalFailedTransaction = failedTransaction
 
             await MainActor.run {
-                refundTransactions.append(transaction)
+                refundTransactions.append(finalFailedTransaction)
 
                 var updated = refundRequests[index]
                 updated.status = .failed
@@ -650,18 +654,20 @@ class MockRefundRepository: RefundRepositoryProtocol {
         // For now, mark any existing requests as auto-approved
         for index in refundRequests.indices {
             if refundRequests[index].eventId == eventId && refundRequests[index].status == .pending {
+                var request = refundRequests[index]
+                request.status = .approved
+                request.reviewerNote = "Auto-approved due to event cancellation"
+                request.statusHistory.append(RefundStatusChange(
+                    fromStatus: .pending,
+                    toStatus: .approved,
+                    note: "Auto-approved: Event cancelled"
+                ))
+                let updatedRequest = request
+
                 await MainActor.run {
-                    var request = refundRequests[index]
-                    request.status = .approved
-                    request.reviewerNote = "Auto-approved due to event cancellation"
-                    request.statusHistory.append(RefundStatusChange(
-                        fromStatus: .pending,
-                        toStatus: .approved,
-                        note: "Auto-approved: Event cancelled"
-                    ))
-                    refundRequests[index] = request
-                    createdRequests.append(request)
+                    refundRequests[index] = updatedRequest
                 }
+                createdRequests.append(updatedRequest)
             }
         }
 
@@ -688,8 +694,9 @@ class MockRefundRepository: RefundRepositoryProtocol {
             policyText: "Full refunds available due to event reschedule. Deadline: \(deadline.formatted())"
         )
 
+        let updatedPolicy = policy
         await MainActor.run {
-            refundPolicies[eventId] = policy
+            refundPolicies[eventId] = updatedPolicy
         }
     }
 

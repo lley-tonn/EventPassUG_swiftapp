@@ -50,6 +50,7 @@
 		468D7066C9492D116B60E843 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E62EFDDF840012429D /* AuthView.swift */; };
 		47086A1A8DBA824C72B49185 /* FollowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A62EFDDF840012429D /* FollowManager.swift */; };
 		47E081502A141B4E05D7009D /* RecommendationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C32EFDDF840012429D /* RecommendationRepository.swift */; };
+		4C8C0E267DAAB09B66B6FD63 /* CancellationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BC7F4592DEBC7221594F64 /* CancellationRepository.swift */; };
 		4D8E4C36862E35C96ABD6DDF /* BecomeOrganizerFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1032EFDDF840012429D /* BecomeOrganizerFlow.swift */; };
 		4F243BC3C30F42F69F8864B7 /* OrganizerProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0CC2EFDDF840012429D /* OrganizerProfile.swift */; };
 		4F4F03BC7BB9A2BD3E235074 /* EventAnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1052EFDDF840012429D /* EventAnalyticsView.swift */; };
@@ -93,9 +94,11 @@
 		8D4B98819A819AB889E30C68 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11C2EFDDF840012429D /* ProfileHeaderView.swift */; };
 		8F7058AB434DDE7732A4F6EB /* DashboardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1162EFDDF840012429D /* DashboardComponents.swift */; };
 		90F6BF82F9624B507D844932 /* OnboardingDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AD2EFDDF840012429D /* OnboardingDebugView.swift */; };
+		9221C614E86F5F12500A0B33 /* CancellationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3CE0414AC75CAE92131920 /* CancellationModels.swift */; };
 		967816A4A8C0750666616F42 /* OperationsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */; };
 		9C993DAF154D5915A7784BDF /* EnhancedAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BC2EFDDF840012429D /* EnhancedAuthRepository.swift */; };
 		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
+		A369BFC0658958DE09DC6308 /* CancellationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A05FCEFCCE228812A41176 /* CancellationComponents.swift */; };
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
 		A9DDEDFD95C15D39462967E2 /* PDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AE2EFDDF840012429D /* PDFGenerator.swift */; };
 		AA477A79CE5F40F62EFC9EBC /* IDCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D293ED25DF9B5F577E27D /* IDCameraView.swift */; };
@@ -104,6 +107,7 @@
 		B732B5EFF9E256E1D7485A18 /* TicketSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E02EFDDF840012429D /* TicketSuccessView.swift */; };
 		B8FE29E05D216165337E3A50 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A32EFDDF840012429D /* DateUtilities.swift */; };
 		BC7CB134EF479AF5A0982E3B /* PaymentConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0DB2EFDDF840012429D /* PaymentConfirmationView.swift */; };
+		BEC5C9FB6BD70D7694D707F0 /* EventCancellationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */; };
 		BF6BD1F298B3B1827BA24092 /* OrganizerRefundViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0E1DBEF51FBFB7066023C7 /* OrganizerRefundViews.swift */; };
 		C086777E87713D0C57F75576 /* RefundModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14BF7498113ECDED046873A /* RefundModels.swift */; };
 		C3FCEC50B20DBBF505A87667 /* EventPassUGApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0942EFDDF840012429D /* EventPassUGApp.swift */; };
@@ -155,6 +159,7 @@
 /* Begin PBXFileReference section */
 		0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageEventTicketsView.swift; sourceTree = "<group>"; };
 		1278B3A2D1FE7991C1E87570 /* RefundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundRepository.swift; path = EventPassUG/Data/Repositories/RefundRepository.swift; sourceTree = "<group>"; };
+		2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventCancellationFlowView.swift; path = EventPassUG/Features/Cancellation/EventCancellationFlowView.swift; sourceTree = "<group>"; };
 		30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictiveAnalysisDetailView.swift; sourceTree = "<group>"; };
 		461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarketingInsightsDetailView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -288,6 +293,7 @@
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudienceAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalytics.swift; sourceTree = "<group>"; };
+		9F3CE0414AC75CAE92131920 /* CancellationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationModels.swift; path = EventPassUG/Domain/Models/CancellationModels.swift; sourceTree = "<group>"; };
 		A14BF7498113ECDED046873A /* RefundModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundModels.swift; path = EventPassUG/Domain/Models/RefundModels.swift; sourceTree = "<group>"; };
 		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
 		C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OperationsDetailView.swift; sourceTree = "<group>"; };
@@ -296,8 +302,10 @@
 		DE1E5AB988366AF5C7CE1870 /* RefundComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundComponents.swift; path = EventPassUG/Features/Refunds/RefundComponents.swift; sourceTree = "<group>"; };
 		E263E86FCAF34C3E53AA7FDF /* RevenueAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RevenueAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthPromptSheet.swift; sourceTree = "<group>"; };
+		E7BC7F4592DEBC7221594F64 /* CancellationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationRepository.swift; path = EventPassUG/Data/Repositories/CancellationRepository.swift; sourceTree = "<group>"; };
 		EBA1D9804E77FAE965F5F032 /* AnalyticsDashboardComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardComponents.swift; sourceTree = "<group>"; };
 		ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F4A05FCEFCCE228812A41176 /* CancellationComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationComponents.swift; path = EventPassUG/Features/Cancellation/CancellationComponents.swift; sourceTree = "<group>"; };
 		F56CA5B3454663E5A74C85D9 /* TicketAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TicketAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		F619E77C7370842FDB348532 /* AnalyticsCharts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsCharts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -339,6 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				1278B3A2D1FE7991C1E87570 /* RefundRepository.swift */,
+				E7BC7F4592DEBC7221594F64 /* CancellationRepository.swift */,
 			);
 			name = Repositories;
 			sourceTree = "<group>";
@@ -713,6 +722,15 @@
 			name = Data;
 			sourceTree = "<group>";
 		};
+		8137F1C99AAAFC11C728A563 /* Cancellation */ = {
+			isa = PBXGroup;
+			children = (
+				F4A05FCEFCCE228812A41176 /* CancellationComponents.swift */,
+				2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */,
+			);
+			name = Cancellation;
+			sourceTree = "<group>";
+		};
 		94E1C8E79CB37CC547C728D0 /* Refunds */ = {
 			isa = PBXGroup;
 			children = (
@@ -727,6 +745,7 @@
 			isa = PBXGroup;
 			children = (
 				A14BF7498113ECDED046873A /* RefundModels.swift */,
+				9F3CE0414AC75CAE92131920 /* CancellationModels.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -735,6 +754,7 @@
 			isa = PBXGroup;
 			children = (
 				94E1C8E79CB37CC547C728D0 /* Refunds */,
+				8137F1C99AAAFC11C728A563 /* Cancellation */,
 			);
 			name = Features;
 			sourceTree = "<group>";
@@ -958,6 +978,10 @@
 				17AC2DC04814A74EFF07FC43 /* RefundComponents.swift in Sources */,
 				82EA13460E99903F18C48037 /* RefundRequestView.swift in Sources */,
 				BF6BD1F298B3B1827BA24092 /* OrganizerRefundViews.swift in Sources */,
+				9221C614E86F5F12500A0B33 /* CancellationModels.swift in Sources */,
+				4C8C0E267DAAB09B66B6FD63 /* CancellationRepository.swift in Sources */,
+				A369BFC0658958DE09DC6308 /* CancellationComponents.swift in Sources */,
+				BEC5C9FB6BD70D7694D707F0 /* EventCancellationFlowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
