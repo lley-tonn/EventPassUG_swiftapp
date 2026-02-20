@@ -17,6 +17,7 @@
 		0C108CB42C7CABB7AD3C0841 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10F2EFDDF840012429D /* QRScannerView.swift */; };
 		0D8954403AB3374B4DBCE35A /* AnalyticsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F619E77C7370842FDB348532 /* AnalyticsCharts.swift */; };
 		0DFC45AEC8724C292CE36C22 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1192EFDDF840012429D /* LoadingView.swift */; };
+		0E3329C86243997AC58065B8 /* CSVGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F91510FD6B25B5DFA27736D /* CSVGenerator.swift */; };
 		0EF927718025CAEEA9E85289 /* FAQSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F02EFDDF840012429D /* FAQSectionView.swift */; };
 		15FEC2AAA48ACB2A17964C2F /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B42EFDDF840012429D /* Validation.swift */; };
 		172C482B577713073B0D5D5B /* NotificationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C12EFDDF840012429D /* NotificationRepository.swift */; };
@@ -40,6 +41,7 @@
 		38C44637D5C9029441B8D9BE /* AddContactMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E32EFDDF840012429D /* AddContactMethodView.swift */; };
 		3AC3D07FDF24CF94A8EA3A40 /* ImageStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AA2EFDDF840012429D /* ImageStorageManager.swift */; };
 		3C2DEE461544F26067AB7C93 /* VerificationRequiredOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1212EFDDF840012429D /* VerificationRequiredOverlay.swift */; };
+		3C5BE80733016E51C106C4BD /* EventReportExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1492BDC152B9EC662EC7D5 /* EventReportExportService.swift */; };
 		3F31A89F30B3DD98B4C9CB9D /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0912EFDDF840012429D /* MainTabView.swift */; };
 		3FA1320C7983194C302AC45E /* AuthPromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */; };
 		41F160ADDD750FF08376F10B /* OrganizerAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */; };
@@ -69,6 +71,7 @@
 		64EBEFACB448460749113B98 /* OnboardingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE9C0F021924E77DEA5A04EB /* OnboardingComponents.swift */; };
 		65BE5AD38195323EAF1FC135 /* LocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BF2EFDDF840012429D /* LocationRepository.swift */; };
 		6B6F38859FBD3C8302E3E9F1 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3030E765F3FF80B86A376D48 /* OnboardingModels.swift */; };
+		6C7AFA2D99083934E0151716 /* AttendeeExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13005B31069C54EF7CEAE6F1 /* AttendeeExportService.swift */; };
 		6F41EAE0E9CCA7B729D7C768 /* OrganizerNotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10B2EFDDF840012429D /* OrganizerNotificationCenterView.swift */; };
 		6F46273018D40915E7AD2799 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0992EFDDF840012429D /* PersistenceController.swift */; };
 		7093EB065629CB7D266EFC9C /* ImageCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A92EFDDF840012429D /* ImageCompressor.swift */; };
@@ -101,18 +104,21 @@
 		9C993DAF154D5915A7784BDF /* EnhancedAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BC2EFDDF840012429D /* EnhancedAuthRepository.swift */; };
 		9D20BC1E282D4968F5CCA43D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED9E3877B1BC2CC3C9BA74F3 /* Assets.xcassets */; };
 		9EEF1AC77ADF3902B63E7E0C /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0250375032A5E3E46BD061 /* OnboardingViewModel.swift */; };
+		A02FC44DC671A1AAAF514CB0 /* ExportAttendeesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865557042AB463830EB3DA5D /* ExportAttendeesButton.swift */; };
 		A369BFC0658958DE09DC6308 /* CancellationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A05FCEFCCE228812A41176 /* CancellationComponents.swift */; };
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
 		A9DDEDFD95C15D39462967E2 /* PDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AE2EFDDF840012429D /* PDFGenerator.swift */; };
 		AA477A79CE5F40F62EFC9EBC /* IDCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D293ED25DF9B5F577E27D /* IDCameraView.swift */; };
 		B065402867C2535D8BDD8246 /* PulsingDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11D2EFDDF840012429D /* PulsingDot.swift */; };
 		B35BA38EB6C9B40AE4CC3676 /* AuthChoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596A0169D31BCD5B6CDD224B /* AuthChoiceView.swift */; };
+		B5E871C115FE780A8B63F263 /* ExportReportButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281200245FB3DE39209FF9A /* ExportReportButton.swift */; };
 		B732B5EFF9E256E1D7485A18 /* TicketSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E02EFDDF840012429D /* TicketSuccessView.swift */; };
 		B8FE29E05D216165337E3A50 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A32EFDDF840012429D /* DateUtilities.swift */; };
 		BC7CB134EF479AF5A0982E3B /* PaymentConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0DB2EFDDF840012429D /* PaymentConfirmationView.swift */; };
 		BEC5C9FB6BD70D7694D707F0 /* EventCancellationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */; };
 		BF6BD1F298B3B1827BA24092 /* OrganizerRefundViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0E1DBEF51FBFB7066023C7 /* OrganizerRefundViews.swift */; };
 		C086777E87713D0C57F75576 /* RefundModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14BF7498113ECDED046873A /* RefundModels.swift */; };
+		C37C3219AC9581F3907E6980 /* Attendee.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2731E72ED5D569CB97B4F87C /* Attendee.swift */; };
 		C3FCEC50B20DBBF505A87667 /* EventPassUGApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0942EFDDF840012429D /* EventPassUGApp.swift */; };
 		C4F3CDA85066038932AA464D /* HapticFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A72EFDDF840012429D /* HapticFeedback.swift */; };
 		C671424F80471AE02AA36E6B /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F72EFDDF840012429D /* NotificationsView.swift */; };
@@ -134,6 +140,7 @@
 		D8AFF628ED73F0772989A039 /* AppNotificationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0B92EFDDF840012429D /* AppNotificationRepository.swift */; };
 		D8E7A47350F592FDE02A96A1 /* DeviceOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A42EFDDF840012429D /* DeviceOrientation.swift */; };
 		D9948E444320DFC6DB3BFA8F /* CardScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0EE2EFDDF840012429D /* CardScanner.swift */; };
+		DB7C6DA77368FA70828EA420 /* AttendeeExportOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4255B8391CD0B8C3C205BD7D /* AttendeeExportOptionsSheet.swift */; };
 		DF78862B54815368AF925DF2 /* RefundRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1278B3A2D1FE7991C1E87570 /* RefundRepository.swift */; };
 		E05E586C61ED14110BAA8352 /* AuthComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0E52EFDDF840012429D /* AuthComponents.swift */; };
 		E0A8EA62C3F0B32E4A512082 /* PaymentMethodsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F82EFDDF840012429D /* PaymentMethodsView.swift */; };
@@ -162,11 +169,16 @@
 
 /* Begin PBXFileReference section */
 		0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageEventTicketsView.swift; sourceTree = "<group>"; };
+		0F91510FD6B25B5DFA27736D /* CSVGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CSVGenerator.swift; sourceTree = "<group>"; };
 		1278B3A2D1FE7991C1E87570 /* RefundRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundRepository.swift; path = EventPassUG/Data/Repositories/RefundRepository.swift; sourceTree = "<group>"; };
+		13005B31069C54EF7CEAE6F1 /* AttendeeExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttendeeExportService.swift; sourceTree = "<group>"; };
 		2356CF723F0A50F4C218AC45 /* EventCancellationFlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventCancellationFlowView.swift; path = EventPassUG/Features/Cancellation/EventCancellationFlowView.swift; sourceTree = "<group>"; };
+		2731E72ED5D569CB97B4F87C /* Attendee.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Attendee.swift; sourceTree = "<group>"; };
+		2D1492BDC152B9EC662EC7D5 /* EventReportExportService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventReportExportService.swift; sourceTree = "<group>"; };
 		2EDF3632CD5B334F8AED8A0E /* OnboardingSlides.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingSlides.swift; path = Onboarding/OnboardingSlides.swift; sourceTree = "<group>"; };
 		3030E765F3FF80B86A376D48 /* OnboardingModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingModels.swift; path = Onboarding/OnboardingModels.swift; sourceTree = "<group>"; };
 		30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictiveAnalysisDetailView.swift; sourceTree = "<group>"; };
+		4255B8391CD0B8C3C205BD7D /* AttendeeExportOptionsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttendeeExportOptionsSheet.swift; sourceTree = "<group>"; };
 		461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarketingInsightsDetailView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		4750C0932EFDDF840012429D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -296,7 +308,9 @@
 		6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuestPlaceholders.swift; sourceTree = "<group>"; };
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		865557042AB463830EB3DA5D /* ExportAttendeesButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExportAttendeesButton.swift; sourceTree = "<group>"; };
 		920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudienceAnalyticsDetailView.swift; sourceTree = "<group>"; };
+		9281200245FB3DE39209FF9A /* ExportReportButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExportReportButton.swift; sourceTree = "<group>"; };
 		9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OrganizerAnalytics.swift; sourceTree = "<group>"; };
 		9F3CE0414AC75CAE92131920 /* CancellationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationModels.swift; path = EventPassUG/Domain/Models/CancellationModels.swift; sourceTree = "<group>"; };
 		A14BF7498113ECDED046873A /* RefundModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundModels.swift; path = EventPassUG/Domain/Models/RefundModels.swift; sourceTree = "<group>"; };
@@ -393,6 +407,16 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		3530CB4226ACB769C105F3A7 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2D1492BDC152B9EC662EC7D5 /* EventReportExportService.swift */,
+				13005B31069C54EF7CEAE6F1 /* AttendeeExportService.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
 		4750C0922EFDDF840012429D /* Routing */ = {
 			isa = PBXGroup;
 			children = (
@@ -483,6 +507,7 @@
 				4750C0B22EFDDF840012429D /* ScrollHelpers.swift */,
 				4750C0B32EFDDF840012429D /* ShareSheet.swift */,
 				4750C0B42EFDDF840012429D /* Validation.swift */,
+				0F91510FD6B25B5DFA27736D /* CSVGenerator.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -533,6 +558,7 @@
 			children = (
 				4750C0B82EFDDF840012429D /* Persistence */,
 				4750C0C72EFDDF840012429D /* Repositories */,
+				3530CB4226ACB769C105F3A7 /* Services */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -552,6 +578,7 @@
 				4750C0D22EFDDF840012429D /* UserInterests.swift */,
 				4750C0D32EFDDF840012429D /* UserPreferences.swift */,
 				9303670E098B828C4BDC34F4 /* OrganizerAnalytics.swift */,
+				2731E72ED5D569CB97B4F87C /* Attendee.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -648,6 +675,7 @@
 				0E0ED3C80564C4E363993F74 /* ManageEventTicketsView.swift */,
 				DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */,
 				058D15D85F386BB9FA88F669 /* Analytics */,
+				C3913E89B77EACBF32D0517C /* Export */,
 			);
 			path = Organizer;
 			sourceTree = "<group>";
@@ -785,6 +813,17 @@
 				9A2FBC92990D103CF9A7B6BC /* Models */,
 			);
 			name = Domain;
+			sourceTree = "<group>";
+		};
+		C3913E89B77EACBF32D0517C /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				9281200245FB3DE39209FF9A /* ExportReportButton.swift */,
+				865557042AB463830EB3DA5D /* ExportAttendeesButton.swift */,
+				4255B8391CD0B8C3C205BD7D /* AttendeeExportOptionsSheet.swift */,
+			);
+			name = Export;
+			path = Export;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1006,6 +1045,13 @@
 				64EBEFACB448460749113B98 /* OnboardingComponents.swift in Sources */,
 				8D67F8062A599BE459B0D17D /* OnboardingSlides.swift in Sources */,
 				EF5D3EBF7AA18996D7D11FDE /* OnboardingView.swift in Sources */,
+				C37C3219AC9581F3907E6980 /* Attendee.swift in Sources */,
+				0E3329C86243997AC58065B8 /* CSVGenerator.swift in Sources */,
+				3C5BE80733016E51C106C4BD /* EventReportExportService.swift in Sources */,
+				6C7AFA2D99083934E0151716 /* AttendeeExportService.swift in Sources */,
+				B5E871C115FE780A8B63F263 /* ExportReportButton.swift in Sources */,
+				A02FC44DC671A1AAAF514CB0 /* ExportAttendeesButton.swift in Sources */,
+				DB7C6DA77368FA70828EA420 /* AttendeeExportOptionsSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

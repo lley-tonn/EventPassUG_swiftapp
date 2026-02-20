@@ -15,6 +15,13 @@ struct EventAnalyticsView: View {
     @State private var showingManageTickets = false
     @State private var showingEditEvent = false
     @State private var showDeleteConfirmation = false
+    @State private var showingExportReportSheet = false
+    @State private var showingExportAttendeesSheet = false
+    @State private var exportedFileURL: URL?
+    @State private var showingShareSheet = false
+    @State private var isExporting = false
+    @State private var exportError: String?
+    @State private var showingExportError = false
 
     init(event: Event) {
         _viewModel = StateObject(wrappedValue: EventAnalyticsViewModel(event: event))
@@ -38,6 +45,26 @@ struct EventAnalyticsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
+                    // Export Section
+                    Section("Export") {
+                        Button(action: {
+                            showingExportReportSheet = true
+                            HapticFeedback.light()
+                        }) {
+                            Label("Export Report", systemImage: "square.and.arrow.up")
+                        }
+
+                        Button(action: {
+                            showingExportAttendeesSheet = true
+                            HapticFeedback.light()
+                        }) {
+                            Label("Export Attendees", systemImage: "person.3")
+                        }
+                    }
+
+                    Divider()
+
+                    // Management Section
                     Button(action: {
                         showingEditEvent = true
                         HapticFeedback.light()
@@ -95,6 +122,49 @@ struct EventAnalyticsView: View {
             } else {
                 Text("This will permanently delete '\(viewModel.event.title)'.")
             }
+        }
+        // MARK: - Export Report Sheet
+        .confirmationDialog(
+            "Export Report Format",
+            isPresented: $showingExportReportSheet,
+            titleVisibility: .visible
+        ) {
+            Button("PDF (Recommended)") {
+                exportReport(format: .pdf)
+            }
+            Button("CSV") {
+                exportReport(format: .csv)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Export analytics report for \"\(viewModel.event.title)\"")
+        }
+        // MARK: - Export Attendees Sheet
+        .sheet(isPresented: $showingExportAttendeesSheet) {
+            AttendeeExportOptionsSheet(event: viewModel.event) { filter in
+                showingExportAttendeesSheet = false
+                exportAttendees(filter: filter)
+            }
+            .environmentObject(services)
+            .presentationDetents([.medium])
+        }
+        // MARK: - Share Sheet for Export
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = exportedFileURL {
+                ShareSheet(items: [url]) { completed in
+                    if completed {
+                        HapticFeedback.success()
+                    }
+                    // Clean up temp file
+                    try? FileManager.default.removeItem(at: url)
+                    exportedFileURL = nil
+                }
+            }
+        }
+        .alert("Export Failed", isPresented: $showingExportError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(exportError ?? "An unknown error occurred")
         }
         .task {
             await viewModel.loadAnalytics()
@@ -187,6 +257,9 @@ struct EventAnalyticsView: View {
     @ViewBuilder
     private func analyticsContent(geometry: GeometryProxy) -> some View {
         VStack(spacing: AppSpacing.lg) {
+            // Export Actions (Quick Access)
+            exportActionsSection
+
             // Overview Metrics Grid
             overviewMetricsGrid(geometry: geometry)
 
@@ -201,6 +274,68 @@ struct EventAnalyticsView: View {
         }
         .padding(AppSpacing.md)
         .padding(.bottom, AppSpacing.xl) // Extra bottom padding for scroll
+    }
+
+    // MARK: - Export Actions Section
+
+    @ViewBuilder
+    private var exportActionsSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            Text("Export Data")
+                .font(AppTypography.caption)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: AppSpacing.sm) {
+                // Export Report Button
+                Button(action: {
+                    showingExportReportSheet = true
+                    HapticFeedback.light()
+                }) {
+                    HStack(spacing: AppSpacing.xs) {
+                        if isExporting {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                                .tint(.white)
+                        } else {
+                            Image(systemName: "chart.bar.doc.horizontal")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        Text("Export Report")
+                            .font(AppTypography.captionEmphasized)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(RoleConfig.organizerPrimary)
+                    .cornerRadius(AppCornerRadius.md)
+                }
+                .disabled(isExporting)
+
+                // Export Attendees Button
+                Button(action: {
+                    showingExportAttendeesSheet = true
+                    HapticFeedback.light()
+                }) {
+                    HStack(spacing: AppSpacing.xs) {
+                        Image(systemName: "person.3")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Export Attendees")
+                            .font(AppTypography.captionEmphasized)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, AppSpacing.md)
+                    .padding(.vertical, AppSpacing.sm)
+                    .background(Color.blue)
+                    .cornerRadius(AppCornerRadius.md)
+                }
+                .disabled(isExporting)
+
+                Spacer()
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.medium)
     }
 
     // MARK: - Overview Metrics
@@ -400,6 +535,135 @@ struct EventAnalyticsView: View {
             } catch {
                 print("Error deleting event: \(error)")
                 await MainActor.run {
+                    HapticFeedback.error()
+                }
+            }
+        }
+    }
+
+    // MARK: - Export Functions
+
+    /// Exports analytics report for the CURRENT event only
+    private func exportReport(format: EventReportExportFormat) {
+        // Safety check: Ensure we're exporting for the correct event
+        guard viewModel.analytics?.eventId == viewModel.event.id else {
+            // If analytics haven't loaded, generate from event data
+            Task {
+                await exportReportWithGeneratedAnalytics(format: format)
+            }
+            return
+        }
+
+        isExporting = true
+
+        Task {
+            do {
+                let exportService = EventReportExportService()
+                guard let analytics = viewModel.analytics else {
+                    await MainActor.run {
+                        exportError = "Analytics not available"
+                        showingExportError = true
+                        isExporting = false
+                    }
+                    return
+                }
+
+                let fileURL = try await exportService.exportReport(
+                    for: viewModel.event,
+                    analytics: analytics,
+                    format: format
+                )
+
+                await MainActor.run {
+                    isExporting = false
+                    if let url = fileURL {
+                        exportedFileURL = url
+                        showingShareSheet = true
+                    } else {
+                        exportError = "Failed to generate export file"
+                        showingExportError = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isExporting = false
+                    exportError = error.localizedDescription
+                    showingExportError = true
+                    HapticFeedback.error()
+                }
+            }
+        }
+    }
+
+    /// Fallback export using generated analytics from event data
+    private func exportReportWithGeneratedAnalytics(format: EventReportExportFormat) async {
+        await MainActor.run {
+            isExporting = true
+        }
+
+        do {
+            // Generate analytics from event data
+            let analytics = viewModel.generateAnalyticsFromEvent()
+            let exportService = EventReportExportService()
+
+            let fileURL = try await exportService.exportReport(
+                for: viewModel.event,
+                analytics: analytics,
+                format: format
+            )
+
+            await MainActor.run {
+                isExporting = false
+                if let url = fileURL {
+                    exportedFileURL = url
+                    showingShareSheet = true
+                } else {
+                    exportError = "Failed to generate export file"
+                    showingExportError = true
+                }
+            }
+        } catch {
+            await MainActor.run {
+                isExporting = false
+                exportError = error.localizedDescription
+                showingExportError = true
+                HapticFeedback.error()
+            }
+        }
+    }
+
+    /// Exports attendee list for the CURRENT event only
+    private func exportAttendees(filter: AttendeeExportFilter) {
+        isExporting = true
+
+        Task {
+            do {
+                let exportService = AttendeeExportService(
+                    ticketService: services.ticketService
+                )
+
+                // CRITICAL: Export only attendees for THIS event
+                let fileURL = try await exportService.exportAttendees(
+                    eventId: viewModel.event.id,
+                    eventTitle: viewModel.event.title,
+                    filter: filter
+                )
+
+                await MainActor.run {
+                    isExporting = false
+                    if let url = fileURL {
+                        exportedFileURL = url
+                        showingShareSheet = true
+                    } else {
+                        exportError = "Failed to generate export file"
+                        showingExportError = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    isExporting = false
+                    exportError = error.localizedDescription
+                    showingExportError = true
                     HapticFeedback.error()
                 }
             }
