@@ -1,7 +1,7 @@
 # EventPass UG - Backend Data Model Specification
 
 **Generated:** 2026-02-20
-**Version:** 1.0
+**Version:** 1.1
 **Purpose:** Complete backend-ready variable and schema specification for database design, API contracts, and entity relationships.
 
 ---
@@ -47,6 +47,8 @@
 | SupportTicket | Customer support requests | SupportModels.swift |
 | OnboardingProfile | Onboarding state | OnboardingModels.swift |
 | ExportRecord | Export audit records (inferred) | EventReportExportService.swift |
+| TicketSaleEvent | Real-time ticket sale notification | TicketRepository.swift |
+| NotificationAnalyticsEvent | Notification engagement tracking | NotificationAnalyticsRepository.swift |
 
 ---
 
@@ -789,6 +791,40 @@ Onboarding state persistence.
 
 ---
 
+### Entity: TicketSaleEvent
+
+Real-time ticket sale notification for organizer dashboards.
+
+| Field | Type | Required | Description | Source |
+|-------|------|----------|-------------|--------|
+| id | UUID | Yes | **Backend: Primary key** | Inferred |
+| eventId | UUID | Yes | Foreign key to Event | TicketRepository.swift:27 |
+| eventTitle | String | Yes | Event title | TicketRepository.swift:28 |
+| ticketType | String | Yes | Ticket type name | TicketRepository.swift:29 |
+| quantity | Int | Yes | Tickets purchased | TicketRepository.swift:30 |
+| totalAmount | Decimal | Yes | Sale total amount | TicketRepository.swift:31 |
+| timestamp | Date | Yes | Sale timestamp | TicketRepository.swift:32 |
+| organizerId | UUID | Yes | **Backend: Organizer to notify** | Inferred |
+
+**Note:** Used for real-time WebSocket/push notifications to organizer dashboard.
+
+---
+
+### Entity: NotificationAnalyticsEvent
+
+Notification engagement tracking for analytics.
+
+| Field | Type | Required | Description | Source |
+|-------|------|----------|-------------|--------|
+| id | UUID | Yes | Primary key | NotificationAnalyticsRepository.swift:14 |
+| type | String | Yes | Notification type | NotificationAnalyticsRepository.swift:15 |
+| action | NotificationAction | Yes | Action taken | NotificationAnalyticsRepository.swift:16 |
+| eventId | UUID | No | Related event | NotificationAnalyticsRepository.swift:17 |
+| userId | UUID | Yes | User ID | NotificationAnalyticsRepository.swift:18 |
+| timestamp | Date | Yes | Action timestamp | NotificationAnalyticsRepository.swift:19 |
+
+---
+
 ## Enumerations
 
 ### User & Auth Enums
@@ -1032,6 +1068,68 @@ SupportCategory:
   - other
 ```
 
+### Onboarding Enums
+
+```
+InterestCategory (Attendee preferences):
+  - music
+  - festivals
+  - concerts
+  - nightlife
+  - sports
+  - arts
+  - comedy
+  - food
+  - networking
+  - technology
+  - education
+  - wellness
+
+OrganizerEventType (Organizer focus areas):
+  - concerts
+  - festivals
+  - clubNights
+  - conferences
+  - workshops
+  - exhibitions
+  - sports
+  - charity
+  - corporate
+  - private
+
+OnboardingStep:
+  - welcome (0)
+  - roleSelection (1)
+  - basicInfo (2)
+  - personalization (3)
+  - permissions (4)
+  - completion (5)
+```
+
+### Notification Analytics Enums
+
+```
+NotificationAction:
+  - scheduled
+  - delivered
+  - opened
+  - dismissed
+```
+
+### Export Enums
+
+```
+EventReportExportFormat:
+  - pdf
+  - csv
+
+AttendeeExportFilter:
+  - all
+  - checkedIn
+  - notCheckedIn
+  - vipOnly
+```
+
 ### Analytics Enums
 
 ```
@@ -1103,6 +1201,9 @@ EventCancellation 1 ←→ * RefundRequest (via eventId)
 OrganizerAnalytics 1 ←→ * SalesDataPoint
 OrganizerAnalytics 1 ←→ * TierSalesData
 OrganizerAnalytics 1 ←→ * PaymentMethodData
+
+Event 1 ←→ * TicketSaleEvent
+User 1 ←→ * NotificationAnalyticsEvent
 ```
 
 ### Relationship Diagram (Simplified)
@@ -1358,6 +1459,7 @@ Standard filter parameters:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-02-20 | Initial specification |
+| 1.1 | 2026-02-20 | Added TicketSaleEvent, NotificationAnalyticsEvent entities; Added InterestCategory, OrganizerEventType, OnboardingStep, NotificationAction, EventReportExportFormat, AttendeeExportFilter enums; Updated entity relationships |
 
 ---
 
