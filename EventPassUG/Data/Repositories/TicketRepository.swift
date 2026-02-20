@@ -14,6 +14,7 @@ protocol TicketRepositoryProtocol {
     func purchaseTicket(eventId: UUID, ticketTypeId: UUID, quantity: Int, event: Event, ticketType: TicketType, userId: UUID) async throws -> [Ticket]
     func fetchUserTickets(userId: UUID) async throws -> [Ticket]
     func fetchAllTickets() async throws -> [Ticket]
+    func fetchTicketsForEvent(eventId: UUID) async throws -> [Ticket]
     func scanTicket(qrCode: String) async throws -> Ticket
     func validateTicket(qrCode: String) async throws -> Bool
     func rateTicket(ticketId: UUID, rating: Double) async throws
@@ -104,6 +105,13 @@ class MockTicketRepository: TicketRepositoryProtocol {
         // TODO: Replace with real API call
         try await Task.sleep(nanoseconds: 300_000_000)
         return tickets
+    }
+
+    func fetchTicketsForEvent(eventId: UUID) async throws -> [Ticket] {
+        // Fetch tickets for a specific event only
+        // CRITICAL: This ensures exports are scoped to the correct event
+        try await Task.sleep(nanoseconds: 300_000_000)
+        return tickets.filter { $0.eventId == eventId }
     }
 
     func scanTicket(qrCode: String) async throws -> Ticket {
