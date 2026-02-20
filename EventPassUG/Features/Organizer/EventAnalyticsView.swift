@@ -17,6 +17,7 @@ struct EventAnalyticsView: View {
     @State private var showDeleteConfirmation = false
     @State private var showingExportReportSheet = false
     @State private var showingExportAttendeesSheet = false
+    @State private var showingScannerManagement = false
     @State private var exportedFileURL: URL?
     @State private var showingShareSheet = false
     @State private var isExporting = false
@@ -79,6 +80,13 @@ struct EventAnalyticsView: View {
                         Label("Manage Tickets", systemImage: "ticket")
                     }
 
+                    Button(action: {
+                        showingScannerManagement = true
+                        HapticFeedback.light()
+                    }) {
+                        Label("Scanner Devices", systemImage: "qrcode.viewfinder")
+                    }
+
                     if viewModel.event.status != .ongoing {
                         Divider()
 
@@ -109,6 +117,9 @@ struct EventAnalyticsView: View {
             CreateEventWizard(existingDraft: viewModel.event)
                 .environmentObject(authService)
                 .environmentObject(services)
+        }
+        .sheet(isPresented: $showingScannerManagement) {
+            ManageScannerDevicesView(event: viewModel.event)
         }
         .alert("Delete Event?", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
