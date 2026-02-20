@@ -55,12 +55,6 @@ struct ManageScannerDevicesView: View {
             .navigationTitle("Scanner Devices")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: { showingAddScanner = true }) {

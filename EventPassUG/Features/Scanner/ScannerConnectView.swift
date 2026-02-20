@@ -225,15 +225,6 @@ struct ScannerConnectView: View {
                     .background(Color.green)
                     .cornerRadius(AppCornerRadius.md)
                 }
-
-                // Disconnect button
-                Button(action: {
-                    viewModel.disconnect()
-                }) {
-                    Text("Disconnect")
-                        .font(AppTypography.buttonSecondary)
-                        .foregroundColor(.red)
-                }
             }
             .padding(.horizontal, AppSpacing.lg)
             .padding(.bottom, AppSpacing.xl)
