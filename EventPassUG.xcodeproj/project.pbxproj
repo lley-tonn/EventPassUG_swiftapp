@@ -63,6 +63,7 @@
 		557E72E587021F213A6BAFCE /* PairingQRGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052E75301CA7757B268AEBD9 /* PairingQRGenerator.swift */; };
 		5634F39642E2411C13FAD957 /* SupportCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0FE2EFDDF840012429D /* SupportCenterView.swift */; };
 		568C6D8CF2BE8C8D7FCB75FA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0932EFDDF840012429D /* ContentView.swift */; };
+		58EB676B317A023B03196B2F /* ScannerPairingDeepLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CEFA3C71FA47269EB81612 /* ScannerPairingDeepLinkView.swift */; };
 		59BC49C2F042A4ED7D06C813 /* OrganizerAnalyticsDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD3B62C0E07C53C997E9C549 /* OrganizerAnalyticsDashboardViewModel.swift */; };
 		5C329D0C2065823E9EDBD24D /* GuestPlaceholders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */; };
 		5D62CD25A27AFC7983A71B63 /* OrganizerIdentityVerificationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10A2EFDDF840012429D /* OrganizerIdentityVerificationStep.swift */; };
@@ -79,6 +80,7 @@
 		6F41EAE0E9CCA7B729D7C768 /* OrganizerNotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10B2EFDDF840012429D /* OrganizerNotificationCenterView.swift */; };
 		6F46273018D40915E7AD2799 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0992EFDDF840012429D /* PersistenceController.swift */; };
 		7093EB065629CB7D266EFC9C /* ImageCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0A92EFDDF840012429D /* ImageCompressor.swift */; };
+		71C435990563C17D901D6710 /* DeepLinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC72D69ECCAF195526D36237 /* DeepLinkManager.swift */; };
 		734BF84BF6EE5F0F20D7F5D0 /* HelpCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0F32EFDDF840012429D /* HelpCenterView.swift */; };
 		744C4A813BE69DE4A3A25D95 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0C92EFDDF840012429D /* Event.swift */; };
 		74DB7466515D00F7F030C16A /* OrganizerProfileCompletionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C10D2EFDDF840012429D /* OrganizerProfileCompletionStep.swift */; };
@@ -319,6 +321,7 @@
 		4D0E1DBEF51FBFB7066023C7 /* OrganizerRefundViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OrganizerRefundViews.swift; path = EventPassUG/Features/Refunds/OrganizerRefundViews.swift; sourceTree = "<group>"; };
 		596A0169D31BCD5B6CDD224B /* AuthChoiceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthChoiceView.swift; sourceTree = "<group>"; };
 		606A44AFCD95D04585FC46CA /* ScannerStatusBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ScannerStatusBadge.swift; path = EventPassUG/Features/Organizer/Scanner/Components/ScannerStatusBadge.swift; sourceTree = "<group>"; };
+		63CEFA3C71FA47269EB81612 /* ScannerPairingDeepLinkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ScannerPairingDeepLinkView.swift; path = EventPassUG/Features/Scanner/ScannerPairingDeepLinkView.swift; sourceTree = "<group>"; };
 		6D74FAE4FD556FF3F26AA9EE /* GuestPlaceholders.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuestPlaceholders.swift; sourceTree = "<group>"; };
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -331,6 +334,7 @@
 		9F3CE0414AC75CAE92131920 /* CancellationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CancellationModels.swift; path = EventPassUG/Domain/Models/CancellationModels.swift; sourceTree = "<group>"; };
 		A14BF7498113ECDED046873A /* RefundModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RefundModels.swift; path = EventPassUG/Domain/Models/RefundModels.swift; sourceTree = "<group>"; };
 		A788EAE728FEFDF5E57A71E0 /* ManageScannerDevicesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ManageScannerDevicesView.swift; path = EventPassUG/Features/Organizer/Scanner/ManageScannerDevicesView.swift; sourceTree = "<group>"; };
+		AC72D69ECCAF195526D36237 /* DeepLinkManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeepLinkManager.swift; path = EventPassUG/Core/DeepLink/DeepLinkManager.swift; sourceTree = "<group>"; };
 		AF9E9F89960285CAA7E9D207 /* ScannerSessionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ScannerSessionService.swift; path = EventPassUG/Data/Services/ScannerSessionService.swift; sourceTree = "<group>"; };
 		B59D293ED25DF9B5F577E27D /* IDCameraView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = IDCameraView.swift; sourceTree = "<group>"; };
 		C138F4BDC643961C9FF7C790 /* OperationsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OperationsDetailView.swift; sourceTree = "<group>"; };
@@ -428,6 +432,7 @@
 			isa = PBXGroup;
 			children = (
 				9915B5F1D738277EF4FBB08E /* ScannerConnectView.swift */,
+				63CEFA3C71FA47269EB81612 /* ScannerPairingDeepLinkView.swift */,
 			);
 			name = Scanner;
 			sourceTree = "<group>";
@@ -449,6 +454,14 @@
 				0F5E79CE477954BA1D99C11F /* SelectEventForScannersView.swift */,
 			);
 			name = Scanner;
+			sourceTree = "<group>";
+		};
+		2F55A70673F52F18C44DD1F1 /* DeepLink */ = {
+			isa = PBXGroup;
+			children = (
+				AC72D69ECCAF195526D36237 /* DeepLinkManager.swift */,
+			);
+			name = DeepLink;
 			sourceTree = "<group>";
 		};
 		2F72F308404F2B7306E8F85E = {
@@ -929,6 +942,7 @@
 			isa = PBXGroup;
 			children = (
 				2CA94A4B6EFE86C2047B1A5F /* Utilities */,
+				2F55A70673F52F18C44DD1F1 /* DeepLink */,
 			);
 			name = Core;
 			sourceTree = "<group>";
@@ -1176,6 +1190,8 @@
 				D4B07B30083F7A5749324298 /* PairScannerView.swift in Sources */,
 				46AFA23A648936C050F9D592 /* ScannerConnectView.swift in Sources */,
 				BB2261245F91B5BF415344F7 /* SelectEventForScannersView.swift in Sources */,
+				71C435990563C17D901D6710 /* DeepLinkManager.swift in Sources */,
+				58EB676B317A023B03196B2F /* ScannerPairingDeepLinkView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

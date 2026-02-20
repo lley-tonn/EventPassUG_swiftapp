@@ -22,6 +22,19 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.eventpassug.scanner-pairing</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>eventpass</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>EventPass UG needs camera access to scan QR codes for ticket validation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

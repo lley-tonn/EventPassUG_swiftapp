@@ -15,6 +15,9 @@ struct EventPassUGApp: App {
     // Service container for dependency injection
     let services: ServiceContainer
 
+    // Deep link manager for URL handling
+    @StateObject private var deepLinkManager = DeepLinkManager.shared
+
     init() {
         // Initialize services with mock implementations
         // TODO: Replace with real implementations when backend is ready
@@ -35,6 +38,18 @@ struct EventPassUGApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(services)
                 .environmentObject(services.authService as! MockAuthRepository)
+                .environmentObject(deepLinkManager)
+                .onOpenURL { url in
+                    deepLinkManager.handle(url: url)
+                }
+                .fullScreenCover(isPresented: $deepLinkManager.showScannerConnect) {
+                    ScannerPairingDeepLinkView(
+                        pairingData: deepLinkManager.scannerPairingData,
+                        onDismiss: {
+                            deepLinkManager.clearScannerPairing()
+                        }
+                    )
+                }
         }
     }
 
