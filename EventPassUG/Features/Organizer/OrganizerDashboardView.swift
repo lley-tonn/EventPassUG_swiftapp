@@ -1113,7 +1113,7 @@ struct OrganizerDashboardView: View {
                 quickActionRow(icon: "qrcode.viewfinder", title: "Scan Tickets", subtitle: "Validate attendee tickets", color: .blue)
             }
 
-            NavigationLink(destination: Text("Scanner Device Management - Coming Soon").navigationTitle("Scanner Devices")) {
+            NavigationLink(destination: SelectEventForScannersView()) {
                 quickActionRow(icon: "iphone.and.arrow.forward", title: "Manage Scanners", subtitle: "Authorize scanning devices", color: .purple)
             }
         }
