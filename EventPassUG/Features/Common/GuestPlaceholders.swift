@@ -114,7 +114,7 @@ struct GuestTicketsPlaceholder: View {
 
 struct GuestProfilePlaceholder: View {
     @State private var showingAuth = false
-    @State private var showingOrganizerSignup = false
+    @Binding var showingOrganizerSignup: Bool
     @EnvironmentObject var authService: MockAuthRepository
 
     var body: some View {
@@ -134,13 +134,7 @@ struct GuestProfilePlaceholder: View {
         .sheet(isPresented: $showingAuth) {
             ModernAuthView(authService: authService)
         }
-        .sheet(isPresented: $showingOrganizerSignup) {
-            ModernAuthView(authService: authService)
-                .onAppear {
-                    // This would set the auth view to signup mode for organizer
-                    // Implementation note: AuthViewModel would need a property to preset organizer role
-                }
-        }
+        // Note: fullScreenCover for organizer signup is handled by MainTabView
     }
 
     // MARK: - Sign In Section
@@ -314,7 +308,7 @@ struct GuestProfilePlaceholder: View {
 
 #Preview("Guest Profile") {
     NavigationStack {
-        GuestProfilePlaceholder()
+        GuestProfilePlaceholder(showingOrganizerSignup: .constant(false))
             .environmentObject(MockAuthRepository())
     }
 }

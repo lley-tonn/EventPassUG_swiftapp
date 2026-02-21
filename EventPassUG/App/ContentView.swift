@@ -25,6 +25,9 @@ struct ContentView: View {
     @State private var showingAuth = false
     @State private var showingOrganizerSignup = false
 
+    // Track if organizer signup flow is in progress (prevents premature transition to main app)
+    @State private var organizerSignupInProgress = false
+
     var body: some View {
         Group {
             // FLOW LOGIC (Priority Order):
@@ -56,12 +59,22 @@ struct ContentView: View {
                     showingOrganizerSignup: $showingOrganizerSignup,
                     continueAsGuest: $continueAsGuest
                 )
+                .fullScreenCover(isPresented: $showingOrganizerSignup) {
+                    // Organizer signup flow: Auth → KYC
+                    OrganizerSignupFlowView(authService: authService) {
+                        // Flow complete (either cancelled or KYC finished)
+                        organizerSignupInProgress = false
+                        showingOrganizerSignup = false
+                        if authService.isAuthenticated {
+                            hasChosenAuthMethod = true
+                        }
+                    }
+                    .onAppear {
+                        organizerSignupInProgress = true
+                    }
+                }
                 .sheet(isPresented: $showingAuth) {
                     ModernAuthView(authService: authService)
-                }
-                .sheet(isPresented: $showingOrganizerSignup) {
-                    ModernAuthView(authService: authService)
-                        // Note: Would need AuthViewModel support to preset organizer role
                 }
                 .onChange(of: continueAsGuest) { isGuest in
                     if isGuest {
@@ -69,17 +82,19 @@ struct ContentView: View {
                     }
                 }
                 .onChange(of: authService.isAuthenticated) { isAuth in
-                    if isAuth {
+                    // Only mark auth method chosen if NOT in organizer signup flow
+                    // Organizer signup handles its own completion
+                    if isAuth && !organizerSignupInProgress {
                         hasChosenAuthMethod = true
                     }
                 }
                 .transition(.opacity)
 
-            } else if authService.isAuthenticated {
+            } else if authService.isAuthenticated && !organizerSignupInProgress {
                 // USER IS LOGGED IN: Show main app
                 if let user = authService.currentUser {
                     // Use currentActiveRole for navigation (supports dual-role switching)
-                    MainTabView(userRole: user.currentActiveRole)
+                    MainTabView(userRole: user.currentActiveRole, organizerSignupInProgress: $organizerSignupInProgress)
                         .fullScreenCover(isPresented: $showPreferencesOnboarding) {
                             OnboardingFlowView(showOnboarding: $showPreferencesOnboarding)
                                 .environmentObject(authService)
@@ -103,7 +118,7 @@ struct ContentView: View {
             } else {
                 // GUEST MODE OR RETURNING USER: Show main app in guest mode
                 // User can browse events without authentication
-                MainTabView(userRole: nil)
+                MainTabView(userRole: nil, organizerSignupInProgress: $organizerSignupInProgress)
             }
         }
         // Smooth transitions between states

@@ -12,6 +12,12 @@ struct MainTabView: View {
     @State private var selectedTab = 0
     @EnvironmentObject var authService: MockAuthRepository
 
+    // Organizer signup flow state (shared across tabs)
+    @State private var showingOrganizerSignup = false
+
+    // Binding to tell parent view (ContentView) that organizer signup is in progress
+    @Binding var organizerSignupInProgress: Bool
+
     // Effective role: default to attendee for guests
     private var effectiveRole: UserRole {
         userRole ?? .attendee
@@ -45,7 +51,7 @@ struct MainTabView: View {
                     if authService.isAuthenticated {
                         ProfileView()
                     } else {
-                        GuestProfilePlaceholder()
+                        GuestProfilePlaceholder(showingOrganizerSignup: $showingOrganizerSignup)
                     }
                 }
                 .tabItem {
@@ -77,11 +83,30 @@ struct MainTabView: View {
         .onChange(of: selectedTab) { _ in
             HapticFeedback.selection()
         }
+        // Organizer signup flow - presented at TabView level to persist across auth state changes
+        .fullScreenCover(isPresented: $showingOrganizerSignup) {
+            OrganizerSignupFlowView(authService: authService) {
+                showingOrganizerSignup = false
+                organizerSignupInProgress = false
+            }
+        }
+        .onChange(of: showingOrganizerSignup) { isShowing in
+            // Sync with parent ContentView so it doesn't switch views during signup
+            organizerSignupInProgress = isShowing
+        }
+    }
+}
+
+// Convenience initializer for when no binding is needed
+extension MainTabView {
+    init(userRole: UserRole?) {
+        self.userRole = userRole
+        self._organizerSignupInProgress = .constant(false)
     }
 }
 
 #Preview {
-    MainTabView(userRole: .attendee)
+    MainTabView(userRole: .attendee, organizerSignupInProgress: .constant(false))
         .environmentObject(MockAuthRepository())
         .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
