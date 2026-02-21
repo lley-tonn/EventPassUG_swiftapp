@@ -33,6 +33,7 @@
 		2436C0F09D445F70FDCD2243 /* EventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1172EFDDF840012429D /* EventCard.swift */; };
 		24B5A3FBFBD6FCC371408886 /* TermsAndPrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0FF2EFDDF840012429D /* TermsAndPrivacyView.swift */; };
 		256FAE4970F0F6EF1ABA7813 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0FA2EFDDF840012429D /* ProfileView.swift */; };
+		27A2FC3C696ABDD4B022CC0A /* OrganizerSignupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E62880501A9A5AB3DF0D476 /* OrganizerSignupFlowView.swift */; };
 		28C09420EA6FEFB89F5D0A36 /* PhoneVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0EA2EFDDF840012429D /* PhoneVerificationView.swift */; };
 		2BDD7A09DF09D2662D3CF362 /* TicketPurchaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0DF2EFDDF840012429D /* TicketPurchaseView.swift */; };
 		2CA27282EFDD2AF0B41FB0F3 /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0BA2EFDDF840012429D /* AuthRepository.swift */; };
@@ -193,6 +194,7 @@
 		30E2ADB51125CF69010C7FA8 /* PredictiveAnalysisDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PredictiveAnalysisDetailView.swift; sourceTree = "<group>"; };
 		3458D4CE2213D6EF29C402B6 /* PairScannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PairScannerView.swift; path = EventPassUG/Features/Organizer/Scanner/PairScannerView.swift; sourceTree = "<group>"; };
 		3E4D36450B1E5B1BEFEC4C50 /* ScannerModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ScannerModels.swift; path = EventPassUG/Domain/Models/ScannerModels.swift; sourceTree = "<group>"; };
+		3E62880501A9A5AB3DF0D476 /* OrganizerSignupFlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventPassUG/Features/Auth/OrganizerSignupFlowView.swift; sourceTree = SOURCE_ROOT; };
 		4255B8391CD0B8C3C205BD7D /* AttendeeExportOptionsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AttendeeExportOptionsSheet.swift; sourceTree = "<group>"; };
 		461018CB616A93D67C864FD6 /* MarketingInsightsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarketingInsightsDetailView.swift; sourceTree = "<group>"; };
 		4750C0912EFDDF840012429D /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -700,6 +702,7 @@
 				4750C0E92EFDDF840012429D /* PermissionsView.swift */,
 				4750C0EA2EFDDF840012429D /* PhoneVerificationView.swift */,
 				596A0169D31BCD5B6CDD224B /* AuthChoiceView.swift */,
+				3E62880501A9A5AB3DF0D476 /* OrganizerSignupFlowView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -1192,6 +1195,7 @@
 				BB2261245F91B5BF415344F7 /* SelectEventForScannersView.swift in Sources */,
 				71C435990563C17D901D6710 /* DeepLinkManager.swift in Sources */,
 				58EB676B317A023B03196B2F /* ScannerPairingDeepLinkView.swift in Sources */,
+				27A2FC3C696ABDD4B022CC0A /* OrganizerSignupFlowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -153,7 +153,7 @@ struct ProfileView: View {
         } else {
             // Fallback: Should not reach here for guests
             // MainTabView shows GuestProfilePlaceholder instead
-            GuestProfilePlaceholder()
+            GuestProfilePlaceholder(showingOrganizerSignup: .constant(false))
                 .environmentObject(authService)
         }
     }

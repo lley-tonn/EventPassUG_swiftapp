@@ -105,9 +105,9 @@ struct OrganizerContactInfoStep: View {
                 .cornerRadius(AppCornerRadius.medium)
                 .padding(.horizontal, AppSpacing.md)
 
-                // Optional Brand Info
+                // Brand & Social Info (at least one social platform required)
                 VStack(alignment: .leading, spacing: AppSpacing.md) {
-                    Text("Brand Information (Optional)")
+                    Text("Brand & Social Platforms")
                         .font(AppTypography.headline)
 
                     VStack(alignment: .leading, spacing: AppSpacing.xs) {
@@ -213,7 +213,7 @@ struct OrganizerContactInfoStep: View {
                 .padding(.horizontal, AppSpacing.md)
 
                 if !isFormValid {
-                    Text("Please provide public email and phone number")
+                    Text("Please provide email, phone, and at least one social platform")
                         .font(AppTypography.caption)
                         .foregroundColor(.red)
                 }
@@ -232,10 +232,13 @@ struct OrganizerContactInfoStep: View {
     }
 
     private var isFormValid: Bool {
-        !profile.publicEmail.isEmpty &&
-        !profile.publicPhone.isEmpty &&
-        profile.publicEmail.contains("@") &&
-        profile.publicPhone.count >= 10
+        // Required: email, phone, and at least one social platform (Instagram, Twitter/X, or Facebook)
+        let hasEmail = !profile.publicEmail.isEmpty && profile.publicEmail.contains("@")
+        let hasPhone = !profile.publicPhone.isEmpty && profile.publicPhone.count >= 10
+        let hasSocialPlatform = !(profile.instagramHandle ?? "").isEmpty ||
+                                !(profile.twitterHandle ?? "").isEmpty ||
+                                !(profile.facebookPage ?? "").isEmpty
+        return hasEmail && hasPhone && hasSocialPlatform
     }
 }
 
