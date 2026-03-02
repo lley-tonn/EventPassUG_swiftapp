@@ -82,10 +82,22 @@ class MockAuthRepository: AuthRepositoryProtocol, ObservableObject {
         // Simulate network delay
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
+        // Use name from onboarding profile if available, otherwise use defaults
+        var firstName = "John"
+        var lastName = "Doe"
+        if let data = UserDefaults.standard.data(forKey: "onboarding_profile"),
+           let profile = try? JSONDecoder().decode(OnboardingProfile.self, from: data),
+           !profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let names = profile.fullName.components(separatedBy: " ")
+            firstName = names.first ?? "John"
+            lastName = names.dropFirst().joined(separator: " ")
+            if lastName.isEmpty { lastName = firstName }
+        }
+
         // Mock authentication - accept any credentials
         let user = User(
-            firstName: "John",
-            lastName: "Doe",
+            firstName: firstName,
+            lastName: lastName,
             email: email,
             role: .attendee
         )
@@ -227,10 +239,22 @@ class MockAuthRepository: AuthRepositoryProtocol, ObservableObject {
         // TODO: Verify phone code with Firebase
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
+        // Use name from onboarding profile if available
+        var firstName = "User"
+        var lastName = "Phone"
+        if let data = UserDefaults.standard.data(forKey: "onboarding_profile"),
+           let profile = try? JSONDecoder().decode(OnboardingProfile.self, from: data),
+           !profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let names = profile.fullName.components(separatedBy: " ")
+            firstName = names.first ?? "User"
+            lastName = names.dropFirst().joined(separator: " ")
+            if lastName.isEmpty { lastName = firstName }
+        }
+
         // Extract phone from verification ID (in real implementation, Firebase handles this)
         let user = User(
-            firstName: "Phone",
-            lastName: "User",
+            firstName: firstName,
+            lastName: lastName,
             role: .attendee,
             phoneNumber: "+256700000000", // Mock phone number
             isPhoneVerified: true,

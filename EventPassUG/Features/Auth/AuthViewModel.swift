@@ -78,6 +78,13 @@ class AuthViewModel: ObservableObject {
 
     init(authService: any AuthRepositoryProtocol) {
         self.authService = authService
+
+        // Pre-fill name from onboarding profile if available
+        if let data = UserDefaults.standard.data(forKey: "onboarding_profile"),
+           let profile = try? JSONDecoder().decode(OnboardingProfile.self, from: data),
+           !profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.fullName = profile.fullName
+        }
     }
 
     // MARK: - Mode Switching
@@ -211,10 +218,15 @@ class AuthViewModel: ObservableObject {
         HapticFeedback.light()
 
         do {
+            // Use name from onboarding profile (stored in fullName) or fallback
+            let names = fullName.isEmpty ? ["User"] : fullName.components(separatedBy: " ")
+            let firstName = names.first ?? "User"
+            let lastName = names.dropFirst().joined(separator: " ").isEmpty ? "Phone" : names.dropFirst().joined(separator: " ")
+
             _ = try await authService.signInWithPhone(
                 phoneNumber: phoneNumber,
-                firstName: "User",
-                lastName: "Phone",
+                firstName: firstName,
+                lastName: lastName,
                 role: .attendee
             )
 
