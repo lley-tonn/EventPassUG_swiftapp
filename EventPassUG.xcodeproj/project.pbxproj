@@ -118,6 +118,7 @@
 		A8283F133F5156C4238D675A /* CreateEventWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C1042EFDDF840012429D /* CreateEventWizard.swift */; };
 		A9DDEDFD95C15D39462967E2 /* PDFGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C0AE2EFDDF840012429D /* PDFGenerator.swift */; };
 		AA477A79CE5F40F62EFC9EBC /* IDCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D293ED25DF9B5F577E27D /* IDCameraView.swift */; };
+		AC376833CD0990C93A29D1E8 /* FormInputComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87EB72D6D3649A64E0184DED /* FormInputComponents.swift */; };
 		B065402867C2535D8BDD8246 /* PulsingDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4750C11D2EFDDF840012429D /* PulsingDot.swift */; };
 		B35BA38EB6C9B40AE4CC3676 /* AuthChoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596A0169D31BCD5B6CDD224B /* AuthChoiceView.swift */; };
 		B5E871C115FE780A8B63F263 /* ExportReportButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281200245FB3DE39209FF9A /* ExportReportButton.swift */; };
@@ -328,6 +329,7 @@
 		79DADAF080FA89248B8A3F25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83D32D584282FCF601A3ADB6 /* EventPassUG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventPassUG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		865557042AB463830EB3DA5D /* ExportAttendeesButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExportAttendeesButton.swift; sourceTree = "<group>"; };
+		87EB72D6D3649A64E0184DED /* FormInputComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FormInputComponents.swift; sourceTree = "<group>"; };
 		8DEF41C4815F26490EB51D3F /* DeviceListItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DeviceListItem.swift; path = EventPassUG/Features/Organizer/Scanner/Components/DeviceListItem.swift; sourceTree = "<group>"; };
 		920E8716D9AA9A77CEA50302 /* AudienceAnalyticsDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudienceAnalyticsDetailView.swift; sourceTree = "<group>"; };
 		9281200245FB3DE39209FF9A /* ExportReportButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExportReportButton.swift; sourceTree = "<group>"; };
@@ -794,6 +796,7 @@
 				E4C63D95BC9A16CCA9DAFD61 /* AuthPromptSheet.swift */,
 				F619E77C7370842FDB348532 /* AnalyticsCharts.swift */,
 				EBA1D9804E77FAE965F5F032 /* AnalyticsDashboardComponents.swift */,
+				87EB72D6D3649A64E0184DED /* FormInputComponents.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1196,6 +1199,7 @@
 				71C435990563C17D901D6710 /* DeepLinkManager.swift in Sources */,
 				58EB676B317A023B03196B2F /* ScannerPairingDeepLinkView.swift in Sources */,
 				27A2FC3C696ABDD4B022CC0A /* OrganizerSignupFlowView.swift in Sources */,
+				AC376833CD0990C93A29D1E8 /* FormInputComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

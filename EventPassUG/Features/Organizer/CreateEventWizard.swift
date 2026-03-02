@@ -498,25 +498,20 @@ struct Step1EventDetails: View {
                 }
 
                 // Title
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Event Title")
-                        .font(AppTypography.headline)
-                    TextField("Enter event title", text: $title)
-                        .textFieldStyle(.roundedBorder)
-                }
+                StyledTextField(
+                    label: "Event Title",
+                    placeholder: "Enter event title",
+                    text: $title,
+                    autocapitalization: .words
+                )
 
                 // Description
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Description")
-                        .font(AppTypography.headline)
-                    TextEditor(text: $description)
-                        .frame(height: 120)
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color(UIColor.separator), lineWidth: 1)
-                        )
-                }
+                StyledTextEditor(
+                    label: "Description",
+                    placeholder: "Describe your event, what attendees can expect...",
+                    text: $description,
+                    minHeight: 120
+                )
 
                 // Category
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
@@ -569,64 +564,40 @@ struct Step1EventDetails: View {
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
                     Text("Venue Name")
                         .font(AppTypography.headline)
+                        .foregroundColor(.primary)
 
-                    TextField("Enter venue name", text: $venueName)
-                        .textFieldStyle(.roundedBorder)
-                        .onChange(of: venueName) { newValue in
-                            locationService.searchLocations(query: newValue)
-                            showingPredictions = !newValue.isEmpty
+                    VenueSearchField(
+                        text: $venueName,
+                        placeholder: "Search for a venue...",
+                        showingPredictions: $showingPredictions,
+                        locationService: locationService,
+                        onLocationSelected: { location in
+                            venueName = location.name
+                            venueAddress = location.address
+                            venueCity = location.city
+                            venueLatitude = location.coordinate.lat
+                            venueLongitude = location.coordinate.lon
+                            showingPredictions = false
+                            HapticFeedback.selection()
                         }
-
-                    // Autocomplete predictions
-                    if showingPredictions && !locationService.predictions.isEmpty {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(locationService.predictions.prefix(5)) { prediction in
-                                Button(action: {
-                                    let location = locationService.selectLocation(prediction)
-                                    venueName = location.name
-                                    venueAddress = location.address
-                                    venueCity = location.city
-                                    venueLatitude = location.coordinate.lat
-                                    venueLongitude = location.coordinate.lon
-                                    showingPredictions = false
-                                    HapticFeedback.selection()
-                                }) {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(prediction.title)
-                                            .font(AppTypography.callout)
-                                            .foregroundColor(.primary)
-                                        Text(prediction.subtitle)
-                                            .font(AppTypography.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(AppSpacing.sm)
-                                }
-
-                                if prediction.id != locationService.predictions.prefix(5).last?.id {
-                                    Divider()
-                                }
-                            }
-                        }
-                        .background(Color(UIColor.systemBackground))
-                        .cornerRadius(AppCornerRadius.small)
-                        .shadow(color: Color.black.opacity(0.1), radius: 8)
-                    }
+                    )
                 }
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Address")
-                        .font(AppTypography.headline)
-                    TextField("Enter address", text: $venueAddress)
-                        .textFieldStyle(.roundedBorder)
-                }
+                // Address
+                StyledTextField(
+                    label: "Address",
+                    placeholder: "Street address",
+                    text: $venueAddress,
+                    icon: "mappin"
+                )
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("City")
-                        .font(AppTypography.headline)
-                    TextField("Enter city", text: $venueCity)
-                        .textFieldStyle(.roundedBorder)
-                }
+                // City
+                StyledTextField(
+                    label: "City",
+                    placeholder: "Enter city",
+                    text: $venueCity,
+                    icon: "building.2"
+                )
             }
             .padding(ResponsiveSpacing.md(geometry))
             }
@@ -702,19 +673,19 @@ struct TicketTypeEditor: View {
                 }
             }
 
-            TextField("Name (e.g., Early Bird, VIP, Regular)", text: $ticketType.name)
-                .textFieldStyle(.roundedBorder)
+            // Ticket name field
+            TicketNameField(text: $ticketType.name)
 
             HStack(spacing: AppSpacing.md) {
+                // Price field
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Price (UGX)")
                         .font(AppTypography.caption)
                         .foregroundColor(.secondary)
-                    TextField("0", value: $ticketType.price, format: .number)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardType(.numberPad)
+                    TicketPriceField(value: $ticketType.price)
                 }
 
+                // Quantity field
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("Quantity")
@@ -724,22 +695,21 @@ struct TicketTypeEditor: View {
                         Toggle("", isOn: $ticketType.isUnlimitedQuantity)
                             .labelsHidden()
                             .scaleEffect(0.8)
+                            .tint(RoleConfig.organizerPrimary)
                         Text("Unlimited")
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                     }
                     if !ticketType.isUnlimitedQuantity {
-                        TextField("100", value: $ticketType.quantity, format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
+                        TicketQuantityField(value: $ticketType.quantity)
                     } else {
                         Text("∞")
                             .font(AppTypography.title2)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 6)
+                            .frame(height: AppDesign.Input.heightCompact)
                             .background(Color(UIColor.tertiarySystemGroupedBackground))
-                            .cornerRadius(8)
+                            .cornerRadius(AppDesign.CornerRadius.input)
                     }
                 }
             }
