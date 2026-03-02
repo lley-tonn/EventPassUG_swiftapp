@@ -344,64 +344,68 @@ struct QRScannerSheet: View {
 
                 // Camera preview would go here
                 // For now, show a mock scanner view
-                VStack(spacing: AppSpacing.lg) {
-                    Spacer()
+                GeometryReader { outerGeometry in
+                    let frameSize = min(outerGeometry.size.width - 80, 250)
+                    VStack(spacing: AppSpacing.lg) {
+                        Spacer()
 
-                    // Scanner frame
-                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                        .stroke(Color.white, lineWidth: 3)
-                        .frame(width: 250, height: 250)
-                        .overlay(
-                            // Corner accents
-                            GeometryReader { geometry in
-                                let size = geometry.size
-                                let cornerLength: CGFloat = 30
-                                let lineWidth: CGFloat = 4
+                        // Scanner frame - Responsive
+                        RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: frameSize, height: frameSize)
+                            .overlay(
+                                // Corner accents
+                                GeometryReader { geometry in
+                                    let size = geometry.size
+                                    let cornerLength: CGFloat = 30
+                                    let lineWidth: CGFloat = 4
 
-                                Path { path in
-                                    // Top left
-                                    path.move(to: CGPoint(x: 0, y: cornerLength))
-                                    path.addLine(to: CGPoint(x: 0, y: 0))
-                                    path.addLine(to: CGPoint(x: cornerLength, y: 0))
+                                    Path { path in
+                                        // Top left
+                                        path.move(to: CGPoint(x: 0, y: cornerLength))
+                                        path.addLine(to: CGPoint(x: 0, y: 0))
+                                        path.addLine(to: CGPoint(x: cornerLength, y: 0))
 
-                                    // Top right
-                                    path.move(to: CGPoint(x: size.width - cornerLength, y: 0))
-                                    path.addLine(to: CGPoint(x: size.width, y: 0))
-                                    path.addLine(to: CGPoint(x: size.width, y: cornerLength))
+                                        // Top right
+                                        path.move(to: CGPoint(x: size.width - cornerLength, y: 0))
+                                        path.addLine(to: CGPoint(x: size.width, y: 0))
+                                        path.addLine(to: CGPoint(x: size.width, y: cornerLength))
 
-                                    // Bottom right
-                                    path.move(to: CGPoint(x: size.width, y: size.height - cornerLength))
-                                    path.addLine(to: CGPoint(x: size.width, y: size.height))
-                                    path.addLine(to: CGPoint(x: size.width - cornerLength, y: size.height))
+                                        // Bottom right
+                                        path.move(to: CGPoint(x: size.width, y: size.height - cornerLength))
+                                        path.addLine(to: CGPoint(x: size.width, y: size.height))
+                                        path.addLine(to: CGPoint(x: size.width - cornerLength, y: size.height))
 
-                                    // Bottom left
-                                    path.move(to: CGPoint(x: cornerLength, y: size.height))
-                                    path.addLine(to: CGPoint(x: 0, y: size.height))
-                                    path.addLine(to: CGPoint(x: 0, y: size.height - cornerLength))
+                                        // Bottom left
+                                        path.move(to: CGPoint(x: cornerLength, y: size.height))
+                                        path.addLine(to: CGPoint(x: 0, y: size.height))
+                                        path.addLine(to: CGPoint(x: 0, y: size.height - cornerLength))
+                                    }
+                                    .stroke(RoleConfig.organizerPrimary, lineWidth: lineWidth)
                                 }
-                                .stroke(RoleConfig.organizerPrimary, lineWidth: lineWidth)
-                            }
-                        )
+                            )
 
-                    Text("Point camera at pairing QR code")
-                        .font(AppTypography.callout)
-                        .foregroundColor(.white)
-
-                    Spacer()
-
-                    // Torch toggle
-                    Button(action: { torchOn.toggle() }) {
-                        Image(systemName: torchOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                            .font(.system(size: 24))
+                        Text("Point camera at pairing QR code")
+                            .font(AppTypography.callout)
                             .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
-                    .padding(.bottom, AppSpacing.xl)
 
-                    // Mock: Simulate successful scan after delay
-                    // In production, this would use AVCaptureSession
+                        Spacer()
+
+                        // Torch toggle
+                        Button(action: { torchOn.toggle() }) {
+                            Image(systemName: torchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Circle())
+                        }
+                        .padding(.bottom, AppSpacing.xl)
+
+                        // Mock: Simulate successful scan after delay
+                        // In production, this would use AVCaptureSession
+                    }
+                    .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("Scan QR Code")
@@ -439,31 +443,39 @@ struct TicketScannerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VStack(spacing: AppSpacing.lg) {
-                // Scanner frame
-                RoundedRectangle(cornerRadius: AppCornerRadius.lg)
-                    .stroke(viewModel.lastResult?.isSuccess == true ? Color.green :
-                            viewModel.lastResult != nil ? Color.red : Color.white,
-                            lineWidth: 3)
-                    .frame(width: 280, height: 280)
-                    .animation(.easeInOut(duration: 0.3), value: viewModel.lastResult?.status)
+            GeometryReader { geometry in
+                let frameSize = min(geometry.size.width - 80, 280)
+                VStack(spacing: AppSpacing.lg) {
+                    Spacer()
 
-                // Status display
-                if let result = viewModel.lastResult {
-                    ScanResultCard(result: result)
-                        .transition(.scale.combined(with: .opacity))
-                } else {
-                    Text("Scan ticket QR code")
-                        .font(AppTypography.callout)
-                        .foregroundColor(.white)
-                }
+                    // Scanner frame - Responsive
+                    RoundedRectangle(cornerRadius: AppCornerRadius.lg)
+                        .stroke(viewModel.lastResult?.isSuccess == true ? Color.green :
+                                viewModel.lastResult != nil ? Color.red : Color.white,
+                                lineWidth: 3)
+                        .frame(width: frameSize, height: frameSize)
+                        .animation(.easeInOut(duration: 0.3), value: viewModel.lastResult?.status)
 
-                // Stats
-                HStack(spacing: AppSpacing.xl) {
-                    StatDisplay(label: "Scanned", value: "\(viewModel.scanCount)")
-                    StatDisplay(label: "Valid", value: "\(viewModel.validCount)")
+                    // Status display
+                    if let result = viewModel.lastResult {
+                        ScanResultCard(result: result)
+                            .transition(.scale.combined(with: .opacity))
+                    } else {
+                        Text("Scan ticket QR code")
+                            .font(AppTypography.callout)
+                            .foregroundColor(.white)
+                    }
+
+                    // Stats
+                    HStack(spacing: AppSpacing.xl) {
+                        StatDisplay(label: "Scanned", value: "\(viewModel.scanCount)")
+                        StatDisplay(label: "Valid", value: "\(viewModel.validCount)")
+                    }
+                    .padding(.top, AppSpacing.lg)
+
+                    Spacer()
                 }
-                .padding(.top, AppSpacing.lg)
+                .frame(maxWidth: .infinity)
             }
         }
         .navigationTitle("Scanning")

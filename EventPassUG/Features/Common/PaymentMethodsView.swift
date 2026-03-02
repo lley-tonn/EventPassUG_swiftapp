@@ -281,6 +281,7 @@ struct AddPaymentMethodView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             if let phone = authService.currentUser?.phoneNumber {
                 mobileMoneyNumber = phone

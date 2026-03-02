@@ -30,38 +30,41 @@ struct QRScannerView: View {
                     .edgesIgnoringSafeArea(.all)
 
                 // Overlay UI
-                VStack {
-                    Spacer()
+                GeometryReader { geometry in
+                    let frameSize = min(geometry.size.width - 80, 280)
+                    VStack {
+                        Spacer()
 
-                    // Scanning frame
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white, lineWidth: 3)
-                        .frame(width: 280, height: 280)
-                        .overlay(
-                            VStack {
-                                ForEach(0..<4) { _ in
-                                    Rectangle()
-                                        .fill(Color.white.opacity(0.3))
-                                        .frame(height: 2)
-                                        .padding(.vertical, 20)
+                        // Scanning frame - Responsive
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: frameSize, height: frameSize)
+                            .overlay(
+                                VStack {
+                                    ForEach(0..<4) { _ in
+                                        Rectangle()
+                                            .fill(Color.white.opacity(0.3))
+                                            .frame(height: 2)
+                                            .padding(.vertical, 20)
+                                    }
                                 }
-                            }
-                        )
+                            )
 
-                    Spacer()
+                        Spacer()
 
-                    // Instructions
-                    VStack(spacing: AppSpacing.sm) {
-                        Text("Scan QR Code")
-                            .font(AppTypography.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
+                        // Instructions
+                        VStack(spacing: AppSpacing.sm) {
+                            Text("Scan QR Code")
+                                .font(AppTypography.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
 
-                        Text("Position the QR code within the frame")
-                            .font(AppTypography.callout)
-                            .foregroundColor(.white.opacity(0.8))
+                            Text("Position the QR code within the frame")
+                                .font(AppTypography.callout)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .padding(.bottom, AppSpacing.xxl)
                     }
-                    .padding(.bottom, AppSpacing.xxl)
                 }
 
                 // Result overlay
@@ -94,6 +97,7 @@ struct QRScannerView: View {
             }
             .toolbarBackground(.hidden, for: .navigationBar)
         }
+        .navigationViewStyle(.stack)
         .onChange(of: scannedCode) { newValue in
             guard let code = newValue, isScanning else { return }
             isScanning = false

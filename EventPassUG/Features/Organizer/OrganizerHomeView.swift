@@ -44,6 +44,7 @@ struct OrganizerHomeView: View {
                     .environmentObject(authService)
             }
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             loadEvents()
             subscribeToTicketSales()

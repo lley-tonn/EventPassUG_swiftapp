@@ -124,6 +124,7 @@ struct AddContactMethodView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .sheet(isPresented: $showPhoneVerification) {
             if verificationId != nil {
                 PhoneVerificationView(phoneNumber: phoneNumber) {

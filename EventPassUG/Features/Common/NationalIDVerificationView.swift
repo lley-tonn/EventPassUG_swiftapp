@@ -278,6 +278,7 @@ struct NationalIDVerificationView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Verification Submitted", isPresented: $showSuccess) {
             Button("OK") {
                 dismiss()

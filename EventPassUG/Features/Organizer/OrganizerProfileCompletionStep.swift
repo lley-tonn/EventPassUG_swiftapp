@@ -111,18 +111,21 @@ struct OrganizerProfileCompletionStep: View {
                 EditProfileView()
                     .environmentObject(authService)
             }
+            .navigationViewStyle(.stack)
         }
         .sheet(isPresented: $showEmailVerification) {
             NavigationView {
                 EmailVerificationView()
                     .environmentObject(authService)
             }
+            .navigationViewStyle(.stack)
         }
         .sheet(isPresented: $showPhoneVerification) {
             NavigationView {
                 OrganizerPhoneVerificationView()
                     .environmentObject(authService)
             }
+            .navigationViewStyle(.stack)
         }
     }
 

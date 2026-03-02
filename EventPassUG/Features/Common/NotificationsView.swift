@@ -43,6 +43,7 @@ struct NotificationsView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private func markAllAsRead() {

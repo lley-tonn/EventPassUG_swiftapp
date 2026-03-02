@@ -150,6 +150,7 @@ struct PhoneVerificationView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Phone Verified", isPresented: $showSuccess) {
             Button("Done") {
                 onVerified?()

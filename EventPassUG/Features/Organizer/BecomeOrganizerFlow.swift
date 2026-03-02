@@ -57,6 +57,7 @@ struct BecomeOrganizerFlow: View {
                 Text("You're now an Organizer! Would you like to switch to Organizer Mode now?")
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     @ViewBuilder

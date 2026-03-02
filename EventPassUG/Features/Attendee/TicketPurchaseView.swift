@@ -236,6 +236,7 @@ struct TicketPurchaseView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .sheet(isPresented: $showingPaymentConfirmation) {
             PaymentConfirmationView(
                 event: event,

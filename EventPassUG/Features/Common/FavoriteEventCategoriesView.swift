@@ -266,6 +266,7 @@ struct FavoriteEventCategoriesView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationViewStyle(.stack)
     }
 
     private var onboardingHeader: some View {
