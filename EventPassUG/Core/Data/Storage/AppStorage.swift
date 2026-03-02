@@ -16,14 +16,13 @@ class AppStorageManager {
 
     // MARK: - Onboarding
 
-    private let onboardingCompletedKey = "hasCompletedOnboarding"
-
+    /// Use the same key as AppStorageKeys.hasSeenOnboarding for consistency
     var hasCompletedOnboarding: Bool {
         get {
-            defaults.bool(forKey: onboardingCompletedKey)
+            defaults.bool(forKey: AppStorageKeys.hasSeenOnboarding)
         }
         set {
-            defaults.set(newValue, forKey: onboardingCompletedKey)
+            defaults.set(newValue, forKey: AppStorageKeys.hasSeenOnboarding)
         }
     }
 

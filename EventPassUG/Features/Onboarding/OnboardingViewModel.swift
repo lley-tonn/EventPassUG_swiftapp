@@ -230,8 +230,9 @@ class OnboardingViewModel: ObservableObject {
             UserDefaults.standard.set(encoded, forKey: "onboarding_profile")
         }
 
-        // Also save completion status
-        UserDefaults.standard.set(true, forKey: "onboarding_completed")
+        // Save completion status using the SAME key that ContentView checks
+        // This is critical - must match AppStorageKeys.hasSeenOnboarding
+        UserDefaults.standard.set(true, forKey: AppStorageKeys.hasSeenOnboarding)
     }
 
     // MARK: - Load Saved Profile
@@ -249,7 +250,7 @@ class OnboardingViewModel: ObservableObject {
         profile = OnboardingProfile()
         currentStep = .welcome
         UserDefaults.standard.removeObject(forKey: "onboarding_profile")
-        UserDefaults.standard.removeObject(forKey: "onboarding_completed")
+        UserDefaults.standard.removeObject(forKey: AppStorageKeys.hasSeenOnboarding)
     }
 
     // MARK: - Validation
@@ -298,6 +299,6 @@ class OnboardingViewModel: ObservableObject {
 
 extension OnboardingViewModel {
     static var isOnboardingCompleted: Bool {
-        UserDefaults.standard.bool(forKey: "onboarding_completed")
+        UserDefaults.standard.bool(forKey: AppStorageKeys.hasSeenOnboarding)
     }
 }
