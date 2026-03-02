@@ -17,16 +17,18 @@ struct AttendeeExportOptionsSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Header
-                headerSection
+            ScrollView {
+                VStack(spacing: AppSpacing.md) {
+                    // Header with event info
+                    headerSection
 
-                // Filter Options
-                filterOptionsSection
-
-                Spacer()
-
-                // Export Button
+                    // Filter Options
+                    filterOptionsSection
+                }
+                .padding(.bottom, 100) // Space for fixed bottom button
+            }
+            .safeAreaInset(edge: .bottom) {
+                // Export Button - fixed at bottom
                 exportButtonSection
             }
             .background(Color(UIColor.systemGroupedBackground))
@@ -41,34 +43,37 @@ struct AttendeeExportOptionsSheet: View {
                 }
             }
         }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     // MARK: - Header Section
 
     @ViewBuilder
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            HStack(spacing: AppSpacing.sm) {
-                Image(systemName: "person.3.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(RoleConfig.organizerPrimary)
+        HStack(spacing: AppSpacing.sm) {
+            Image(systemName: "calendar.circle.fill")
+                .font(.system(size: 32))
+                .foregroundColor(RoleConfig.organizerPrimary)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(event.title)
-                        .font(AppTypography.calloutEmphasized)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.title)
+                    .font(AppTypography.headline)
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
 
-                    Text("Select which attendees to export")
-                        .font(AppTypography.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
+                Text("Select attendees to export")
+                    .font(AppTypography.caption)
+                    .foregroundColor(.secondary)
             }
+
+            Spacer()
         }
         .padding(AppSpacing.md)
         .background(Color(UIColor.secondarySystemGroupedBackground))
+        .cornerRadius(AppCornerRadius.md)
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.top, AppSpacing.sm)
     }
 
     // MARK: - Filter Options Section
@@ -162,36 +167,35 @@ struct AttendeeExportOptionsSheet: View {
             // Privacy Notice
             HStack(spacing: AppSpacing.xs) {
                 Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 12))
+                    .font(.system(size: 14))
                     .foregroundColor(.green)
 
                 Text("Contact info (email/phone) is never exported")
                     .font(AppTypography.caption)
                     .foregroundColor(.secondary)
             }
-            .padding(.horizontal, AppSpacing.md)
 
             // Export Button
             Button(action: {
                 HapticFeedback.medium()
                 onExport(selectedFilter)
             }) {
-                HStack {
+                HStack(spacing: AppSpacing.sm) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 16, weight: .semibold))
                     Text("Export as CSV")
                         .font(AppTypography.buttonPrimary)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
-                .padding(AppSpacing.md)
+                .frame(height: 52)
                 .background(RoleConfig.organizerPrimary)
                 .cornerRadius(AppCornerRadius.md)
             }
-            .padding(.horizontal, AppSpacing.md)
         }
+        .padding(.horizontal, AppSpacing.md)
         .padding(.vertical, AppSpacing.md)
-        .background(Color(UIColor.systemBackground))
+        .background(Color(UIColor.secondarySystemGroupedBackground))
     }
 }
 
