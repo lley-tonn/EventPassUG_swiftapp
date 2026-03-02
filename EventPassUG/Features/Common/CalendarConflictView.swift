@@ -48,6 +48,7 @@ struct CalendarConflictView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     // MARK: - Components

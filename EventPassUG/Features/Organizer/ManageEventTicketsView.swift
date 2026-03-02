@@ -94,6 +94,7 @@ struct ManageEventTicketsView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     // MARK: - Sections

@@ -101,6 +101,7 @@ struct OrganizerIdentityVerificationStep: View {
                 NationalIDVerificationView()
                     .environmentObject(authService)
             }
+            .navigationViewStyle(.stack)
         }
     }
 

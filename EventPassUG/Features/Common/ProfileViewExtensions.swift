@@ -319,6 +319,7 @@ struct EmailVerificationSheet: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Email Sent!", isPresented: $showSuccess) {
             Button("OK") {
                 dismiss()
@@ -452,6 +453,7 @@ struct AccountLinkingView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Account Linked!", isPresented: $showSuccess) {
             Button("OK") {}
         } message: {

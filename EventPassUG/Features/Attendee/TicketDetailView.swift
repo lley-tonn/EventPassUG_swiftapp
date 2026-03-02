@@ -181,28 +181,33 @@ struct TicketDetailView: View {
                                     .foregroundColor(.secondary)
                             }
 
-                            // QR Code
-                            if let qrImage = QRCodeGenerator.generate(
-                                from: ticket.qrCodeData,
-                                size: CGSize(width: 280, height: 280)
-                            ) {
-                                VStack(spacing: AppSpacing.md) {
-                                    Image(uiImage: qrImage)
-                                        .interpolation(.none)
-                                        .resizable()
-                                        .frame(width: 280, height: 280)
-                                        .padding(AppSpacing.lg)
-                                        .background(Color.white)
-                                        .cornerRadius(AppCornerRadius.medium)
-                                        .shadow(color: .black.opacity(0.1), radius: 10)
+                            // QR Code - Responsive sizing
+                            GeometryReader { geometry in
+                                let qrSize = min(geometry.size.width - AppSpacing.lg * 2, 280)
+                                if let qrImage = QRCodeGenerator.generate(
+                                    from: ticket.qrCodeData,
+                                    size: CGSize(width: qrSize, height: qrSize)
+                                ) {
+                                    VStack(spacing: AppSpacing.md) {
+                                        Image(uiImage: qrImage)
+                                            .interpolation(.none)
+                                            .resizable()
+                                            .frame(width: qrSize, height: qrSize)
+                                            .padding(AppSpacing.lg)
+                                            .background(Color.white)
+                                            .cornerRadius(AppCornerRadius.medium)
+                                            .shadow(color: .black.opacity(0.1), radius: 10)
 
-                                    Text(ticket.qrCodeData.suffix(12).uppercased())
-                                        .font(AppTypography.caption)
-                                        .monospaced()
-                                        .foregroundColor(.secondary)
+                                        Text(ticket.qrCodeData.suffix(12).uppercased())
+                                            .font(AppTypography.caption)
+                                            .monospaced()
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
                                 }
-                                .frame(maxWidth: .infinity)
                             }
+                            .aspectRatio(1, contentMode: .fit)
+                            .frame(maxWidth: 320)
                         }
 
                         // Rating section for expired tickets
@@ -331,6 +336,7 @@ struct TicketDetailView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Rating Submitted", isPresented: $showingRatingConfirmation) {
             Button("OK", role: .cancel) { }
         } message: {

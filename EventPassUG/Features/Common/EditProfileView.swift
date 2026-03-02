@@ -383,6 +383,7 @@ struct UpdateEmailView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Verification Sent", isPresented: $showSuccess) {
             Button("OK") {
                 dismiss()
@@ -491,6 +492,7 @@ struct UpdatePhoneView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert("Phone Updated", isPresented: $showSuccess) {
             Button("OK") {
                 dismiss()

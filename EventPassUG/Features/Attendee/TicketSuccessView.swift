@@ -114,20 +114,26 @@ struct TicketSuccessView: View {
 
                         ForEach(tickets) { ticket in
                             VStack(spacing: AppSpacing.md) {
-                                // QR Code
-                                if let qrImage = QRCodeGenerator.generate(
-                                    from: ticket.qrCodeData,
-                                    size: CGSize(width: 250, height: 250)
-                                ) {
-                                    Image(uiImage: qrImage)
-                                        .interpolation(.none)
-                                        .resizable()
-                                        .frame(width: 250, height: 250)
-                                        .padding()
-                                        .background(Color.white)
-                                        .cornerRadius(AppCornerRadius.medium)
-                                        .shadow(color: .black.opacity(0.1), radius: 10)
+                                // QR Code - Responsive sizing
+                                GeometryReader { geometry in
+                                    let qrSize = min(geometry.size.width - AppSpacing.lg * 2, 280)
+                                    if let qrImage = QRCodeGenerator.generate(
+                                        from: ticket.qrCodeData,
+                                        size: CGSize(width: qrSize, height: qrSize)
+                                    ) {
+                                        Image(uiImage: qrImage)
+                                            .interpolation(.none)
+                                            .resizable()
+                                            .frame(width: qrSize, height: qrSize)
+                                            .padding()
+                                            .background(Color.white)
+                                            .cornerRadius(AppCornerRadius.medium)
+                                            .shadow(color: .black.opacity(0.1), radius: 10)
+                                            .frame(maxWidth: .infinity)
+                                    }
                                 }
+                                .aspectRatio(1, contentMode: .fit)
+                                .frame(maxWidth: 320)
 
                                 // Ticket ID
                                 Text(ticket.id.uuidString.prefix(8).uppercased())
@@ -198,6 +204,7 @@ struct TicketSuccessView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 }
 

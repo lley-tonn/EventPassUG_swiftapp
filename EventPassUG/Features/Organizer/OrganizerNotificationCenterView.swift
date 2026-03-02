@@ -70,6 +70,7 @@ struct OrganizerNotificationCenterView: View {
             }
             .navigationBarHidden(true)
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             loadNotifications()
         }

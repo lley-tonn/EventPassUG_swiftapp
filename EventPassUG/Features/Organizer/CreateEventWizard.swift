@@ -168,6 +168,7 @@ struct CreateEventWizard: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
         .alert(isEditingExistingEvent ? "Event Updated!" : "Event Published!", isPresented: $showingSuccessAlert) {
             Button("Done") {
                 dismiss()

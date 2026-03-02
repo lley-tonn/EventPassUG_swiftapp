@@ -68,6 +68,7 @@ struct PaymentConfirmationView: View {
                 )
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     // MARK: - Header Section
