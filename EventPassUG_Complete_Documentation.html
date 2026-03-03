@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EventPassUG Complete Documentation</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm 2cm 3cm 2cm;
+            counter-increment: page;
+        }
+
+        @page {
+            @bottom-center {
+                content: "Page " counter(page);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #FF7A00;
+            border-bottom: 3px solid #FF7A00;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            page-break-after: avoid;
+        }
+
+        h1:first-of-type {
+            margin-top: 0;
+            text-align: center;
+            font-size: 32pt;
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 30px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #555;
+            margin-top: 20px;
+            page-break-after: avoid;
+        }
+
+        h4, h5, h6 {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #666;
+            margin-top: 15px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+
+        code {
+            font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+            font-size: 9pt;
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+            font-size: 9pt;
+            line-height: 1.4;
+            page-break-inside: avoid;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #FF7A00;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #FF7A00;
+            margin: 30px 0;
+        }
+
+        blockquote {
+            border-left: 4px solid #FF7A00;
+            margin: 15px 0;
+            padding: 10px 20px;
+            background-color: #fff8f0;
+            color: #666;
+        }
+
+        a {
+            color: #FF7A00;
+            text-decoration: none;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #222;
+        }
+
+        /* Page number footer */
+        .page-footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            font-size: 9pt;
+            color: #999;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        @media print {
+            body {
+                font-size: 10pt;
+            }
+
+            h1:first-of-type {
+                page-break-after: always;
+            }
+
+            h1 {
+                page-break-before: always;
+            }
+
+            h1:first-of-type {
+                page-break-before: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page-header">EventPassUG Documentation v3.0 | March 2026</div>
+<h1 id="eventpassug-mobile-application">EventPassUG Mobile Application</h1>
+<h2 id="complete-technical-documentation">Complete Technical Documentation</h2>
+<hr />
+<p><strong>Version:</strong> 3.0
+<strong>Generated:</strong> March 2026
+<strong>Platform:</strong> iOS 17+
+<strong>Architecture:</strong> SwiftUI + MVVM + Clean Architecture</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a> .......................... Page 2</li>
+<li><a href="#2-project-overview">Project Overview</a> ............................ Page 3</li>
+<li><a href="#3-system-requirements">System Requirements</a> ...................... Page 4</li>
+<li><a href="#4-architecture">Architecture</a> .................................... Page 5</li>
+<li><a href="#5-design-system--tokens">Design System &amp; Tokens</a> ................. Page 8</li>
+<li><a href="#6-features">Features</a> ............................................ Page 14</li>
+<li><a href="#7-data-models">Data Models</a> ...................................... Page 32</li>
+<li><a href="#8-repositories--services">Repositories &amp; Services</a> .............. Page 38</li>
+<li><a href="#9-ui-components">UI Components</a> .................................. Page 42</li>
+<li><a href="#10-utilities">Utilities</a> ........................................ Page 46</li>
+<li><a href="#11-configuration">Configuration</a> ................................ Page 48</li>
+<li><a href="#12-testing-strategy">Testing Strategy</a> .......................... Page 49</li>
+<li><a href="#13-deployment">Deployment</a> ...................................... Page 50</li>
+<li><a href="#14-appendix">Appendix</a> .......................................... Page 51</li>
+</ol>
+<hr />
+<h1 id="1-executive-summary">1. Executive Summary</h1>
+<p>EventPassUG is a comprehensive mobile event management platform designed for the Ugandan market. It enables users to discover events, purchase tickets, and manage their event experiences as attendees, while empowering organizers to create events, manage ticket sales, scan entries, and analyze performance.</p>
+<h2 id="key-highlights">Key Highlights</h2>
+<ul>
+<li><strong>Dual-Role Support</strong>: Single account operates as both Attendee and Organizer</li>
+<li><strong>172 Swift Files</strong>: Production-ready codebase</li>
+<li><strong>55+ Features</strong>: Fully implemented functionality</li>
+<li><strong>Design System</strong>: Centralized design tokens for consistency</li>
+<li><strong>Privacy-First</strong>: On-device processing, no unnecessary data collection</li>
+<li><strong>Offline Support</strong>: Core functionality works without network</li>
+<li><strong>iPad Responsive</strong>: Adaptive layouts for all screen sizes</li>
+</ul>
+<h2 id="technology-stack">Technology Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework</td>
+<td>SwiftUI (100%)</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>MVVM + Clean Architecture</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>async/await, Combine</td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>UserDefaults, CoreData</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>CryptoKit (SHA256)</td>
+</tr>
+<tr>
+<td>Mapping</td>
+<td>MapKit</td>
+</tr>
+<tr>
+<td>Camera</td>
+<td>AVFoundation</td>
+</tr>
+<tr>
+<td>OCR</td>
+<td>Vision Framework</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="2-project-overview">2. Project Overview</h1>
+<h2 id="21-purpose">2.1 Purpose</h2>
+<p>EventPassUG solves key challenges in the Ugandan event ecosystem:</p>
+<ol>
+<li><strong>For Attendees</strong>: Discover local events, purchase tickets securely, and manage event experiences</li>
+<li><strong>For Organizers</strong>: Create events, sell tickets, validate entries, and analyze business metrics</li>
+<li><strong>For the Market</strong>: Provide a trusted, localized platform with Uganda-specific payment methods</li>
+</ol>
+<h2 id="22-target-market">2.2 Target Market</h2>
+<ul>
+<li><strong>Primary</strong>: Uganda (Kampala focus)</li>
+<li><strong>Secondary</strong>: East African region</li>
+<li><strong>Payment Methods</strong>: MTN Mobile Money, Airtel Money, Card payments (Visa/Mastercard)</li>
+<li><strong>Currency</strong>: UGX (Ugandan Shilling)</li>
+</ul>
+<h2 id="23-user-personas">2.3 User Personas</h2>
+<h3 id="attendee">Attendee</h3>
+<ul>
+<li>Discovers and browses events</li>
+<li>Purchases tickets via mobile money or card</li>
+<li>Views QR codes for event entry</li>
+<li>Rates and reviews attended events</li>
+</ul>
+<h3 id="organizer">Organizer</h3>
+<ul>
+<li>Creates and publishes events</li>
+<li>Configures ticket types and pricing</li>
+<li>Scans tickets at venue entry</li>
+<li>Views analytics and earnings</li>
+<li>Manages attendee lists</li>
+</ul>
+<hr />
+<h1 id="3-system-requirements">3. System Requirements</h1>
+<h2 id="31-development-requirements">3.1 Development Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Xcode</td>
+<td>15.0+</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>Sonoma 14.0+</td>
+</tr>
+<tr>
+<td>Swift</td>
+<td>5.9+</td>
+</tr>
+<tr>
+<td>iOS SDK</td>
+<td>17.0+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="32-runtime-requirements">3.2 Runtime Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Minimum</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iOS Version</td>
+<td>17.0</td>
+</tr>
+<tr>
+<td>Device</td>
+<td>iPhone 12 or newer (recommended)</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>100MB</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>Required for initial sync, optional for core features</td>
+</tr>
+</tbody>
+</table>
+<h2 id="33-permissions">3.3 Permissions</h2>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Purpose</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Camera</td>
+<td>QR code scanning, Card scanning</td>
+<td>Yes (Organizers)</td>
+</tr>
+<tr>
+<td>Location</td>
+<td>Nearby events, venue directions</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>Event reminders, updates</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>Calendar</td>
+<td>Conflict detection</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>Photos</td>
+<td>Event poster upload</td>
+<td>Yes (Organizers)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="4-architecture">4. Architecture</h1>
+<h2 id="41-architecture-pattern">4.1 Architecture Pattern</h2>
+<p>EventPassUG follows <strong>Feature-First + Clean Architecture</strong>:</p>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│                      App Layer                       │
+│        (Entry Point, Navigation, DI Container)       │
+├─────────────────────────────────────────────────────┤
+│                   Features Layer                     │
+│    (Auth, Attendee, Organizer, Common, Scanner)     │
+├──────────────────┬──────────────────────────────────┤
+│   Domain Layer   │           Data Layer             │
+│   (Pure Models)  │  (Repositories, Persistence)     │
+├──────────────────┴──────────────────────────────────┤
+│                      UI Layer                        │
+│       (Components, Design System, Modifiers)         │
+├─────────────────────────────────────────────────────┤
+│                     Core Layer                       │
+│        (DI, Utilities, Extensions, Config)           │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="42-project-structure">4.2 Project Structure</h2>
+<pre><code>EventPassUG/
+├── App/                          # Application Layer (4 files)
+│   ├── EventPassUGApp.swift
+│   ├── ContentView.swift
+│   └── MainTabView.swift
+│
+├── Features/                     # Feature Modules (55+ files)
+│   ├── Auth/                    # Authentication (8 files)
+│   ├── Attendee/                # Attendee Features (12 files)
+│   ├── Organizer/               # Organizer Features (18 files)
+│   ├── Scanner/                 # Scanner Features (4 files)
+│   ├── Common/                  # Shared Features (23 files)
+│   ├── Onboarding/              # Onboarding (4 files)
+│   ├── Refunds/                 # Refund System (4 files)
+│   └── Cancellation/            # Cancellation (3 files)
+│
+├── Domain/                       # Business Logic (17 models)
+│   └── Models/
+│
+├── Data/                         # Data Access (16 repositories)
+│   ├── Repositories/
+│   └── Persistence/
+│
+├── UI/                          # UI Components (18 components)
+│   ├── Components/
+│   └── DesignSystem/
+│
+├── Core/                        # Infrastructure (21 utilities)
+│   ├── DI/
+│   ├── Utilities/
+│   ├── Extensions/
+│   └── Configuration/
+│
+└── Resources/
+    └── Assets.xcassets
+</code></pre>
+<p><strong>Total: 172 Swift files</strong></p>
+<h2 id="43-layer-responsibilities">4.3 Layer Responsibilities</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Purpose</th>
+<th>Can Import</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>App</strong></td>
+<td>Entry point, routing, DI setup</td>
+<td>All layers</td>
+</tr>
+<tr>
+<td><strong>Features</strong></td>
+<td>UI + ViewModels</td>
+<td>Domain, Data, UI, Core</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>Pure business models</td>
+<td>Foundation only</td>
+</tr>
+<tr>
+<td><strong>Data</strong></td>
+<td>Repositories, API, persistence</td>
+<td>Domain, Core</td>
+</tr>
+<tr>
+<td><strong>UI</strong></td>
+<td>Reusable components, design system</td>
+<td>Core only</td>
+</tr>
+<tr>
+<td><strong>Core</strong></td>
+<td>DI, utilities, extensions</td>
+<td>Foundation only</td>
+</tr>
+</tbody>
+</table>
+<h2 id="44-data-flow">4.4 Data Flow</h2>
+<pre><code>User Action (View)
+       │
+       ▼
+   ViewModel (@Published)
+       │
+       ▼
+   Repository (Protocol)
+       │
+   ┌───┴───┬─────────┐
+   ▼       ▼         ▼
+  API    Cache    Database
+   │       │         │
+   └───────┴─────────┘
+           │
+           ▼
+     Domain Model
+           │
+           ▼
+     ViewModel Update
+           │
+           ▼
+     View Re-render
+</code></pre>
+<h2 id="45-dependency-injection">4.5 Dependency Injection</h2>
+<pre><code class="language-swift">class ServiceContainer: ObservableObject {
+    let authService: AuthRepositoryProtocol
+    let eventService: EventRepositoryProtocol
+    let ticketService: TicketRepositoryProtocol
+    let paymentService: PaymentRepositoryProtocol
+    // ... 12 more repositories
+}
+</code></pre>
+<hr />
+<h1 id="5-design-system-tokens">5. Design System &amp; Tokens</h1>
+<h2 id="51-overview">5.1 Overview</h2>
+<p>The design system is centralized in <code>AppDesignSystem.swift</code> to ensure consistency across all UI components. All values are defined as static constants with semantic naming.</p>
+<p><strong>Location</strong>: <code>EventPassUG/UI/DesignSystem/AppDesignSystem.swift</code></p>
+<h2 id="52-color-tokens">5.2 Color Tokens</h2>
+<h3 id="521-brand-colors">5.2.1 Brand Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Hex Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>primary</code></td>
+<td>#FF7A00</td>
+<td>Main brand color, CTAs</td>
+</tr>
+<tr>
+<td><code>primaryDark</code></td>
+<td>#E66D00</td>
+<td>Hover/pressed states</td>
+</tr>
+<tr>
+<td><code>primaryLight</code></td>
+<td>#FFA040</td>
+<td>Backgrounds, accents</td>
+</tr>
+</tbody>
+</table>
+<h3 id="522-semantic-colors">5.2.2 Semantic Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success</code></td>
+<td>System Green</td>
+<td>Success states, confirmations</td>
+</tr>
+<tr>
+<td><code>warning</code></td>
+<td>System Orange</td>
+<td>Warnings, alerts</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>System Red</td>
+<td>Errors, destructive actions</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>System Blue</td>
+<td>Information, links</td>
+</tr>
+</tbody>
+</table>
+<h3 id="523-background-colors">5.2.3 Background Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>System Color</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backgroundPrimary</code></td>
+<td>systemBackground</td>
+<td>Main background</td>
+</tr>
+<tr>
+<td><code>backgroundSecondary</code></td>
+<td>secondarySystemBackground</td>
+<td>Cards, sections</td>
+</tr>
+<tr>
+<td><code>backgroundTertiary</code></td>
+<td>tertiarySystemBackground</td>
+<td>Nested elements</td>
+</tr>
+<tr>
+<td><code>backgroundGrouped</code></td>
+<td>systemGroupedBackground</td>
+<td>Lists, forms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="524-text-colors">5.2.4 Text Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>textPrimary</code></td>
+<td>primary</td>
+<td>Main text</td>
+</tr>
+<tr>
+<td><code>textSecondary</code></td>
+<td>secondary</td>
+<td>Supporting text</td>
+</tr>
+<tr>
+<td><code>textTertiary</code></td>
+<td>tertiaryLabel</td>
+<td>Hints, metadata</td>
+</tr>
+<tr>
+<td><code>textInverse</code></td>
+<td>white</td>
+<td>Text on dark backgrounds</td>
+</tr>
+</tbody>
+</table>
+<h3 id="525-border-colors">5.2.5 Border Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>border</code></td>
+<td>separator</td>
+<td>Standard borders</td>
+</tr>
+<tr>
+<td><code>borderLight</code></td>
+<td>gray @ 0.2</td>
+<td>Subtle borders</td>
+</tr>
+<tr>
+<td><code>borderDark</code></td>
+<td>gray @ 0.4</td>
+<td>Emphasized borders</td>
+</tr>
+</tbody>
+</table>
+<h3 id="526-special-colors">5.2.6 Special Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Hex Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>happeningNow</code></td>
+<td>#7CFC66</td>
+<td>Live event indicator</td>
+</tr>
+<tr>
+<td><code>premium</code></td>
+<td>#FFD700</td>
+<td>Premium/VIP badges</td>
+</tr>
+</tbody>
+</table>
+<h3 id="527-role-based-colors">5.2.7 Role-Based Colors</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Primary Color</th>
+<th>Hex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Attendee</td>
+<td><code>attendeePrimary</code></td>
+<td>#FF7A00</td>
+</tr>
+<tr>
+<td>Organizer</td>
+<td><code>organizerPrimary</code></td>
+<td>#FFA500</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-swift">// Usage
+RoleConfig.getPrimaryColor(for: .attendee) // #FF7A00
+RoleConfig.getPrimaryColor(for: .organizer) // #FFA500
+</code></pre>
+<h2 id="53-typography-tokens">5.3 Typography Tokens</h2>
+<h3 id="531-semantic-text-styles">5.3.1 Semantic Text Styles</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Font</th>
+<th>Weight</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hero</code></td>
+<td>largeTitle</td>
+<td>bold</td>
+<td>Hero/screen titles</td>
+</tr>
+<tr>
+<td><code>largeTitle</code></td>
+<td>largeTitle</td>
+<td>bold</td>
+<td>Onboarding, empty states</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>title</td>
+<td>semibold</td>
+<td>Dialog headers</td>
+</tr>
+<tr>
+<td><code>title2</code></td>
+<td>title2</td>
+<td>semibold</td>
+<td>Subsections</td>
+</tr>
+<tr>
+<td><code>section</code></td>
+<td>title3</td>
+<td>semibold</td>
+<td>Major sections</td>
+</tr>
+<tr>
+<td><code>cardTitle</code></td>
+<td>headline</td>
+<td>semibold</td>
+<td>Card headings</td>
+</tr>
+<tr>
+<td><code>body</code></td>
+<td>body</td>
+<td>regular</td>
+<td>Primary content</td>
+</tr>
+<tr>
+<td><code>bodyEmphasized</code></td>
+<td>body</td>
+<td>semibold</td>
+<td>Important body text</td>
+</tr>
+<tr>
+<td><code>secondary</code></td>
+<td>subheadline</td>
+<td>regular</td>
+<td>Supporting info</td>
+</tr>
+<tr>
+<td><code>callout</code></td>
+<td>callout</td>
+<td>regular</td>
+<td>Emphasized content</td>
+</tr>
+<tr>
+<td><code>calloutEmphasized</code></td>
+<td>callout</td>
+<td>semibold</td>
+<td>Important callouts</td>
+</tr>
+<tr>
+<td><code>caption</code></td>
+<td>caption</td>
+<td>regular</td>
+<td>Metadata, timestamps</td>
+</tr>
+<tr>
+<td><code>captionEmphasized</code></td>
+<td>caption</td>
+<td>medium</td>
+<td>Important small text</td>
+</tr>
+<tr>
+<td><code>footnote</code></td>
+<td>footnote</td>
+<td>regular</td>
+<td>Fine print</td>
+</tr>
+</tbody>
+</table>
+<h3 id="532-button-typography">5.3.2 Button Typography</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Font</th>
+<th>Weight</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>buttonPrimary</code></td>
+<td>headline</td>
+<td>semibold</td>
+<td>Primary buttons</td>
+</tr>
+<tr>
+<td><code>buttonSecondary</code></td>
+<td>subheadline</td>
+<td>semibold</td>
+<td>Secondary buttons</td>
+</tr>
+<tr>
+<td><code>buttonSmall</code></td>
+<td>caption</td>
+<td>semibold</td>
+<td>Compact buttons</td>
+</tr>
+</tbody>
+</table>
+<h3 id="533-custom-font-sizes">5.3.3 Custom Font Sizes</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Size</th>
+<th>Design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title1</code></td>
+<td>28pt</td>
+<td>rounded, bold</td>
+</tr>
+<tr>
+<td><code>title3</code></td>
+<td>20pt</td>
+<td>rounded, semibold</td>
+</tr>
+<tr>
+<td><code>headline</code></td>
+<td>17pt</td>
+<td>rounded, semibold</td>
+</tr>
+<tr>
+<td><code>subheadline</code></td>
+<td>15pt</td>
+<td>default, regular</td>
+</tr>
+<tr>
+<td><code>buttonLarge</code></td>
+<td>17pt</td>
+<td>rounded, semibold</td>
+</tr>
+<tr>
+<td><code>buttonMedium</code></td>
+<td>15pt</td>
+<td>rounded, semibold</td>
+</tr>
+</tbody>
+</table>
+<h2 id="54-spacing-tokens">5.4 Spacing Tokens</h2>
+<h3 id="541-base-spacing-scale">5.4.1 Base Spacing Scale</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>xxs</code></td>
+<td>2pt</td>
+<td>Micro spacing</td>
+</tr>
+<tr>
+<td><code>xs</code></td>
+<td>4pt</td>
+<td>Tight spacing</td>
+</tr>
+<tr>
+<td><code>sm</code></td>
+<td>8pt</td>
+<td>Small gaps</td>
+</tr>
+<tr>
+<td><code>md</code></td>
+<td>16pt</td>
+<td>Standard spacing</td>
+</tr>
+<tr>
+<td><code>lg</code></td>
+<td>24pt</td>
+<td>Section spacing</td>
+</tr>
+<tr>
+<td><code>xl</code></td>
+<td>32pt</td>
+<td>Large gaps</td>
+</tr>
+<tr>
+<td><code>xxl</code></td>
+<td>48pt</td>
+<td>Major sections</td>
+</tr>
+<tr>
+<td><code>xxxl</code></td>
+<td>64pt</td>
+<td>Screen margins</td>
+</tr>
+</tbody>
+</table>
+<h3 id="542-semantic-spacing">5.4.2 Semantic Spacing</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compact</code></td>
+<td>6pt</td>
+<td>Compact layouts</td>
+</tr>
+<tr>
+<td><code>section</code></td>
+<td>24pt</td>
+<td>Between sections</td>
+</tr>
+<tr>
+<td><code>item</code></td>
+<td>12pt</td>
+<td>List item spacing</td>
+</tr>
+<tr>
+<td><code>edge</code></td>
+<td>16pt</td>
+<td>Screen edge padding</td>
+</tr>
+</tbody>
+</table>
+<h2 id="55-corner-radius-tokens">5.5 Corner Radius Tokens</h2>
+<h3 id="551-base-scale">5.5.1 Base Scale</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>xs</code></td>
+<td>4pt</td>
+<td>Badges, tags</td>
+</tr>
+<tr>
+<td><code>sm</code></td>
+<td>8pt</td>
+<td>Small elements</td>
+</tr>
+<tr>
+<td><code>md</code></td>
+<td>12pt</td>
+<td>Standard</td>
+</tr>
+<tr>
+<td><code>lg</code></td>
+<td>16pt</td>
+<td>Cards</td>
+</tr>
+<tr>
+<td><code>xl</code></td>
+<td>24pt</td>
+<td>Large cards</td>
+</tr>
+<tr>
+<td><code>pill</code></td>
+<td>100pt</td>
+<td>Pills, toggles</td>
+</tr>
+</tbody>
+</table>
+<h3 id="552-semantic-radius">5.5.2 Semantic Radius</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>card</code></td>
+<td>12pt</td>
+<td>Card components</td>
+</tr>
+<tr>
+<td><code>button</code></td>
+<td>12pt</td>
+<td>Buttons</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td>10pt</td>
+<td>Text fields</td>
+</tr>
+<tr>
+<td><code>badge</code></td>
+<td>6pt</td>
+<td>Status badges</td>
+</tr>
+</tbody>
+</table>
+<h2 id="56-shadow-tokens">5.6 Shadow Tokens</h2>
+<h3 id="561-shadow-styles">5.6.1 Shadow Styles</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Color</th>
+<th>Radius</th>
+<th>Offset</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>card</code></td>
+<td>black @ 8%</td>
+<td>8pt</td>
+<td>(0, 4)</td>
+<td>Cards</td>
+</tr>
+<tr>
+<td><code>elevated</code></td>
+<td>black @ 12%</td>
+<td>16pt</td>
+<td>(0, 8)</td>
+<td>Modals, sheets</td>
+</tr>
+<tr>
+<td><code>subtle</code></td>
+<td>black @ 5%</td>
+<td>4pt</td>
+<td>(0, 2)</td>
+<td>Subtle depth</td>
+</tr>
+<tr>
+<td><code>button</code></td>
+<td>black @ 10%</td>
+<td>6pt</td>
+<td>(0, 3)</td>
+<td>Buttons</td>
+</tr>
+<tr>
+<td><code>floating</code></td>
+<td>black @ 15%</td>
+<td>20pt</td>
+<td>(0, 10)</td>
+<td>FABs, overlays</td>
+</tr>
+</tbody>
+</table>
+<h3 id="562-shadow-usage">5.6.2 Shadow Usage</h3>
+<pre><code class="language-swift">// View modifiers
+view.cardShadow()       // Standard card shadow
+view.elevatedShadow()   // Elevated component
+view.subtleShadow()     // Subtle depth
+view.buttonShadow()     // Button shadow
+</code></pre>
+<h2 id="57-button-dimensions">5.7 Button Dimensions</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>heightLarge</code></td>
+<td>56pt</td>
+<td>Primary CTAs</td>
+</tr>
+<tr>
+<td><code>heightMedium</code></td>
+<td>48pt</td>
+<td>Standard buttons</td>
+</tr>
+<tr>
+<td><code>heightSmall</code></td>
+<td>36pt</td>
+<td>Secondary actions</td>
+</tr>
+<tr>
+<td><code>heightCompact</code></td>
+<td>32pt</td>
+<td>Inline buttons</td>
+</tr>
+<tr>
+<td><code>iconSize</code></td>
+<td>44pt</td>
+<td>Icon buttons (accessibility)</td>
+</tr>
+<tr>
+<td><code>iconSizeCompact</code></td>
+<td>32pt</td>
+<td>Compact icon buttons</td>
+</tr>
+<tr>
+<td><code>minimumTouchTarget</code></td>
+<td>44pt</td>
+<td>Accessibility minimum</td>
+</tr>
+<tr>
+<td><code>paddingHorizontal</code></td>
+<td>24pt</td>
+<td>Button padding</td>
+</tr>
+<tr>
+<td><code>paddingVertical</code></td>
+<td>12pt</td>
+<td>Button padding</td>
+</tr>
+</tbody>
+</table>
+<h2 id="58-input-field-dimensions">5.8 Input Field Dimensions</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>height</code></td>
+<td>52pt</td>
+<td>Standard inputs</td>
+</tr>
+<tr>
+<td><code>heightCompact</code></td>
+<td>44pt</td>
+<td>Compact inputs</td>
+</tr>
+<tr>
+<td><code>paddingHorizontal</code></td>
+<td>16pt</td>
+<td>Input padding</td>
+</tr>
+<tr>
+<td><code>iconSize</code></td>
+<td>20pt</td>
+<td>Input icons</td>
+</tr>
+</tbody>
+</table>
+<h2 id="59-animation-tokens">5.9 Animation Tokens</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Type</th>
+<th>Duration</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>quick</code></td>
+<td>easeInOut</td>
+<td>0.15s</td>
+<td>Micro-interactions</td>
+</tr>
+<tr>
+<td><code>standard</code></td>
+<td>easeInOut</td>
+<td>0.2s</td>
+<td>Standard transitions</td>
+</tr>
+<tr>
+<td><code>slow</code></td>
+<td>easeInOut</td>
+<td>0.4s</td>
+<td>Complex animations</td>
+</tr>
+<tr>
+<td><code>spring</code></td>
+<td>spring</td>
+<td>0.3s (0.7 damping)</td>
+<td>Bouncy feedback</td>
+</tr>
+<tr>
+<td><code>springBouncy</code></td>
+<td>spring</td>
+<td>0.4s (0.6 damping)</td>
+<td>Playful animations</td>
+</tr>
+</tbody>
+</table>
+<h2 id="510-border-tokens">5.10 Border Tokens</h2>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>width</code></td>
+<td>1pt</td>
+<td>Standard borders</td>
+</tr>
+<tr>
+<td><code>selectedWidth</code></td>
+<td>2pt</td>
+<td>Selected state</td>
+</tr>
+<tr>
+<td><code>thickWidth</code></td>
+<td>3pt</td>
+<td>Emphasized borders</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="6-features">6. Features</h1>
+<h2 id="61-authentication-system">6.1 Authentication System</h2>
+<h3 id="611-emailpassword-authentication">6.1.1 Email/Password Authentication</h3>
+<p><strong>Location</strong>: <code>Features/Auth/AuthView.swift</code></p>
+<p><strong>Features</strong>:
+- Full registration with validation
+- Secure password hashing (SHA256 + salt)
+- Email format validation
+- Password strength requirements</p>
+<p><strong>Flow</strong>:</p>
+<pre><code>Register Tab → Enter Details → Validate → Hash Password → Create User → Login
+</code></pre>
+<h3 id="612-phone-otp-authentication">6.1.2 Phone OTP Authentication</h3>
+<p><strong>Features</strong>:
+- 6-digit code verification
+- Phone number validation (E.164 format)
+- Automatic user creation
+- Mock OTP in development (123456)</p>
+<p><strong>Flow</strong>:</p>
+<pre><code>Phone Auth Tab → Enter Phone → Send OTP → Enter Code → Verify → Login/Register
+</code></pre>
+<h3 id="613-social-login">6.1.3 Social Login</h3>
+<p><strong>Supported Providers</strong>:
+- Apple Sign In
+- Google Sign In
+- Facebook Sign In</p>
+<p><strong>Status</strong>: Mock implementations ready for production SDK integration</p>
+<h3 id="614-test-users">6.1.4 Test Users</h3>
+<table>
+<thead>
+<tr>
+<th>Email</th>
+<th>Password</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>john@example.com</td>
+<td>password123</td>
+<td>Attendee</td>
+</tr>
+<tr>
+<td>jane@example.com</td>
+<td>password123</td>
+<td>Attendee</td>
+</tr>
+<tr>
+<td>alice@example.com</td>
+<td>password123</td>
+<td>Attendee</td>
+</tr>
+<tr>
+<td>bob@events.com</td>
+<td>organizer123</td>
+<td>Organizer</td>
+</tr>
+<tr>
+<td>sarah@events.com</td>
+<td>organizer123</td>
+<td>Organizer</td>
+</tr>
+</tbody>
+</table>
+<h2 id="62-dual-role-support">6.2 Dual Role Support</h2>
+<h3 id="621-overview">6.2.1 Overview</h3>
+<p>Users operate as both Attendees and Organizers within a single account.</p>
+<h3 id="622-attendee-mode-features">6.2.2 Attendee Mode Features</h3>
+<ul>
+<li>Discover and browse events</li>
+<li>Purchase tickets</li>
+<li>View QR codes</li>
+<li>Manage favorites</li>
+<li>Rate and review events</li>
+</ul>
+<h3 id="623-organizer-mode-features">6.2.3 Organizer Mode Features</h3>
+<ul>
+<li>Create and manage events</li>
+<li>Configure ticket types and pricing</li>
+<li>Scan tickets for validation</li>
+<li>View analytics and earnings</li>
+<li>Manage attendees</li>
+</ul>
+<h3 id="624-role-switching">6.2.4 Role Switching</h3>
+<p><strong>Location</strong>: Profile Tab → Role Switcher</p>
+<p><strong>UI Changes on Switch</strong>:
+- Tab bar icons and labels update
+- Theme color adjusts (Attendee: #FF7A00, Organizer: #FFA500)
+- Dashboard replaces home feed
+- Available features change</p>
+<h2 id="63-attendee-features">6.3 Attendee Features</h2>
+<h3 id="631-event-discovery">6.3.1 Event Discovery</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/AttendeeHomeView.swift</code></p>
+<p><strong>Features</strong>:
+- Grid/list view of events
+- Category filters (16 categories)
+- Time-based filters (Today, This Week, This Month)
+- "Happening now" indicators
+- Ticket availability status
+- Sales countdown timers
+- Recommendation engine</p>
+<p><strong>Event Card Information</strong>:
+- Event poster image
+- Title and category badge
+- Date and time
+- Location and distance
+- Price range
+- Like/favorite button
+- Sold out indicators</p>
+<h3 id="632-search-events">6.3.2 Search Events</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/SearchView.swift</code></p>
+<p><strong>Search Capabilities</strong>:
+- Search by event name
+- Search by location
+- Search by category
+- Recent searches
+- Search suggestions
+- Filter results by date/price</p>
+<h3 id="633-event-details">6.3.3 Event Details</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/EventDetailsView.swift</code></p>
+<p><strong>Information Displayed</strong>:
+- Hero poster image
+- Event title and category
+- Organizer information with follow button
+- Date and time
+- Location with interactive map
+- Full description
+- Age restrictions
+- Ticket types and pricing
+- Availability status
+- Ratings and reviews</p>
+<p><strong>Actions Available</strong>:
+- Like/favorite event
+- Share event
+- Report event
+- Follow organizer
+- Add to calendar
+- Buy tickets</p>
+<h3 id="634-ticket-purchasing">6.3.4 Ticket Purchasing</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/TicketPurchaseView.swift</code></p>
+<p><strong>Purchase Flow</strong>:</p>
+<pre><code>Select Ticket Type → Choose Quantity → Select Payment Method →
+Review Order → Confirm Payment → Success → View QR Code
+</code></pre>
+<p><strong>Payment Methods</strong>:
+- MTN Mobile Money (Uganda)
+- Airtel Money (Uganda)
+- Card payment (Visa/Mastercard)</p>
+<p><strong>Features</strong>:
+- Multiple ticket types per event
+- Quantity selection
+- Real-time price calculation
+- Calendar conflict detection
+- Order summary
+- Terms and conditions</p>
+<h3 id="635-ticket-management">6.3.5 Ticket Management</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/TicketsView.swift</code></p>
+<p><strong>Features</strong>:
+- View all purchased tickets
+- Filter by status (Upcoming, Past, All)
+- Grid/list view toggle
+- Quick QR code access
+- Ticket detail view</p>
+<h3 id="636-ticket-detail">6.3.6 Ticket Detail</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/TicketDetailView.swift</code></p>
+<p><strong>Features</strong>:
+- Full QR code (scannable)
+- Event information
+- Ticket type and quantity
+- Purchase date and price
+- Event venue with map
+- PDF generation and sharing
+- Request refund option</p>
+<h3 id="637-favorites-system">6.3.7 Favorites System</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/FavoriteEventsView.swift</code></p>
+<p><strong>Features</strong>:
+- Like/unlike events
+- View all favorited events
+- Persistent storage
+- Notification for updates</p>
+<h2 id="64-organizer-features">6.4 Organizer Features</h2>
+<h3 id="641-organizer-dashboard">6.4.1 Organizer Dashboard</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/OrganizerDashboardView.swift</code></p>
+<p><strong>Analytics Cards</strong>:
+- Total Revenue (all-time)
+- Tickets Sold (all-time)
+- Active Events (published)
+- Upcoming Events (next 7 days)</p>
+<p><strong>Quick Actions</strong>:
+- Create New Event
+- Scan Tickets
+- View Analytics
+- Manage Events</p>
+<h3 id="642-event-creation">6.4.2 Event Creation</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/CreateEventWizard.swift</code></p>
+<p><strong>3-Step Wizard</strong>:</p>
+<p><strong>Step 1: Basic Info</strong>
+- Event title
+- Description
+- Category selection (16 options)
+- Age restriction</p>
+<p><strong>Step 2: Date &amp; Venue</strong>
+- Start date and time
+- End date and time
+- Venue name
+- Address
+- Location picker (map)</p>
+<p><strong>Step 3: Tickets &amp; Media</strong>
+- Ticket types (name, price, quantity, sale dates)
+- Event poster upload (min 900×1125px)
+- Image validation</p>
+<p><strong>Features</strong>:
+- Draft auto-save (every 30 seconds)
+- Form validation
+- Preview before publish
+- Edit mode support</p>
+<h3 id="643-event-management">6.4.3 Event Management</h3>
+<p><strong>Edit Events</strong>:
+- Access: Long-press card or toolbar menu
+- Pre-filled data from existing event
+- Full field editing
+- Warning if tickets already sold</p>
+<p><strong>Delete Events</strong>:
+- Confirmation required
+- Shows attendee count warning
+- Soft delete with refund processing
+- Blocked for ongoing events</p>
+<h3 id="644-qr-code-scanning">6.4.4 QR Code Scanning</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/QRScannerView.swift</code></p>
+<p><strong>Features</strong>:
+- Camera-based QR code scanning
+- Instant validation
+- Ticket information display
+- Already scanned detection
+- Invalid ticket alerts
+- Responsive scanning frame</p>
+<p><strong>Validation Results</strong>:
+- ✅ Valid: Green success
+- ⚠️ Already Scanned: Yellow warning
+- ❌ Invalid: Red error
+- 🔒 Not Started: Gray warning</p>
+<h3 id="645-event-analytics">6.4.5 Event Analytics</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/EventAnalyticsView.swift</code></p>
+<p><strong>Metrics</strong>:
+- Total Revenue
+- Tickets Sold (by type)
+- Attendance Rate
+- Sales Velocity
+- Revenue by Ticket Type
+- Sales Timeline
+- Peak Sales Periods</p>
+<p><strong>Visualizations</strong>:
+- Line chart: Sales over time
+- Pie chart: Revenue by ticket type
+- Bar chart: Daily ticket sales</p>
+<h3 id="646-analytics-dashboard">6.4.6 Analytics Dashboard</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/OrganizerAnalyticsDashboardView.swift</code></p>
+<p><strong>Detailed Views</strong>:
+- Revenue Analytics Detail
+- Ticket Analytics Detail
+- Audience Analytics Detail
+- Marketing Insights Detail
+- Operations Detail
+- Predictive Analysis Detail</p>
+<h3 id="647-attendee-management">6.4.7 Attendee Management</h3>
+<p><strong>Features</strong>:
+- View attendee list
+- Export attendees (CSV/PDF)
+- Check-in status tracking
+- VIP identification</p>
+<h3 id="648-scanner-device-management">6.4.8 Scanner Device Management</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/Scanner/</code></p>
+<p><strong>Features</strong>:
+- Pair scanner devices via deep link
+- Manage multiple devices
+- Per-event scanner assignment
+- Real-time status tracking</p>
+<h2 id="65-scanner-features">6.5 Scanner Features</h2>
+<h3 id="651-scanner-connect">6.5.1 Scanner Connect</h3>
+<p><strong>Location</strong>: <code>Features/Scanner/ScannerConnectView.swift</code></p>
+<p><strong>Features</strong>:
+- Camera-based QR scanning
+- Flashlight toggle
+- Responsive frame sizing
+- Dual camera support
+- Real-time validation</p>
+<h3 id="652-deep-link-pairing">6.5.2 Deep Link Pairing</h3>
+<p><strong>Location</strong>: <code>Features/Scanner/ScannerPairingDeepLinkView.swift</code></p>
+<p><strong>Features</strong>:
+- Scan pairing QR code
+- Automatic device registration
+- Event assignment</p>
+<h2 id="66-onboarding">6.6 Onboarding</h2>
+<h3 id="661-onboarding-flow">6.6.1 Onboarding Flow</h3>
+<p><strong>Location</strong>: <code>Features/Onboarding/OnboardingView.swift</code></p>
+<p><strong>Steps</strong>:
+1. Welcome slide
+2. Role selection
+3. Basic info
+4. Personalization (interests)
+5. Permissions
+6. Completion</p>
+<h3 id="662-organizer-onboarding">6.6.2 Organizer Onboarding</h3>
+<p><strong>Location</strong>: <code>Features/Organizer/BecomeOrganizerFlow.swift</code></p>
+<p><strong>5-Step Process</strong>:
+1. Profile Completion
+2. Identity Verification (National ID)
+3. Contact Information
+4. Payout Setup (Mobile Money/Bank)
+5. Terms Agreement</p>
+<h2 id="67-refund-system">6.7 Refund System</h2>
+<h3 id="671-refund-request">6.7.1 Refund Request</h3>
+<p><strong>Location</strong>: <code>Features/Refunds/RefundRequestView.swift</code></p>
+<p><strong>Features</strong>:
+- Reason selection
+- Amount display
+- Policy information
+- Request tracking</p>
+<h3 id="672-organizer-refund-management">6.7.2 Organizer Refund Management</h3>
+<p><strong>Location</strong>: <code>Features/Refunds/OrganizerRefundViews.swift</code></p>
+<p><strong>Features</strong>:
+- View pending requests
+- Approve/reject with notes
+- Processing tracking
+- Batch operations</p>
+<h2 id="68-event-cancellation">6.8 Event Cancellation</h2>
+<h3 id="681-cancellation-flow">6.8.1 Cancellation Flow</h3>
+<p><strong>Location</strong>: <code>Features/Cancellation/EventCancellationFlowView.swift</code></p>
+<p><strong>Features</strong>:
+- Reason selection
+- Impact preview (attendees, revenue)
+- Compensation plan configuration
+- Attendee notification
+- Automatic refund processing</p>
+<h2 id="69-support-system">6.9 Support System</h2>
+<h3 id="691-support-center">6.9.1 Support Center</h3>
+<p><strong>Location</strong>: <code>Features/Common/SupportCenterView.swift</code></p>
+<p><strong>Features</strong>:
+- FAQ sections
+- Help articles
+- Submit support ticket
+- Contact options</p>
+<h3 id="692-help-center">6.9.2 Help Center</h3>
+<p><strong>Location</strong>: <code>Features/Common/HelpCenterView.swift</code></p>
+<p><strong>Features</strong>:
+- Searchable help articles
+- Category navigation
+- Related topics</p>
+<h3 id="693-troubleshooting">6.9.3 Troubleshooting</h3>
+<p><strong>Location</strong>: <code>Features/Common/TroubleshootingView.swift</code></p>
+<p><strong>Features</strong>:
+- Common issues
+- Step-by-step solutions
+- Device diagnostics</p>
+<h2 id="610-profile-settings">6.10 Profile &amp; Settings</h2>
+<h3 id="6101-edit-profile">6.10.1 Edit Profile</h3>
+<p><strong>Location</strong>: <code>Features/Common/EditProfileView.swift</code></p>
+<p><strong>Features</strong>:
+- Name editing
+- Profile photo
+- Contact methods
+- Date of birth
+- Location</p>
+<h3 id="6102-notification-settings">6.10.2 Notification Settings</h3>
+<p><strong>Location</strong>: <code>Features/Common/NotificationSettingsView.swift</code></p>
+<p><strong>Categories</strong>:
+- Event reminders
+- Purchase confirmations
+- Event updates
+- Recommendations
+- Marketing (opt-in)
+- Quiet hours</p>
+<h3 id="6103-payment-methods">6.10.3 Payment Methods</h3>
+<p><strong>Location</strong>: <code>Features/Common/PaymentMethodsView.swift</code></p>
+<p><strong>Features</strong>:
+- Add/remove payment methods
+- Set default method
+- Card scanning integration</p>
+<h3 id="6104-id-verification">6.10.4 ID Verification</h3>
+<p><strong>Location</strong>: <code>Features/Common/NationalIDVerificationView.swift</code></p>
+<p><strong>Features</strong>:
+- National ID capture (front/back)
+- Image validation
+- Verification status tracking</p>
+<h2 id="611-advanced-features">6.11 Advanced Features</h2>
+<h3 id="6111-credit-card-scanner">6.11.1 Credit Card Scanner</h3>
+<p><strong>Location</strong>: <code>Core/Utilities/CardScanner.swift</code> (736 lines)</p>
+<p><strong>Features</strong>:
+- On-device OCR (Vision framework)
+- Real-time detection
+- Card number extraction
+- Expiry date extraction
+- Cardholder name extraction
+- Luhn algorithm validation
+- Brand detection (Visa, Mastercard, Amex, Discover)
+- Privacy-first (no images stored)</p>
+<h3 id="6112-pdf-ticket-generator">6.11.2 PDF Ticket Generator</h3>
+<p><strong>Location</strong>: <code>Core/Utilities/PDFGenerator.swift</code> (290 lines)</p>
+<p><strong>Features</strong>:
+- Color extraction from event poster
+- Gradient headers
+- QR code embedding
+- Professional layout
+- Print-optimized (300 DPI)
+- Share/export support</p>
+<h3 id="6113-calendar-conflict-detection">6.11.3 Calendar Conflict Detection</h3>
+<p><strong>Location</strong>: <code>Features/Common/CalendarConflictView.swift</code></p>
+<p><strong>Features</strong>:
+- EventKit integration
+- Conflict types: exact, partial, adjacent
+- Warning UI with details
+- Override option
+- Privacy-focused (read-only)</p>
+<h3 id="6114-recommendation-engine">6.11.4 Recommendation Engine</h3>
+<p><strong>Location</strong>: <code>Features/Attendee/AttendeeHomeViewModel.swift</code></p>
+<p><strong>Scoring Factors</strong>:
+| Factor | Points |
+|--------|--------|
+| Category Match | 40 |
+| Purchase History | 35 |
+| Followed Organizer | 30 |
+| Like History | 25 |
+| Happening Now | 25 |
+| Same City | 20 |
+| Nearby Event | 15 |
+| Upcoming Soon | 15 |
+| Popular Event | 10 |
+| This Weekend | 10 |
+| Price Match | 8 |
+| High Rating | 5 |
+| Free Event | 5 |
+| Recently Added | 5 |</p>
+<h3 id="6115-guest-browsing">6.11.5 Guest Browsing</h3>
+<p><strong>Features</strong>:
+- Browse events without account
+- View event details
+- Authentication prompts for actions
+- Contextual sign-in CTAs</p>
+<hr />
+<h1 id="7-data-models">7. Data Models</h1>
+<h2 id="71-user">7.1 User</h2>
+<pre><code class="language-swift">struct User {
+    let id: UUID
+    var firstName: String
+    var lastName: String
+    var email: String?
+    var phoneNumber: String?
+    var profileImageUrl: String?
+    var role: UserRole
+    var dateJoined: Date
+    var isEmailVerified: Bool
+    var isPhoneVerified: Bool
+    var isVerified: Bool
+    var nationalIdNumber: String?
+    var isAttendeeRole: Bool
+    var isOrganizerRole: Bool
+    var currentActiveRole: UserRole
+    var favoriteEventIds: [UUID]
+    var followedOrganizerIds: [UUID]
+    var favoriteEventTypes: [String]
+}
+</code></pre>
+<h2 id="72-event">7.2 Event</h2>
+<pre><code class="language-swift">struct Event {
+    let id: UUID
+    var title: String
+    var description: String
+    var organizerId: UUID
+    var organizerName: String
+    var posterUrl: String?
+    var category: EventCategory
+    var startDate: Date
+    var endDate: Date
+    var venue: Venue
+    var ticketTypes: [TicketType]
+    var status: EventStatus
+    var rating: Double
+    var totalRatings: Int
+    var likeCount: Int
+    var ageRestriction: AgeRestriction
+}
+</code></pre>
+<h2 id="73-ticket">7.3 Ticket</h2>
+<pre><code class="language-swift">struct Ticket {
+    let id: UUID
+    var ticketNumber: String
+    var orderNumber: String
+    var eventId: UUID
+    var eventTitle: String
+    var eventDate: Date
+    var eventEndDate: Date
+    var eventVenue: String
+    var ticketType: TicketType
+    var userId: UUID
+    var purchaseDate: Date
+    var scanStatus: TicketScanStatus
+    var scanDate: Date?
+    var qrCodeData: String
+    var userRating: Double?
+}
+</code></pre>
+<h2 id="74-tickettype">7.4 TicketType</h2>
+<pre><code class="language-swift">struct TicketType {
+    let id: UUID
+    var name: String
+    var price: Double
+    var quantity: Int
+    var sold: Int
+    var description: String?
+    var perks: [String]
+    var saleStartDate: Date
+    var saleEndDate: Date
+    var isUnlimitedQuantity: Bool
+}
+</code></pre>
+<h2 id="75-organizerprofile">7.5 OrganizerProfile</h2>
+<pre><code class="language-swift">struct OrganizerProfile {
+    var publicEmail: String
+    var publicPhone: String
+    var brandName: String?
+    var website: String?
+    var instagramHandle: String?
+    var twitterHandle: String?
+    var facebookPage: String?
+    var followerCount: Int
+    var completedOnboardingSteps: [OrganizerOnboardingStep]
+    var payoutMethod: PayoutMethod?
+    var agreedToTermsDate: Date?
+}
+</code></pre>
+<h2 id="76-organizeranalytics">7.6 OrganizerAnalytics</h2>
+<pre><code class="language-swift">struct OrganizerAnalytics {
+    var eventId: UUID
+    var eventTitle: String
+    var lastUpdated: Date
+    var revenue: Double
+    var ticketsSold: Int
+    var totalCapacity: Int
+    var attendanceRate: Double
+    var ticketVelocity: Double
+    var totalAttendees: Int
+    var repeatAttendees: Int
+    var eventViews: Int
+    var uniqueViews: Int
+    var conversionRate: Double
+    var checkinRate: Double
+    var grossRevenue: Double
+    var netRevenue: Double
+    var platformFees: Double
+    var healthScore: Int
+}
+</code></pre>
+<h2 id="77-enumerations">7.7 Enumerations</h2>
+<h3 id="userrole">UserRole</h3>
+<pre><code class="language-swift">enum UserRole: String {
+    case attendee
+    case organizer
+}
+</code></pre>
+<h3 id="eventcategory-16-categories">EventCategory (16 categories)</h3>
+<pre><code class="language-swift">enum EventCategory: String {
+    case music, artsCulture, concerts, sportsWellness
+    case technology, fundraising, comedy, poetry
+    case drama, exhibitions, networking, education
+    case food, nightlife, festivals, other
+}
+</code></pre>
+<h3 id="eventstatus">EventStatus</h3>
+<pre><code class="language-swift">enum EventStatus: String {
+    case draft, published, ongoing, completed, cancelled
+}
+</code></pre>
+<h3 id="ticketscanstatus">TicketScanStatus</h3>
+<pre><code class="language-swift">enum TicketScanStatus: String {
+    case unused, scanned, expired
+}
+</code></pre>
+<h3 id="paymentmethod">PaymentMethod</h3>
+<pre><code class="language-swift">enum PaymentMethod: String {
+    case mtnMomo, airtelMoney, card
+}
+</code></pre>
+<h3 id="refundstatus">RefundStatus</h3>
+<pre><code class="language-swift">enum RefundStatus: String {
+    case pending, approved, rejected
+    case processing, completed, failed
+}
+</code></pre>
+<hr />
+<h1 id="8-repositories-services">8. Repositories &amp; Services</h1>
+<h2 id="81-repository-pattern">8.1 Repository Pattern</h2>
+<p>All repositories follow the protocol-based pattern for dependency injection and testability.</p>
+<h2 id="82-core-repositories">8.2 Core Repositories</h2>
+<h3 id="authrepository">AuthRepository</h3>
+<pre><code class="language-swift">protocol AuthRepositoryProtocol {
+    func login(email: String, password: String) async throws -&gt; User
+    func register(user: User, password: String) async throws -&gt; User
+    func sendOTP(phoneNumber: String) async throws -&gt; Bool
+    func verifyOTP(phoneNumber: String, code: String) async throws -&gt; User
+    func logout() async throws
+    func getCurrentUser() async throws -&gt; User?
+}
+</code></pre>
+<h3 id="eventrepository">EventRepository</h3>
+<pre><code class="language-swift">protocol EventRepositoryProtocol {
+    func fetchEvents() async throws -&gt; [Event]
+    func getEvent(id: UUID) async throws -&gt; Event
+    func createEvent(_ event: Event) async throws -&gt; Event
+    func updateEvent(_ event: Event) async throws
+    func deleteEvent(_ id: UUID) async throws
+    func searchEvents(query: String) async throws -&gt; [Event]
+    func rateEvent(id: UUID, rating: Double, review: String?) async throws
+}
+</code></pre>
+<h3 id="ticketrepository">TicketRepository</h3>
+<pre><code class="language-swift">protocol TicketRepositoryProtocol {
+    func purchaseTickets(event: Event, type: TicketType, quantity: Int) async throws -&gt; [Ticket]
+    func getUserTickets() async throws -&gt; [Ticket]
+    func scanTicket(qrCode: String) async throws -&gt; Ticket
+    func validateTicket(code: String) async throws -&gt; TicketValidationResult
+    func rateTicket(ticketId: UUID, rating: Double) async throws
+}
+</code></pre>
+<h3 id="paymentrepository">PaymentRepository</h3>
+<pre><code class="language-swift">protocol PaymentRepositoryProtocol {
+    func processPayment(amount: Double, method: PaymentMethod) async throws -&gt; Payment
+    func verifyPayment(reference: String) async throws -&gt; PaymentStatus
+    func getPaymentHistory() async throws -&gt; [Payment]
+}
+</code></pre>
+<h2 id="83-additional-repositories">8.3 Additional Repositories</h2>
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RefundRepository</td>
+<td>Refund request and processing</td>
+</tr>
+<tr>
+<td>AppNotificationRepository</td>
+<td>In-app notifications</td>
+</tr>
+<tr>
+<td>CalendarRepository</td>
+<td>Calendar integration</td>
+</tr>
+<tr>
+<td>UserLocationRepository</td>
+<td>Location services</td>
+</tr>
+<tr>
+<td>UserPreferencesRepository</td>
+<td>User settings</td>
+</tr>
+<tr>
+<td>EventFilterRepository</td>
+<td>Event filtering</td>
+</tr>
+<tr>
+<td>NotificationAnalyticsRepository</td>
+<td>Notification tracking</td>
+</tr>
+</tbody>
+</table>
+<h2 id="84-service-container">8.4 Service Container</h2>
+<pre><code class="language-swift">class ServiceContainer: ObservableObject {
+    let authService: AuthRepositoryProtocol
+    let eventService: EventRepositoryProtocol
+    let ticketService: TicketRepositoryProtocol
+    let paymentService: PaymentRepositoryProtocol
+    let refundService: RefundRepositoryProtocol
+    let notificationService: AppNotificationRepository
+    // ... additional services
+
+    init(
+        authService: AuthRepositoryProtocol = AuthRepository(),
+        eventService: EventRepositoryProtocol = EventRepository(),
+        // ...
+    )
+}
+</code></pre>
+<hr />
+<h1 id="9-ui-components">9. UI Components</h1>
+<h2 id="91-event-components">9.1 Event Components</h2>
+<h3 id="eventcard">EventCard</h3>
+<p><strong>Location</strong>: <code>UI/Components/EventCard.swift</code></p>
+<p><strong>Features</strong>:
+- Poster image with gradient overlay
+- Title and category badge
+- Date, location, price
+- Like button
+- Status indicators</p>
+<h3 id="categorytile">CategoryTile</h3>
+<p><strong>Location</strong>: <code>UI/Components/CategoryTile.swift</code></p>
+<p><strong>Features</strong>:
+- Icon and label
+- Selection state
+- Horizontal scroll support</p>
+<h2 id="92-form-components">9.2 Form Components</h2>
+<h3 id="forminputcomponents">FormInputComponents</h3>
+<p><strong>Location</strong>: <code>UI/Components/FormInputComponents.swift</code></p>
+<p><strong>Includes</strong>:
+- Text input with validation
+- Phone number input
+- Email input
+- Password input with visibility toggle
+- OTP input (6 digits)</p>
+<h2 id="93-analytics-components">9.3 Analytics Components</h2>
+<h3 id="analyticscharts">AnalyticsCharts</h3>
+<p><strong>Location</strong>: <code>UI/Components/AnalyticsCharts.swift</code></p>
+<p><strong>Chart Types</strong>:
+- Line chart
+- Bar chart
+- Pie chart
+- Progress indicators</p>
+<h3 id="analyticsdashboardcomponents">AnalyticsDashboardComponents</h3>
+<p><strong>Location</strong>: <code>UI/Components/AnalyticsDashboardComponents.swift</code></p>
+<p><strong>Includes</strong>:
+- Metric cards
+- Trend indicators
+- Comparison views</p>
+<h2 id="94-common-components">9.4 Common Components</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoadingView</td>
+<td>Loading states</td>
+</tr>
+<tr>
+<td>HeaderBar</td>
+<td>Navigation headers</td>
+</tr>
+<tr>
+<td>NotificationBadge</td>
+<td>Unread count</td>
+</tr>
+<tr>
+<td>VerificationRequiredOverlay</td>
+<td>ID verification prompt</td>
+</tr>
+<tr>
+<td>PulsingDot</td>
+<td>Live indicators</td>
+</tr>
+<tr>
+<td>SalesCountdownTimer</td>
+<td>Ticket sale countdown</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="10-utilities">10. Utilities</h1>
+<h2 id="101-date-utilities">10.1 Date Utilities</h2>
+<p><strong>Location</strong>: <code>Core/Utilities/DateUtilities.swift</code></p>
+<p><strong>Functions</strong>:
+- <code>formatEventDateTime()</code> - Event date display
+- <code>formatEventFullDateTime()</code> - Full date with end time
+- <code>formatRelativeTime()</code> - "2 hours ago"
+- <code>isToday()</code>, <code>isThisWeek()</code>, <code>isThisMonth()</code></p>
+<h2 id="102-qr-code-generator">10.2 QR Code Generator</h2>
+<p><strong>Location</strong>: <code>Core/Utilities/QRCodeGenerator.swift</code></p>
+<p><strong>Functions</strong>:
+- <code>generate(from: String, size: CGSize)</code> - Create QR code
+- Uses CIQRCodeGenerator filter</p>
+<h2 id="103-haptic-feedback">10.3 Haptic Feedback</h2>
+<p><strong>Location</strong>: <code>Core/Utilities/HapticFeedback.swift</code></p>
+<p><strong>Functions</strong>:
+- <code>light()</code> - Light tap
+- <code>medium()</code> - Medium impact
+- <code>success()</code> - Success notification
+- <code>error()</code> - Error notification
+- <code>warning()</code> - Warning notification</p>
+<h2 id="104-image-utilities">10.4 Image Utilities</h2>
+<table>
+<thead>
+<tr>
+<th>Utility</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ImageCompressor</td>
+<td>JPEG compression</td>
+</tr>
+<tr>
+<td>ImageValidator</td>
+<td>Size/format validation</td>
+</tr>
+<tr>
+<td>ImageStorage</td>
+<td>Local caching</td>
+</tr>
+<tr>
+<td>ImageColorExtractor</td>
+<td>Dominant color extraction</td>
+</tr>
+</tbody>
+</table>
+<h2 id="105-responsive-utilities">10.5 Responsive Utilities</h2>
+<h3 id="responsivesize">ResponsiveSize</h3>
+<p><strong>Location</strong>: <code>Core/Utilities/ResponsiveSize.swift</code></p>
+<p><strong>Features</strong>:
+- Device-adaptive sizing
+- iPad support
+- Dynamic type scaling</p>
+<h3 id="deviceorientation">DeviceOrientation</h3>
+<p><strong>Location</strong>: <code>Core/Utilities/DeviceOrientation.swift</code></p>
+<p><strong>Features</strong>:
+- Orientation detection
+- Layout adaptation</p>
+<hr />
+<h1 id="11-configuration">11. Configuration</h1>
+<h2 id="111-role-configuration">11.1 Role Configuration</h2>
+<p><strong>Location</strong>: <code>Core/Configuration/RoleConfig.swift</code></p>
+<pre><code class="language-swift">struct RoleConfig {
+    static let attendeePrimary = Color(hex: &quot;FF7A00&quot;)
+    static let organizerPrimary = Color(hex: &quot;FFA500&quot;)
+    static let lightBackground = Color(hex: &quot;FBFBF7&quot;)
+    static let darkBackground = Color(hex: &quot;000000&quot;)
+    static let happeningNow = Color(hex: &quot;7CFC66&quot;)
+
+    static func getPrimaryColor(for role: UserRole) -&gt; Color
+    static func getAccentColor(for role: UserRole) -&gt; Color
+}
+</code></pre>
+<h2 id="112-app-storage-keys">11.2 App Storage Keys</h2>
+<p><strong>Location</strong>: <code>Core/Data/Storage/AppStorageKeys.swift</code></p>
+<p><strong>Keys</strong>:
+- <code>hasCompletedOnboarding</code>
+- <code>currentUserId</code>
+- <code>userRole</code>
+- <code>favoriteEventIds</code>
+- <code>notificationPreferences</code></p>
+<hr />
+<h1 id="12-testing-strategy">12. Testing Strategy</h1>
+<h2 id="121-unit-tests">12.1 Unit Tests</h2>
+<p><strong>Target</strong>: ViewModels, Domain Models, Repositories</p>
+<p><strong>Coverage Goals</strong>:
+- ViewModels: 80%+
+- Domain logic: 90%+
+- Repositories: 70%+</p>
+<h2 id="122-mock-implementations">12.2 Mock Implementations</h2>
+<p>All repositories have mock implementations for testing:
+- <code>MockAuthRepository</code>
+- <code>MockEventRepository</code>
+- <code>MockTicketRepository</code>
+- <code>MockPaymentRepository</code></p>
+<h2 id="123-ui-tests">12.3 UI Tests</h2>
+<p><strong>Critical Flows</strong>:
+- Authentication (login, register, OTP)
+- Ticket purchase
+- Event creation
+- QR scanning</p>
+<h2 id="124-swiftui-previews">12.4 SwiftUI Previews</h2>
+<p>All views include <code>#Preview</code> blocks with mock data.</p>
+<hr />
+<h1 id="13-deployment">13. Deployment</h1>
+<h2 id="131-build-configuration">13.1 Build Configuration</h2>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debug</td>
+<td>Development, mock data</td>
+</tr>
+<tr>
+<td>Release</td>
+<td>Production, real APIs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="132-app-store-requirements">13.2 App Store Requirements</h2>
+<ul>
+<li>iOS 17.0 minimum deployment</li>
+<li>iPhone and iPad support</li>
+<li>Dark mode support</li>
+<li>Dynamic Type support</li>
+<li>Accessibility compliance</li>
+</ul>
+<h2 id="133-privacy">13.3 Privacy</h2>
+<p><strong>Data Collected</strong>:
+- User profile information
+- Location (with permission)
+- Purchase history
+- Event interactions</p>
+<p><strong>Privacy Features</strong>:
+- On-device card scanning
+- No card images stored
+- Calendar read-only access
+- Location opt-in only</p>
+<hr />
+<h1 id="14-appendix">14. Appendix</h1>
+<h2 id="141-file-count-summary">14.1 File Count Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Features</td>
+<td>76</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>16</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Core</td>
+<td>21</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>172</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="142-feature-count-summary">14.2 Feature Count Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Attendee</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Organizer</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Scanner</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Common</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Support</td>
+<td>6</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>55+</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="143-design-token-count">14.3 Design Token Count</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Colors</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Typography</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Spacing</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Corner Radius</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Shadows</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Button Dimensions</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Animations</td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>78</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="144-references">14.4 References</h2>
+<ul>
+<li><a href="https://developer.apple.com/design/human-interface-guidelines/">Apple Human Interface Guidelines</a></li>
+<li><a href="https://developer.apple.com/documentation/swiftui/">SwiftUI Documentation</a></li>
+<li><a href="./EventPass_Data_Model_Spec.md">EventPassUG Data Model Spec</a></li>
+</ul>
+<hr />
+<p><strong>Document Version</strong>: 3.0
+<strong>Last Updated</strong>: March 2026
+<strong>Maintained By</strong>: EventPassUG Development Team</p>
+<hr />
+<p><em>This documentation is auto-generated. For updates, modify the source files and regenerate.</em></p>
+</body>
+</html>
