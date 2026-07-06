@@ -3,8 +3,8 @@
 
 ---
 
-**Version:** 3.0
-**Generated:** March 2026
+**Version:** 3.1
+**Generated:** July 2026
 **Platform:** iOS 17+
 **Architecture:** SwiftUI + MVVM + Clean Architecture
 
@@ -16,6 +16,7 @@
 2. [Project Overview](#2-project-overview) ............................ Page 3
 3. [System Requirements](#3-system-requirements) ...................... Page 4
 4. [Architecture](#4-architecture) .................................... Page 5
+4A. [Navigation, Routing & Screen Flow](#4a-navigation-routing--screen-flow) ... Page 7
 5. [Design System & Tokens](#5-design-system--tokens) ................. Page 8
 6. [Features](#6-features) ............................................ Page 14
 7. [Data Models](#7-data-models) ...................................... Page 32
@@ -239,6 +240,203 @@ class ServiceContainer: ObservableObject {
     let paymentService: PaymentRepositoryProtocol
     // ... 12 more repositories
 }
+```
+
+The container is instantiated once in `EventPassUGApp.init()` with **mock repository implementations** (`MockAuthRepository`, `MockEventRepository`, `MockTicketRepository`, `MockPaymentRepository`) and injected into the view hierarchy via `.environmentObject(services)`. The auth service is additionally injected as a concrete `MockAuthRepository` (`.environmentObject(services.authService as! MockAuthRepository)`) so views can observe authentication state through `@EnvironmentObject`.
+
+---
+
+# 4A. Navigation, Routing & Screen Flow
+
+This section documents the full navigation architecture: how the app boots, how the root view decides what to show, how tab navigation is structured per role, how deep links are routed, and how every screen connects to the next.
+
+## 4A.1 App Entry Point
+
+**Location**: `App/EventPassUGApp.swift`
+
+The `@main` `EventPassUGApp` is the composition root. On launch it:
+
+1. Creates the Core Data `PersistenceController.shared`.
+2. Instantiates the `ServiceContainer` with mock repositories (TODO markers indicate where real backends plug in).
+3. Creates the shared `DeepLinkManager.shared` as a `@StateObject`.
+4. Calls `configureAppearance()` to set a global `UINavigationBarAppearance` (default background, `.label`-colored titles in light/dark).
+
+The single `WindowGroup` renders `ContentView()` and wires app-wide environment + URL handling:
+
+```swift
+ContentView()
+    .environment(\.managedObjectContext, persistenceController.container.viewContext)
+    .environmentObject(services)                       // ServiceContainer (all repositories)
+    .environmentObject(services.authService as! MockAuthRepository)
+    .environmentObject(deepLinkManager)
+    .onOpenURL { url in deepLinkManager.handle(url: url) }   // deep link entry
+    .fullScreenCover(isPresented: $deepLinkManager.showScannerConnect) {
+        ScannerPairingDeepLinkView(pairingData: deepLinkManager.scannerPairingData) { ... }
+    }
+```
+
+Scanner-pairing deep links are handled at the **app root** via a `fullScreenCover`, so pairing works regardless of which screen the user is on.
+
+## 4A.2 Root Navigation Flow (ContentView)
+
+**Location**: `App/ContentView.swift`
+
+`ContentView` is a state machine that selects the top-level screen. It reads two persisted `@AppStorage` flags — `hasSeenOnboarding` and `hasChosenAuthMethod` — plus live auth state from `MockAuthRepository`.
+
+**Decision priority (top to bottom):**
+
+| # | Condition | Screen shown |
+|---|-----------|--------------|
+| 1 | `!hasSeenOnboarding` (first launch) | `OnboardingView` (marketing slides) |
+| 2 | Onboarding seen, no auth method chosen, not authenticated | `AuthChoiceView` |
+| 3 | Authenticated (and not mid organizer-signup) | `MainTabView(userRole: currentActiveRole)` |
+| 4 | Guest / returning-not-logged-in | `MainTabView(userRole: nil)` — guest mode |
+
+**Key transitions:**
+
+- Completing `OnboardingView` sets `hasSeenOnboarding = true` (persisted, so it never shows again) and mirrors to legacy `AppStorageManager.hasCompletedOnboarding`.
+- From `AuthChoiceView` the user branches three ways:
+  - **Sign in / register** → `ModernAuthView` presented as a `.sheet`.
+  - **Become an organizer** → `OrganizerSignupFlowView` as `.fullScreenCover` (Auth → KYC). The `organizerSignupInProgress` flag prevents `ContentView` from prematurely switching to the main app while KYC is still running.
+  - **Continue as guest** → sets `hasChosenAuthMethod = true`, drops into guest `MainTabView`.
+- Once authenticated, if `user.hasCompletedOnboarding == false`, a post-login **preferences onboarding** (`OnboardingFlowView`) is presented as a `fullScreenCover` over the tab bar.
+- All state changes animate with a 0.3s `easeInOut` cross-fade.
+
+```
+Launch
+  │
+  ├─ hasSeenOnboarding == false ─────────► OnboardingView ──(complete)──► set hasSeenOnboarding
+  │
+  ├─ seen, no auth method, not authed ───► AuthChoiceView
+  │                                            ├─ Sign in/Register ─► ModernAuthView (sheet)
+  │                                            ├─ Become Organizer ─► OrganizerSignupFlowView (fullScreenCover: Auth→KYC)
+  │                                            └─ Continue as Guest ─► hasChosenAuthMethod = true
+  │
+  ├─ authenticated ──────────────────────► MainTabView(userRole: currentActiveRole)
+  │                                            └─ if !hasCompletedOnboarding ─► OnboardingFlowView (fullScreenCover)
+  │
+  └─ guest / returning ──────────────────► MainTabView(userRole: nil)   // guest mode
+```
+
+## 4A.3 Tab Navigation (MainTabView)
+
+**Location**: `App/Routing/MainTabView.swift`
+
+`MainTabView` renders a role-based `TabView` with three tabs. `userRole` is optional; guests get an `effectiveRole` of `.attendee`. The tab bar accent color comes from `RoleConfig.getPrimaryColor(for: effectiveRole)`, and tab changes fire `HapticFeedback.selection()`.
+
+**Attendee / Guest tabs:**
+
+| Tab | Icon | Authenticated | Guest |
+|-----|------|---------------|-------|
+| Home | `house.fill` | `AttendeeHomeView` | `AttendeeHomeView` |
+| Tickets | `ticket.fill` | `TicketsView` | `GuestTicketsPlaceholder` |
+| Profile | `person.fill` | `ProfileView` | `GuestProfilePlaceholder` |
+
+**Organizer tabs:**
+
+| Tab | Icon | Screen |
+|-----|------|--------|
+| Home | `house.fill` | `OrganizerHomeView` |
+| Dashboard | `chart.bar.fill` | `OrganizerDashboardView` |
+| Profile | `person.fill` | `ProfileView` |
+
+Guests browse Home freely; the Tickets and Profile tabs show placeholder views (`GuestPlaceholders.swift`) with contextual sign-in CTAs. The organizer-signup `fullScreenCover` is hosted at the `TabView` level (not inside a tab) so it survives auth-state changes, and it syncs `organizerSignupInProgress` back to `ContentView` via a `@Binding`.
+
+## 4A.4 Deep Linking & URL Schemes
+
+**Location**: `Core/DeepLink/DeepLinkManager.swift`
+
+The app registers the custom URL scheme **`eventpass://`**. `DeepLinkManager` (a `@MainActor` singleton `ObservableObject`) parses incoming URLs into a typed `DeepLink` enum and drives presentation state.
+
+**Supported deep links:**
+
+| URL pattern | `DeepLink` case | Behavior |
+|-------------|-----------------|----------|
+| `eventpass://pair?session={UUID}&event={UUID}` | `.scannerPairing` | Sets `scannerPairingData`, flips `showScannerConnect = true` → presents `ScannerPairingDeepLinkView` at app root |
+| `eventpass://event?id={UUID}` | `.event` | Intended to open event details (currently logs; wiring point for navigation) |
+| `eventpass://ticket?id={UUID}` | `.ticket` | Intended to open ticket details (currently logs; wiring point for navigation) |
+| anything else | `.unknown` | Ignored (logged) |
+
+Parsing is defensive: non-`eventpass` schemes, missing query items, or malformed UUIDs all resolve to `.unknown`. Published properties (`pendingDeepLink`, `scannerPairingData`, `showScannerConnect`) let SwiftUI react. `clearScannerPairing()` resets state on dismissal.
+
+> **Note:** `.event` and `.ticket` cases are parsed and validated but not yet bound to a navigation target — they print to the console. This is the intended integration point when in-app routing to arbitrary events/tickets is added.
+
+## 4A.5 In-App Navigation Patterns
+
+Beyond the root/tab/deep-link layers, individual features navigate using standard SwiftUI mechanisms:
+
+- **`NavigationView` + `NavigationLink`** — push navigation within a tab. Each tab root wraps its content in a `NavigationView` using `.navigationViewStyle(.stack)` (applied across 22 sites) to force single-column push behavior on iPad instead of split view.
+- **`.sheet`** — modal, dismissible flows that don't replace the whole screen (auth, verification, notifications, create-event, export options).
+- **`.fullScreenCover`** — immersive, multi-step flows that should own the screen (onboarding, organizer signup/KYC, scanner pairing).
+
+**Profile as the settings hub** (`Features/Common/ProfileView.swift`): the Profile tab is the central navigation hub for account and settings screens. It pushes (via `NavigationLink`) to:
+
+| Row | Destination |
+|-----|-------------|
+| Edit Profile | `EditProfileView` |
+| Interests | `FavoriteEventCategoriesView` |
+| Notifications | `NotificationSettingsView` |
+| Payment Methods | `PaymentMethodsView` |
+| Help Center | `HelpCenterView` |
+| Contact Support | `SupportCenterView` |
+| Terms & Privacy | `TermsAndPrivacyView` |
+
+And presents as sheets/covers: email/phone verification, add email/phone, account linking, National ID verification (`showingVerification`), and the **Become an Organizer** flow (`showingBecomeOrganizer` → `BecomeOrganizerFlow` as `fullScreenCover`). Role switching updates `currentActiveRole`, which `ContentView`/`MainTabView` observe to swap the entire tab set.
+
+## 4A.6 Screen Connection Map (Navigation Graph)
+
+```
+EventPassUGApp (@main)
+└── ContentView (root state machine)
+     ├── OnboardingView ─────────────► (first launch only)
+     ├── AuthChoiceView
+     │     ├── ModernAuthView (sheet)
+     │     └── OrganizerSignupFlowView (fullScreenCover → KYC steps)
+     │
+     └── MainTabView ──────────────────────────────────────────────┐
+          │                                                          │
+          ├── [Attendee/Guest]                                       │
+          │    ├── Tab 0: AttendeeHomeView                           │
+          │    │      ├── SearchView                                 │
+          │    │      ├── EventDetailsView ──► TicketPurchaseView ──►│
+          │    │      │        │                 PaymentConfirmationView
+          │    │      │        │                 └► TicketSuccessView
+          │    │      │        ├── CalendarConflictView (sheet)      │
+          │    │      │        └── (follow organizer, share, report) │
+          │    │      └── FavoriteEventsView                         │
+          │    ├── Tab 1: TicketsView ──► TicketDetailView           │
+          │    │              └── RefundRequestView, PDF share        │
+          │    │         (guest: GuestTicketsPlaceholder)            │
+          │    └── Tab 2: ProfileView (settings hub — see 4A.5)      │
+          │              (guest: GuestProfilePlaceholder)            │
+          │                                                          │
+          └── [Organizer]                                            │
+               ├── Tab 0: OrganizerHomeView                          │
+               │      ├── CreateEventWizard (sheet, 3 steps)         │
+               │      ├── QRScannerView                              │
+               │      ├── OrganizerNotificationCenterView (sheet)    │
+               │      └── EventAnalyticsView (per event)             │
+               │            ├── ManageEventTicketsView               │
+               │            ├── EventCancellationFlowView            │
+               │            └── SelectEventForScannersView (scanners)│
+               ├── Tab 1: OrganizerDashboardView                     │
+               │      ├── SelectEventForScannersView (scanners)      │
+               │      └── OrganizerAnalyticsDashboardView            │
+               │            ├── RevenueAnalyticsDetailView           │
+               │            ├── TicketAnalyticsDetailView            │
+               │            ├── AudienceAnalyticsDetailView          │
+               │            ├── MarketingInsightsDetailView          │
+               │            ├── OperationsDetailView                 │
+               │            └── PredictiveAnalysisDetailView         │
+               └── Tab 2: ProfileView                                │
+                                                                     │
+     App-root overlays (present over any screen):                   │
+       • ScannerPairingDeepLinkView  ◄── eventpass://pair deep link ─┘
+       • OnboardingFlowView (post-login preferences)
+
+Scanner sub-app (entered from Dashboard or EventAnalyticsView):
+  SelectEventForScannersView ──► PairScannerView ──► ManageScannerDevicesView
+  ScannerConnectView (device-side pairing + live validation)
 ```
 
 ---
@@ -1561,8 +1759,8 @@ All views include `#Preview` blocks with mock data.
 
 ---
 
-**Document Version**: 3.0
-**Last Updated**: March 2026
+**Document Version**: 3.1
+**Last Updated**: July 2026
 **Maintained By**: EventPassUG Development Team
 
 ---
